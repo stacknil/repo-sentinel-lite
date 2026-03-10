@@ -1,0 +1,60 @@
+name: Release
+
+# Configure TestPyPI Trusted Publishing with these values before enabling releases:
+#   GitHub owner: stacknil
+#   Repository name: repo-sentinel-lite
+#   Workflow file: .github/workflows/release.yml
+#   Environment name: testpypi
+#   TestPyPI project: repo-sentinel-lite
+#
+# This workflow is intended for a private GitHub repository and publishes only to
+# TestPyPI, not to the real PyPI service.
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Build distributions
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+          python -m build
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/*
+
+  publish-testpypi:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/repo-sentinel-lite/
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@v1.12.3
+        with:
+          repository-url: https://test.pypi.org/legacy/

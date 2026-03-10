@@ -1,0 +1,21 @@
+{
+  "high_entropy_findings": [
+    {
+      "entropy": 4.0,
+      "file": "notes/tokens.txt",
+      "line": 2,
+      "token": "0123456789abcdef0123456789abcdef"
+    }
+  ],
+  "missing_files": {
+    ".gitignore": true,
+    "LICENSE": true,
+    "README.md": false
+  },
+  "suspicious_files": [
+    ".env",
+    "certs/service.pem",
+    "keys/id_rsa",
+    "vault/archive.kdbx"
+  ]
+}
