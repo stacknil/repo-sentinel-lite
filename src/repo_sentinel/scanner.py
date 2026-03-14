@@ -170,6 +170,50 @@ def format_report(report: dict[str, object]) -> str:
     return json.dumps(report, indent=2, sort_keys=True) + "\n"
 
 
+def format_text_report(report: dict[str, object]) -> str:
+    entropy_findings, missing_files, suspicious_files = _extract_report_components(
+        report
+    )
+    missing_paths = [path for path, is_missing in missing_files.items() if is_missing]
+    lines: list[str] = []
+
+    if suspicious_files:
+        lines.append(f"Suspicious files ({len(suspicious_files)}):")
+        lines.extend(f"- {path}" for path in suspicious_files)
+
+    if missing_paths:
+        if lines:
+            lines.append("")
+        lines.append(f"Missing required files ({len(missing_paths)}):")
+        lines.extend(f"- {path}" for path in missing_paths)
+
+    if entropy_findings:
+        if lines:
+            lines.append("")
+        lines.append(f"High-entropy findings ({len(entropy_findings)}):")
+        lines.extend(
+            (
+                f"- {finding.file}:{finding.line} "
+                f"entropy={finding.entropy} token={finding.token}"
+            )
+            for finding in entropy_findings
+        )
+
+    if not lines:
+        return "No findings.\n"
+
+    return "\n".join(lines) + "\n"
+
+
+def has_findings(report: dict[str, object]) -> bool:
+    entropy_findings, missing_files, suspicious_files = _extract_report_components(
+        report
+    )
+    return bool(
+        entropy_findings or suspicious_files or any(missing_files.values())
+    )
+
+
 def format_baseline(baseline: dict[str, object]) -> str:
     return json.dumps(_normalize_baseline(baseline), indent=2, sort_keys=True) + "\n"
 
@@ -302,8 +346,12 @@ def _relative_path(path: Path, root: Path) -> str:
     return path.relative_to(root).as_posix()
 
 
+def _normalize_logical_path_string(path: str) -> str:
+    return path.replace("\\", "/")
+
+
 def _normalize_path(path: str | Path | PurePath) -> str:
-    return PurePosixPath(PurePath(path).as_posix()).as_posix()
+    return PurePosixPath(_normalize_logical_path_string(str(path))).as_posix()
 
 
 def _matches_globs(path: str, patterns: Sequence[str]) -> bool:
@@ -554,7 +602,7 @@ def _coerce_baseline_finding(value: object) -> dict[str, object]:
 def _baseline_finding_sort_key(finding: dict[str, object]) -> tuple[object, ...]:
     kind = finding["kind"]
     if kind == "high_entropy":
-        file_key = _sort_key(str(finding["file"]))
+        file_key = _sort_key(_normalize_path(str(finding["file"])))
         return (
             0,
             file_key[0],
@@ -564,7 +612,7 @@ def _baseline_finding_sort_key(finding: dict[str, object]) -> tuple[object, ...]
             float(finding["entropy"]),
         )
 
-    path_key = _sort_key(str(finding["path"]))
+    path_key = _sort_key(_normalize_path(str(finding["path"])))
     return (
         1 if kind == "missing_file" else 2,
         path_key[0],
@@ -577,12 +625,12 @@ def _baseline_finding_identity(finding: dict[str, object]) -> tuple[object, ...]
     if kind == "high_entropy":
         return (
             kind,
-            str(finding["file"]),
+            _normalize_path(str(finding["file"])),
             int(finding["line"]),
             str(finding["token"]),
             float(finding["entropy"]),
         )
-    return (kind, str(finding["path"]))
+    return (kind, _normalize_path(str(finding["path"])))
 
 
 def _entropy_baseline_finding(finding: EntropyFinding) -> dict[str, object]:

@@ -17,12 +17,27 @@ suppressing known findings.
 pip install repo-sentinel-lite
 ```
 
+Note: releases are currently validated through **TestPyPI** before any
+production PyPI release.
+
 ## Usage
 
-Scan the current repository:
+Scan the current repository. This defaults to deterministic JSON output:
 
 ```bash
 repo-sentinel scan
+```
+
+Emit deterministic JSON explicitly for a specific path:
+
+```bash
+repo-sentinel scan --format json path/to/repo
+```
+
+Render a concise text summary for a specific path:
+
+```bash
+repo-sentinel scan --format text path/to/repo
 ```
 
 Scan a specific path and save a baseline:
@@ -35,6 +50,19 @@ Scan with an existing baseline applied:
 
 ```bash
 repo-sentinel scan --baseline baseline.json path/to/repo
+```
+
+Fail with exit code `1` when unsuppressed findings remain:
+
+```bash
+repo-sentinel scan --fail-on-findings path/to/repo
+```
+
+Use a `.reposentinel.toml` config to ignore paths or adjust thresholds:
+
+```toml
+ignore_globs = ["dist/*", ".venv/*"]
+entropy_threshold = 4.2
 ```
 
 ## Local development

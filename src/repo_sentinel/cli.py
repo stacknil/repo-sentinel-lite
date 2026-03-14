@@ -9,6 +9,8 @@ from . import __version__
 from .scanner import (
     apply_baseline,
     format_report,
+    format_text_report,
+    has_findings,
     load_baseline,
     scan_repository,
     write_baseline,
@@ -33,7 +35,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     scan_parser = subparsers.add_parser(
         "scan",
-        help="Scan a repository and emit a deterministic JSON report.",
+        help="Scan a repository and emit a deterministic report.",
+    )
+    scan_parser.add_argument(
+        "--format",
+        choices=("json", "text"),
+        default="json",
+        help="Output format. Defaults to json.",
     )
     scan_parser.add_argument(
         "--baseline",
@@ -44,6 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--write-baseline",
         type=Path,
         help="Path to write the current findings as a baseline JSON file.",
+    )
+    scan_parser.add_argument(
+        "--fail-on-findings",
+        action="store_true",
+        help="Return exit code 1 when unsuppressed findings remain.",
     )
     scan_parser.add_argument(
         "path",
@@ -94,7 +107,10 @@ def _run_scan(args: argparse.Namespace) -> int:
     if baseline_report is not None:
         report = apply_baseline(report, baseline_report)
 
-    print(format_report(report), end="")
+    formatter = format_report if args.format == "json" else format_text_report
+    print(formatter(report), end="")
+    if args.fail_on_findings and has_findings(report):
+        return 1
     return 0
 
 

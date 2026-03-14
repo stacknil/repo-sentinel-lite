@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repo-sentinel-lite"
-version = "0.1.0"
+version = "0.3.1"
 description = "Minimal repository scanning CLI."
 readme = "README.md"
 license = "MIT"
@@ -22,10 +22,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/<github-owner>/<repository-name>"
-Repository = "https://github.com/<github-owner>/<repository-name>"
-Issues = "https://github.com/<github-owner>/<repository-name>/issues"
-Releases = "https://github.com/<github-owner>/<repository-name>/releases"
+Homepage = "https://github.com/stacknil/repo-sentinel-lite"
+Repository = "https://github.com/stacknil/repo-sentinel-lite"
+Issues = "https://github.com/stacknil/repo-sentinel-lite/issues"
+Releases = "https://github.com/stacknil/repo-sentinel-lite/releases"
 
 [project.optional-dependencies]
 dev = [

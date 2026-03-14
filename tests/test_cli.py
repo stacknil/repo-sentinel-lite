@@ -54,6 +54,73 @@ def test_scan_command_emits_stable_json(
     assert captured.out == expected_output
 
 
+def test_scan_command_returns_success_when_findings_present_and_flag_absent(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
+        encoding="utf-8"
+    )
+
+    exit_code = main(["scan", str(fixture_root)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == expected_output
+
+
+def test_scan_command_returns_failure_when_findings_present_and_flag_enabled(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+
+    exit_code = main(
+        ["scan", "--format", "text", "--fail-on-findings", str(fixture_root)]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert captured.out == (
+        "Suspicious files (4):\n"
+        "- .env\n"
+        "- certs/service.pem\n"
+        "- keys/id_rsa\n"
+        "- vault/archive.kdbx\n"
+        "\n"
+        "Missing required files (2):\n"
+        "- .gitignore\n"
+        "- LICENSE\n"
+        "\n"
+        "High-entropy findings (1):\n"
+        "- notes/tokens.txt:2 entropy=4.0 token=0123456789abcdef0123456789abcdef\n"
+    )
+
+
+def test_scan_command_emits_concise_text_report(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+
+    exit_code = main(["scan", "--format", "text", str(fixture_root)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == (
+        "Suspicious files (4):\n"
+        "- .env\n"
+        "- certs/service.pem\n"
+        "- keys/id_rsa\n"
+        "- vault/archive.kdbx\n"
+        "\n"
+        "Missing required files (2):\n"
+        "- .gitignore\n"
+        "- LICENSE\n"
+        "\n"
+        "High-entropy findings (1):\n"
+        "- notes/tokens.txt:2 entropy=4.0 token=0123456789abcdef0123456789abcdef\n"
+    )
+
+
 def test_scan_command_writes_baseline(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -123,6 +190,69 @@ def test_scan_command_suppresses_known_findings_with_baseline(
     }
 
 
+def test_scan_command_emits_no_findings_text_after_baseline_suppression(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    baseline_path = tmp_path / "baseline.json"
+
+    write_exit_code = main(
+        ["scan", "--write-baseline", str(baseline_path), str(fixture_root)]
+    )
+    assert write_exit_code == 0
+    capsys.readouterr()
+
+    exit_code = main(
+        [
+            "scan",
+            "--format",
+            "text",
+            "--baseline",
+            str(baseline_path),
+            str(fixture_root),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == "No findings.\n"
+
+
+def test_scan_command_returns_success_when_baseline_suppresses_all_findings(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    baseline_path = tmp_path / "baseline.json"
+
+    write_exit_code = main(
+        ["scan", "--write-baseline", str(baseline_path), str(fixture_root)]
+    )
+    assert write_exit_code == 0
+    capsys.readouterr()
+
+    exit_code = main(
+        [
+            "scan",
+            "--fail-on-findings",
+            "--baseline",
+            str(baseline_path),
+            str(fixture_root),
+        ]
+    )
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert json.loads(captured.out) == {
+        "high_entropy_findings": [],
+        "missing_files": {
+            ".gitignore": False,
+            "LICENSE": False,
+            "README.md": False,
+        },
+        "suspicious_files": [],
+    }
+
+
 def test_scan_command_surfaces_new_findings_outside_baseline(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -162,6 +292,28 @@ def test_scan_command_surfaces_new_findings_outside_baseline(
             "README.md": False,
         },
         "suspicious_files": ["certs/new.key"],
+    }
+
+
+def test_scan_command_returns_success_for_clean_scan_with_flag_enabled(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("dist/\n", encoding="utf-8")
+
+    exit_code = main(["scan", "--fail-on-findings", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert json.loads(captured.out) == {
+        "high_entropy_findings": [],
+        "missing_files": {
+            ".gitignore": False,
+            "LICENSE": False,
+            "README.md": False,
+        },
+        "suspicious_files": [],
     }
 
 

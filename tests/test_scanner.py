@@ -245,3 +245,45 @@ def test_apply_baseline_compares_findings_deterministically() -> None:
         },
         "suspicious_files": [],
     }
+
+
+def test_apply_baseline_normalizes_path_separators_for_all_finding_kinds() -> None:
+    report = {
+        "high_entropy_findings": [
+            {
+                "entropy": 4.0,
+                "file": "notes/tokens.txt",
+                "line": 2,
+                "token": "0123456789abcdef0123456789abcdef",
+            }
+        ],
+        "missing_files": {
+            "docs/guide.md": True,
+            "README.md": False,
+        },
+        "suspicious_files": ["secrets/private.key"],
+    }
+    baseline = {
+        "schema_version": 1,
+        "generated_at": "2026-03-10T00:00:00Z",
+        "findings": [
+            {
+                "entropy": 4.0,
+                "file": "notes\\tokens.txt",
+                "kind": "high_entropy",
+                "line": 2,
+                "token": "0123456789abcdef0123456789abcdef",
+            },
+            {"kind": "missing_file", "path": "docs\\guide.md"},
+            {"kind": "suspicious_file", "path": "secrets\\private.key"},
+        ],
+    }
+
+    assert apply_baseline(report, baseline) == {
+        "high_entropy_findings": [],
+        "missing_files": {
+            "README.md": False,
+            "docs/guide.md": False,
+        },
+        "suspicious_files": [],
+    }
