@@ -46,3 +46,14 @@ pip install --index-url https://test.pypi.org/simple/ --no-deps repo-sentinel-li
 repo-sentinel --help
 python -m repo_sentinel --help
 ```
+
+### SARIF fallback workflow
+
+When GitHub code scanning is unavailable for this private repository, use
+`.github/workflows/code-scanning.yml` as the fallback path.
+
+1. Open the repository `Actions` tab.
+2. Run the `Code Scanning` workflow manually.
+3. After the run completes, open the workflow run and download the
+   `repo-sentinel-lite-sarif` artifact.
+4. The artifact contains the generated `results.sarif` file.

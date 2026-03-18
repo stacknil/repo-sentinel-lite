@@ -27,8 +27,9 @@ jobs:
         run: |
           python -m repo_sentinel scan --format sarif . > results.sarif
 
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v4
+      - name: Upload SARIF Artifact
+        uses: actions/upload-artifact@v4
         with:
-          sarif_file: results.sarif
-          category: repo-sentinel-lite
+          name: repo-sentinel-lite-sarif
+          path: results.sarif
+          retention-days: 14
