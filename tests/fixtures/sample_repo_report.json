@@ -1,4 +1,44 @@
 {
+  "findings": [
+    {
+      "entropy": 4.0,
+      "file": "notes/tokens.txt",
+      "kind": "high_entropy",
+      "line": 2,
+      "severity": "error",
+      "token": "0123456789abcdef0123456789abcdef"
+    },
+    {
+      "kind": "missing_file",
+      "path": ".gitignore",
+      "severity": "warning"
+    },
+    {
+      "kind": "missing_file",
+      "path": "LICENSE",
+      "severity": "warning"
+    },
+    {
+      "kind": "suspicious_file",
+      "path": ".env",
+      "severity": "error"
+    },
+    {
+      "kind": "suspicious_file",
+      "path": "certs/service.pem",
+      "severity": "error"
+    },
+    {
+      "kind": "suspicious_file",
+      "path": "keys/id_rsa",
+      "severity": "error"
+    },
+    {
+      "kind": "suspicious_file",
+      "path": "vault/archive.kdbx",
+      "severity": "error"
+    }
+  ],
   "high_entropy_findings": [
     {
       "entropy": 4.0,

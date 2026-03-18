@@ -77,6 +77,31 @@ def test_scan_repository_uses_default_config_when_config_file_missing(
             "token": "0123456789abcdef0123456789abcdef",
         }
     ]
+    assert report["findings"] == [
+        {
+            "entropy": 4.0,
+            "file": "tokens.txt",
+            "kind": "high_entropy",
+            "line": 1,
+            "severity": "error",
+            "token": "0123456789abcdef0123456789abcdef",
+        },
+        {
+            "kind": "missing_file",
+            "path": ".gitignore",
+            "severity": "warning",
+        },
+        {
+            "kind": "missing_file",
+            "path": "LICENSE",
+            "severity": "warning",
+        },
+        {
+            "kind": "suspicious_file",
+            "path": ".env",
+            "severity": "error",
+        },
+    ]
 
 
 def test_scan_repository_uses_custom_entropy_threshold(tmp_path: Path) -> None:
@@ -237,6 +262,7 @@ def test_apply_baseline_compares_findings_deterministically() -> None:
     }
 
     assert apply_baseline(report, baseline) == {
+        "findings": [],
         "high_entropy_findings": [],
         "missing_files": {
             ".gitignore": False,
@@ -280,6 +306,7 @@ def test_apply_baseline_normalizes_path_separators_for_all_finding_kinds() -> No
     }
 
     assert apply_baseline(report, baseline) == {
+        "findings": [],
         "high_entropy_findings": [],
         "missing_files": {
             "README.md": False,

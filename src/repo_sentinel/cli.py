@@ -9,6 +9,7 @@ from . import __version__
 from .scanner import (
     apply_baseline,
     format_report,
+    format_sarif_report,
     format_text_report,
     has_findings,
     load_baseline,
@@ -39,7 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     scan_parser.add_argument(
         "--format",
-        choices=("json", "text"),
+        choices=("json", "sarif", "text"),
         default="json",
         help="Output format. Defaults to json.",
     )
@@ -107,7 +108,11 @@ def _run_scan(args: argparse.Namespace) -> int:
     if baseline_report is not None:
         report = apply_baseline(report, baseline_report)
 
-    formatter = format_report if args.format == "json" else format_text_report
+    formatter = {
+        "json": format_report,
+        "sarif": format_sarif_report,
+        "text": format_text_report,
+    }[args.format]
     print(formatter(report), end="")
     if args.fail_on_findings and has_findings(report):
         return 1

@@ -13,6 +13,170 @@ from repo_sentinel.cli import main
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 
+def _expected_sample_repo_sarif() -> dict[str, object]:
+    return {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "runs": [
+            {
+                "results": [
+                    {
+                        "level": "error",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {
+                                        "uri": "notes/tokens.txt"
+                                    },
+                                    "region": {"startLine": 2},
+                                }
+                            }
+                        ],
+                        "message": {
+                            "text": (
+                                "High-entropy string detected: "
+                                "notes/tokens.txt:2"
+                            )
+                        },
+                        "ruleId": "high_entropy",
+                    },
+                    {
+                        "level": "warning",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": ".gitignore"}
+                                }
+                            }
+                        ],
+                        "message": {"text": "Required file missing: .gitignore"},
+                        "ruleId": "missing_file",
+                    },
+                    {
+                        "level": "warning",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": "LICENSE"}
+                                }
+                            }
+                        ],
+                        "message": {"text": "Required file missing: LICENSE"},
+                        "ruleId": "missing_file",
+                    },
+                    {
+                        "level": "error",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": ".env"}
+                                }
+                            }
+                        ],
+                        "message": {"text": "Suspicious file detected: .env"},
+                        "ruleId": "suspicious_file",
+                    },
+                    {
+                        "level": "error",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {
+                                        "uri": "certs/service.pem"
+                                    }
+                                }
+                            }
+                        ],
+                        "message": {
+                            "text": "Suspicious file detected: certs/service.pem"
+                        },
+                        "ruleId": "suspicious_file",
+                    },
+                    {
+                        "level": "error",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": "keys/id_rsa"}
+                                }
+                            }
+                        ],
+                        "message": {
+                            "text": "Suspicious file detected: keys/id_rsa"
+                        },
+                        "ruleId": "suspicious_file",
+                    },
+                    {
+                        "level": "error",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {
+                                        "uri": "vault/archive.kdbx"
+                                    }
+                                }
+                            }
+                        ],
+                        "message": {
+                            "text": "Suspicious file detected: vault/archive.kdbx"
+                        },
+                        "ruleId": "suspicious_file",
+                    },
+                ],
+                "tool": {
+                    "driver": {
+                        "name": "repo-sentinel-lite",
+                        "rules": [
+                            {
+                                "defaultConfiguration": {"level": "error"},
+                                "fullDescription": {
+                                    "text": (
+                                        "Detects high-entropy strings that may "
+                                        "indicate secrets."
+                                    )
+                                },
+                                "id": "high_entropy",
+                                "name": "High Entropy",
+                                "shortDescription": {
+                                    "text": "High-entropy string detected."
+                                },
+                            },
+                            {
+                                "defaultConfiguration": {"level": "warning"},
+                                "fullDescription": {
+                                    "text": (
+                                        "Detects required repository files that "
+                                        "are missing."
+                                    )
+                                },
+                                "id": "missing_file",
+                                "name": "Missing File",
+                                "shortDescription": {
+                                    "text": "Required file missing."
+                                },
+                            },
+                            {
+                                "defaultConfiguration": {"level": "error"},
+                                "fullDescription": {
+                                    "text": (
+                                        "Detects suspicious filenames commonly "
+                                        "associated with secrets."
+                                    )
+                                },
+                                "id": "suspicious_file",
+                                "name": "Suspicious File",
+                                "shortDescription": {
+                                    "text": "Suspicious file detected."
+                                },
+                            },
+                        ],
+                    }
+                },
+            }
+        ],
+        "version": "2.1.0",
+    }
+
+
 def test_help_command_succeeds(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exc_info:
         main(["--help"])
@@ -54,6 +218,22 @@ def test_scan_command_emits_stable_json(
     assert captured.out == expected_output
 
 
+def test_scan_command_emits_stable_sarif(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    expected_output = (
+        json.dumps(_expected_sample_repo_sarif(), indent=2, sort_keys=True) + "\n"
+    )
+
+    exit_code = main(["scan", "--format", "sarif", str(fixture_root)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == expected_output
+    assert json.loads(captured.out) == _expected_sample_repo_sarif()
+
+
 def test_scan_command_returns_success_when_findings_present_and_flag_absent(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
@@ -82,17 +262,18 @@ def test_scan_command_returns_failure_when_findings_present_and_flag_enabled(
     assert exit_code == 1
     assert captured.out == (
         "Suspicious files (4):\n"
-        "- .env\n"
-        "- certs/service.pem\n"
-        "- keys/id_rsa\n"
-        "- vault/archive.kdbx\n"
+        "- [ERROR] .env\n"
+        "- [ERROR] certs/service.pem\n"
+        "- [ERROR] keys/id_rsa\n"
+        "- [ERROR] vault/archive.kdbx\n"
         "\n"
         "Missing required files (2):\n"
-        "- .gitignore\n"
-        "- LICENSE\n"
+        "- [WARNING] .gitignore\n"
+        "- [WARNING] LICENSE\n"
         "\n"
         "High-entropy findings (1):\n"
-        "- notes/tokens.txt:2 entropy=4.0 token=0123456789abcdef0123456789abcdef\n"
+        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
+        "token=0123456789abcdef0123456789abcdef\n"
     )
 
 
@@ -107,17 +288,18 @@ def test_scan_command_emits_concise_text_report(
     assert exit_code == 0
     assert captured.out == (
         "Suspicious files (4):\n"
-        "- .env\n"
-        "- certs/service.pem\n"
-        "- keys/id_rsa\n"
-        "- vault/archive.kdbx\n"
+        "- [ERROR] .env\n"
+        "- [ERROR] certs/service.pem\n"
+        "- [ERROR] keys/id_rsa\n"
+        "- [ERROR] vault/archive.kdbx\n"
         "\n"
         "Missing required files (2):\n"
-        "- .gitignore\n"
-        "- LICENSE\n"
+        "- [WARNING] .gitignore\n"
+        "- [WARNING] LICENSE\n"
         "\n"
         "High-entropy findings (1):\n"
-        "- notes/tokens.txt:2 entropy=4.0 token=0123456789abcdef0123456789abcdef\n"
+        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
+        "token=0123456789abcdef0123456789abcdef\n"
     )
 
 
@@ -180,6 +362,7 @@ def test_scan_command_suppresses_known_findings_with_baseline(
 
     assert exit_code == 0
     assert json.loads(captured.out) == {
+        "findings": [],
         "high_entropy_findings": [],
         "missing_files": {
             ".gitignore": False,
@@ -218,6 +401,41 @@ def test_scan_command_emits_no_findings_text_after_baseline_suppression(
     assert captured.out == "No findings.\n"
 
 
+def test_scan_command_emits_empty_sarif_results_after_baseline_suppression(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    baseline_path = tmp_path / "baseline.json"
+
+    write_exit_code = main(
+        ["scan", "--write-baseline", str(baseline_path), str(fixture_root)]
+    )
+    assert write_exit_code == 0
+    capsys.readouterr()
+
+    exit_code = main(
+        [
+            "scan",
+            "--format",
+            "sarif",
+            "--baseline",
+            str(baseline_path),
+            str(fixture_root),
+        ]
+    )
+    captured = capsys.readouterr()
+    sarif = json.loads(captured.out)
+
+    assert exit_code == 0
+    assert sarif["version"] == "2.1.0"
+    assert sarif["runs"][0]["results"] == []
+    assert [rule["id"] for rule in sarif["runs"][0]["tool"]["driver"]["rules"]] == [
+        "high_entropy",
+        "missing_file",
+        "suspicious_file",
+    ]
+
+
 def test_scan_command_returns_success_when_baseline_suppresses_all_findings(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
@@ -243,6 +461,7 @@ def test_scan_command_returns_success_when_baseline_suppresses_all_findings(
 
     assert exit_code == 0
     assert json.loads(captured.out) == {
+        "findings": [],
         "high_entropy_findings": [],
         "missing_files": {
             ".gitignore": False,
@@ -278,6 +497,21 @@ def test_scan_command_surfaces_new_findings_outside_baseline(
 
     assert exit_code == 0
     assert json.loads(captured.out) == {
+        "findings": [
+            {
+                "entropy": 4.0,
+                "file": "notes/new_tokens.txt",
+                "kind": "high_entropy",
+                "line": 1,
+                "severity": "error",
+                "token": "fedcba9876543210fedcba9876543210",
+            },
+            {
+                "kind": "suspicious_file",
+                "path": "certs/new.key",
+                "severity": "error",
+            },
+        ],
         "high_entropy_findings": [
             {
                 "entropy": 4.0,
@@ -307,6 +541,7 @@ def test_scan_command_returns_success_for_clean_scan_with_flag_enabled(
 
     assert exit_code == 0
     assert json.loads(captured.out) == {
+        "findings": [],
         "high_entropy_findings": [],
         "missing_files": {
             ".gitignore": False,

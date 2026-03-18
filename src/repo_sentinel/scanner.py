@@ -20,6 +20,32 @@ HIGH_ENTROPY_MIN_LENGTH = 20
 TEXT_SAMPLE_SIZE = 8192
 CONFIG_FILENAME = ".reposentinel.toml"
 BASELINE_SCHEMA_VERSION = 1
+FINDING_SEVERITIES = {
+    "high_entropy": "error",
+    "missing_file": "warning",
+    "suspicious_file": "error",
+}
+SARIF_RULE_METADATA = {
+    "high_entropy": {
+        "full_description": (
+            "Detects high-entropy strings that may indicate secrets."
+        ),
+        "name": "High Entropy",
+        "short_description": "High-entropy string detected.",
+    },
+    "missing_file": {
+        "full_description": "Detects required repository files that are missing.",
+        "name": "Missing File",
+        "short_description": "Required file missing.",
+    },
+    "suspicious_file": {
+        "full_description": (
+            "Detects suspicious filenames commonly associated with secrets."
+        ),
+        "name": "Suspicious File",
+        "short_description": "Suspicious file detected.",
+    },
+}
 TOKEN_PATTERN = re.compile(
     rf"(?<![A-Za-z0-9+/_-])([A-Za-z0-9+/_-]{{{HIGH_ENTROPY_MIN_LENGTH},}}"
     r"(?:={1,2})?)(?![A-Za-z0-9+/_=-])"
@@ -108,13 +134,11 @@ def scan_repository(root: Path) -> dict[str, object]:
         key=lambda finding: (_sort_key(finding.file), finding.line, finding.token)
     )
 
-    return {
-        "high_entropy_findings": [
-            finding.to_dict() for finding in entropy_findings
-        ],
-        "missing_files": _detect_missing_files(resolved_root, config.required_files),
-        "suspicious_files": suspicious_files,
-    }
+    return _report_from_components(
+        entropy_findings,
+        _detect_missing_files(resolved_root, config.required_files),
+        suspicious_files,
+    )
 
 
 def load_baseline(path: Path) -> dict[str, object]:
@@ -179,13 +203,18 @@ def format_text_report(report: dict[str, object]) -> str:
 
     if suspicious_files:
         lines.append(f"Suspicious files ({len(suspicious_files)}):")
-        lines.extend(f"- {path}" for path in suspicious_files)
+        lines.extend(
+            f"- [{_severity_label('suspicious_file')}] {path}"
+            for path in suspicious_files
+        )
 
     if missing_paths:
         if lines:
             lines.append("")
         lines.append(f"Missing required files ({len(missing_paths)}):")
-        lines.extend(f"- {path}" for path in missing_paths)
+        lines.extend(
+            f"- [{_severity_label('missing_file')}] {path}" for path in missing_paths
+        )
 
     if entropy_findings:
         if lines:
@@ -193,7 +222,8 @@ def format_text_report(report: dict[str, object]) -> str:
         lines.append(f"High-entropy findings ({len(entropy_findings)}):")
         lines.extend(
             (
-                f"- {finding.file}:{finding.line} "
+                f"- [{_severity_label('high_entropy')}] "
+                f"{finding.file}:{finding.line} "
                 f"entropy={finding.entropy} token={finding.token}"
             )
             for finding in entropy_findings
@@ -203,6 +233,35 @@ def format_text_report(report: dict[str, object]) -> str:
         return "No findings.\n"
 
     return "\n".join(lines) + "\n"
+
+
+def format_sarif_report(report: dict[str, object]) -> str:
+    normalized = _normalize_report(report)
+    findings = normalized["findings"]
+    if not isinstance(findings, list):
+        raise ValueError("report findings must be a list")
+
+    sarif = {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "runs": [
+            {
+                "results": [_sarif_result(finding) for finding in findings],
+                "tool": {
+                    "driver": {
+                        "name": "repo-sentinel-lite",
+                        "rules": [
+                            _sarif_rule(rule_id)
+                            for rule_id in sorted(
+                                FINDING_SEVERITIES, key=_sort_key
+                            )
+                        ],
+                    }
+                },
+            }
+        ],
+        "version": "2.1.0",
+    }
+    return json.dumps(sarif, indent=2, sort_keys=True) + "\n"
 
 
 def has_findings(report: dict[str, object]) -> bool:
@@ -400,6 +459,63 @@ def _sort_key(value: str) -> tuple[str, str]:
     return (value.casefold(), value)
 
 
+def _severity_label(kind: str) -> str:
+    return FINDING_SEVERITIES[kind].upper()
+
+
+def _sarif_rule(rule_id: str) -> dict[str, object]:
+    metadata = SARIF_RULE_METADATA[rule_id]
+    return {
+        "defaultConfiguration": {"level": FINDING_SEVERITIES[rule_id]},
+        "fullDescription": {"text": metadata["full_description"]},
+        "id": rule_id,
+        "name": metadata["name"],
+        "shortDescription": {"text": metadata["short_description"]},
+    }
+
+
+def _sarif_result(finding: object) -> dict[str, object]:
+    if not isinstance(finding, dict):
+        raise ValueError("report findings entries must be objects")
+
+    kind = str(finding["kind"])
+    result = {
+        "level": FINDING_SEVERITIES[kind],
+        "locations": [_sarif_location(finding)],
+        "message": {"text": _sarif_message(finding)},
+        "ruleId": kind,
+    }
+    return result
+
+
+def _sarif_location(finding: dict[str, object]) -> dict[str, object]:
+    if finding["kind"] == "high_entropy":
+        return {
+            "physicalLocation": {
+                "artifactLocation": {"uri": str(finding["file"])},
+                "region": {"startLine": int(finding["line"])},
+            }
+        }
+
+    return {
+        "physicalLocation": {
+            "artifactLocation": {"uri": str(finding["path"])},
+        }
+    }
+
+
+def _sarif_message(finding: dict[str, object]) -> str:
+    kind = str(finding["kind"])
+    if kind == "high_entropy":
+        return (
+            "High-entropy string detected: "
+            f"{finding['file']}:{int(finding['line'])}"
+        )
+    if kind == "missing_file":
+        return f"Required file missing: {finding['path']}"
+    return f"Suspicious file detected: {finding['path']}"
+
+
 def _baseline_from_report(report: dict[str, object]) -> dict[str, object]:
     entropy_findings, missing_files, suspicious_files = _extract_report_components(
         report
@@ -501,7 +617,23 @@ def _report_from_components(
     missing_files: dict[str, bool],
     suspicious_files: Sequence[str],
 ) -> dict[str, object]:
+    findings = [
+        _report_finding(_entropy_baseline_finding(finding))
+        for finding in entropy_findings
+    ]
+    findings.extend(
+        _report_finding(_missing_file_baseline_finding(path))
+        for path, is_missing in missing_files.items()
+        if is_missing
+    )
+    findings.extend(
+        _report_finding(_suspicious_file_baseline_finding(path))
+        for path in suspicious_files
+    )
+    findings.sort(key=_baseline_finding_sort_key)
+
     return {
+        "findings": findings,
         "high_entropy_findings": [finding.to_dict() for finding in entropy_findings],
         "missing_files": {
             path: is_missing
@@ -511,6 +643,12 @@ def _report_from_components(
         },
         "suspicious_files": list(suspicious_files),
     }
+
+
+def _report_finding(finding: dict[str, object]) -> dict[str, object]:
+    normalized = dict(finding)
+    normalized["severity"] = FINDING_SEVERITIES[str(finding["kind"])]
+    return normalized
 
 
 def _coerce_entropy_findings(value: object) -> list[EntropyFinding]:
