@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repo-sentinel-lite"
-version = "0.3.1"
+version = "0.4.0"
 description = "Minimal repository scanning CLI."
 readme = "README.md"
 license = "MIT"
