@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import codecs
 import fnmatch
+import hashlib
 import json
 import math
 import os
@@ -24,6 +25,10 @@ FINDING_SEVERITIES = {
     "high_entropy": "error",
     "missing_file": "warning",
     "suspicious_file": "error",
+}
+SEVERITY_RANKS = {
+    "warning": 1,
+    "error": 2,
 }
 SARIF_RULE_METADATA = {
     "high_entropy": {
@@ -163,31 +168,71 @@ def apply_baseline(
     current_entropy, current_missing, current_suspicious = _extract_report_components(
         report
     )
-    baseline_finding_keys = frozenset(
-        _baseline_finding_identity(finding)
-        for finding in _extract_baseline_findings(baseline)
+    baseline_fingerprint_keys, baseline_finding_keys = _baseline_match_keys(
+        baseline
     )
 
     return _report_from_components(
         [
             finding
             for finding in current_entropy
-            if _baseline_finding_identity(_entropy_baseline_finding(finding))
-            not in baseline_finding_keys
+            if not _finding_matches_baseline(
+                _entropy_baseline_finding(finding),
+                baseline_fingerprint_keys,
+                baseline_finding_keys,
+            )
         ],
         {
             path: is_missing
-            and _baseline_finding_identity(_missing_file_baseline_finding(path))
-            not in baseline_finding_keys
+            and not _finding_matches_baseline(
+                _missing_file_baseline_finding(path),
+                baseline_fingerprint_keys,
+                baseline_finding_keys,
+            )
             for path, is_missing in current_missing.items()
         },
         [
             path
             for path in current_suspicious
-            if _baseline_finding_identity(_suspicious_file_baseline_finding(path))
-            not in baseline_finding_keys
+            if not _finding_matches_baseline(
+                _suspicious_file_baseline_finding(path),
+                baseline_fingerprint_keys,
+                baseline_finding_keys,
+            )
         ],
     )
+
+
+def prune_baseline(
+    report: dict[str, object], baseline: dict[str, object]
+) -> dict[str, object]:
+    current_baseline = _baseline_from_report(report)
+    current_findings = _extract_baseline_findings(current_baseline)
+    baseline_fingerprint_keys, baseline_finding_keys = _baseline_match_keys(
+        baseline
+    )
+
+    return {
+        "findings": [
+            finding
+            for finding in current_findings
+            if _finding_matches_baseline(
+                finding,
+                baseline_fingerprint_keys,
+                baseline_finding_keys,
+            )
+        ],
+        "generated_at": current_baseline["generated_at"],
+        "schema_version": BASELINE_SCHEMA_VERSION,
+    }
+
+
+def update_baseline(
+    report: dict[str, object], baseline: dict[str, object] | None = None
+) -> dict[str, object]:
+    if baseline is None:
+        return _baseline_from_report(report)
+    return prune_baseline(report, baseline)
 
 
 def format_report(report: dict[str, object]) -> str:
@@ -271,6 +316,25 @@ def has_findings(report: dict[str, object]) -> bool:
     return bool(
         entropy_findings or suspicious_files or any(missing_files.values())
     )
+
+
+def has_findings_at_or_above_severity(
+    report: dict[str, object], severity: str
+) -> bool:
+    minimum_rank = SEVERITY_RANKS[severity]
+    normalized = _normalize_report(report)
+    findings = normalized["findings"]
+    if not isinstance(findings, list):
+        raise ValueError("report findings must be a list")
+
+    for finding in findings:
+        if not isinstance(finding, dict):
+            raise ValueError("report findings entries must be objects")
+        finding_severity = str(finding["severity"])
+        if SEVERITY_RANKS[finding_severity] >= minimum_rank:
+            return True
+
+    return False
 
 
 def format_baseline(baseline: dict[str, object]) -> str:
@@ -483,6 +547,9 @@ def _sarif_result(finding: object) -> dict[str, object]:
         "level": FINDING_SEVERITIES[kind],
         "locations": [_sarif_location(finding)],
         "message": {"text": _sarif_message(finding)},
+        "partialFingerprints": {
+            "repoSentinelFingerprint": str(finding["fingerprint"])
+        },
         "ruleId": kind,
     }
     return result
@@ -520,14 +587,18 @@ def _baseline_from_report(report: dict[str, object]) -> dict[str, object]:
     entropy_findings, missing_files, suspicious_files = _extract_report_components(
         report
     )
-    findings = [_entropy_baseline_finding(finding) for finding in entropy_findings]
+    findings = [
+        _baseline_finding_with_fingerprint(_entropy_baseline_finding(finding))
+        for finding in entropy_findings
+    ]
     findings.extend(
-        _missing_file_baseline_finding(path)
+        _baseline_finding_with_fingerprint(_missing_file_baseline_finding(path))
         for path, is_missing in missing_files.items()
         if is_missing
     )
     findings.extend(
-        _suspicious_file_baseline_finding(path) for path in suspicious_files
+        _baseline_finding_with_fingerprint(_suspicious_file_baseline_finding(path))
+        for path in suspicious_files
     )
     findings.sort(key=_baseline_finding_sort_key)
 
@@ -590,6 +661,24 @@ def _extract_baseline_findings(baseline: object) -> list[dict[str, object]]:
     return findings
 
 
+def _baseline_match_keys(
+    baseline: object,
+) -> tuple[frozenset[str], frozenset[tuple[object, ...]]]:
+    baseline_findings = _extract_baseline_findings(baseline)
+    return (
+        frozenset(
+            str(finding["fingerprint"])
+            for finding in baseline_findings
+            if "fingerprint" in finding
+        ),
+        frozenset(
+            _baseline_finding_identity(finding)
+            for finding in baseline_findings
+            if "fingerprint" not in finding
+        ),
+    )
+
+
 def _normalize_report(report: object) -> dict[str, object]:
     entropy_findings, missing_files, suspicious_files = _extract_report_components(
         report
@@ -647,7 +736,35 @@ def _report_from_components(
 
 def _report_finding(finding: dict[str, object]) -> dict[str, object]:
     normalized = dict(finding)
+    normalized["fingerprint"] = _finding_fingerprint(finding)
     normalized["severity"] = FINDING_SEVERITIES[str(finding["kind"])]
+    return normalized
+
+
+def _finding_fingerprint(finding: dict[str, object]) -> str:
+    identity = _baseline_finding_identity(finding)
+    serialized_identity = json.dumps(
+        list(identity), ensure_ascii=False, separators=(",", ":")
+    )
+    return hashlib.sha256(serialized_identity.encode("utf-8")).hexdigest()
+
+
+def _finding_matches_baseline(
+    finding: dict[str, object],
+    baseline_fingerprint_keys: frozenset[str],
+    baseline_finding_keys: frozenset[tuple[object, ...]],
+) -> bool:
+    fingerprint = _finding_fingerprint(finding)
+    if fingerprint in baseline_fingerprint_keys:
+        return True
+    return _baseline_finding_identity(finding) in baseline_finding_keys
+
+
+def _baseline_finding_with_fingerprint(
+    finding: dict[str, object],
+) -> dict[str, object]:
+    normalized = dict(finding)
+    normalized["fingerprint"] = _finding_fingerprint(finding)
     return normalized
 
 
@@ -723,16 +840,25 @@ def _coerce_baseline_finding(value: object) -> dict[str, object]:
         raise ValueError("baseline findings entries must be objects")
 
     kind = value.get("kind")
+    fingerprint = value.get("fingerprint")
+    if fingerprint is not None and not isinstance(fingerprint, str):
+        raise ValueError("baseline finding fingerprint must be a string")
+
     if kind == "high_entropy":
         finding = _coerce_entropy_finding(value)
         normalized = finding.to_dict()
         normalized["kind"] = kind
+        if fingerprint is not None:
+            normalized["fingerprint"] = fingerprint
         return normalized
     if kind in {"missing_file", "suspicious_file"}:
         path = value.get("path")
         if not isinstance(path, str):
             raise ValueError(f"{kind} baseline path must be a string")
-        return {"kind": kind, "path": _normalize_path(path)}
+        normalized = {"kind": kind, "path": _normalize_path(path)}
+        if fingerprint is not None:
+            normalized["fingerprint"] = fingerprint
+        return normalized
 
     raise ValueError("baseline findings kind must be recognized")
 

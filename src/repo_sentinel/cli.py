@@ -8,12 +8,16 @@ from pathlib import Path
 from . import __version__
 from .scanner import (
     apply_baseline,
+    format_baseline,
     format_report,
     format_sarif_report,
     format_text_report,
     has_findings,
+    has_findings_at_or_above_severity,
     load_baseline,
+    prune_baseline,
     scan_repository,
+    update_baseline,
     write_baseline,
 )
 
@@ -55,9 +59,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Path to write the current findings as a baseline JSON file.",
     )
     scan_parser.add_argument(
+        "--prune-baseline",
+        type=Path,
+        help=(
+            "Write a pruned copy of --baseline containing only entries that "
+            "still match current findings."
+        ),
+    )
+    scan_parser.add_argument(
+        "--update-baseline",
+        type=Path,
+        help=(
+            "Write a refreshed canonical baseline for the current findings "
+            "state."
+        ),
+    )
+    scan_parser.add_argument(
         "--fail-on-findings",
         action="store_true",
         help="Return exit code 1 when unsuppressed findings remain.",
+    )
+    scan_parser.add_argument(
+        "--fail-on-severity",
+        choices=("error", "warning"),
+        help=(
+            "Return exit code 1 when unsuppressed findings remain at or above "
+            "the given severity."
+        ),
+    )
+    scan_parser.add_argument(
+        "--output",
+        type=Path,
+        help="Write the selected output format to a file instead of stdout.",
     )
     scan_parser.add_argument(
         "path",
@@ -80,6 +113,10 @@ def _run_scan(args: argparse.Namespace) -> int:
         return 2
 
     baseline_report: dict[str, object] | None = None
+    if args.prune_baseline is not None and args.baseline is None:
+        print("--prune-baseline requires --baseline", file=sys.stderr)
+        return 2
+
     if args.baseline is not None:
         try:
             baseline_report = load_baseline(args.baseline)
@@ -105,6 +142,32 @@ def _run_scan(args: argparse.Namespace) -> int:
             )
             return 2
 
+    if args.prune_baseline is not None and baseline_report is not None:
+        try:
+            pruned_baseline = prune_baseline(report, baseline_report)
+            args.prune_baseline.write_text(
+                format_baseline(pruned_baseline), encoding="utf-8"
+            )
+        except OSError as exc:
+            print(
+                f"Failed to write pruned baseline {args.prune_baseline}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
+
+    if args.update_baseline is not None:
+        try:
+            refreshed_baseline = update_baseline(report, baseline_report)
+            args.update_baseline.write_text(
+                format_baseline(refreshed_baseline), encoding="utf-8"
+            )
+        except OSError as exc:
+            print(
+                f"Failed to write updated baseline {args.update_baseline}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
+
     if baseline_report is not None:
         report = apply_baseline(report, baseline_report)
 
@@ -113,8 +176,21 @@ def _run_scan(args: argparse.Namespace) -> int:
         "sarif": format_sarif_report,
         "text": format_text_report,
     }[args.format]
-    print(formatter(report), end="")
+    rendered = formatter(report)
+    if args.output is None:
+        print(rendered, end="")
+    else:
+        try:
+            args.output.write_text(rendered, encoding="utf-8")
+        except OSError as exc:
+            print(f"Failed to write output {args.output}: {exc}", file=sys.stderr)
+            return 2
     if args.fail_on_findings and has_findings(report):
+        return 1
+    if (
+        args.fail_on_severity is not None
+        and has_findings_at_or_above_severity(report, args.fail_on_severity)
+    ):
         return 1
     return 0
 

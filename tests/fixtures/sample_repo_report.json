@@ -3,37 +3,44 @@
     {
       "entropy": 4.0,
       "file": "notes/tokens.txt",
+      "fingerprint": "9d32570586e37a6005c9ce58edd091a56032dc3f38ae5c907033c17661286129",
       "kind": "high_entropy",
       "line": 2,
       "severity": "error",
       "token": "0123456789abcdef0123456789abcdef"
     },
     {
+      "fingerprint": "2268e39db2ef51eba92c7640986350d5843da88ece2739c97ec7ab0b3e267a93",
       "kind": "missing_file",
       "path": ".gitignore",
       "severity": "warning"
     },
     {
+      "fingerprint": "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e",
       "kind": "missing_file",
       "path": "LICENSE",
       "severity": "warning"
     },
     {
+      "fingerprint": "a6eba87257d11d0a165ac41d54729cdcd8300281102b58776ee8b453eea0138c",
       "kind": "suspicious_file",
       "path": ".env",
       "severity": "error"
     },
     {
+      "fingerprint": "16217ed2c8122262f2faf42e00ab7ae26888cf35b22de840faefe6cae9c03834",
       "kind": "suspicious_file",
       "path": "certs/service.pem",
       "severity": "error"
     },
     {
+      "fingerprint": "d14152416103f5602ac35e2bb4c0c7006bc25c646512361c1b5d056ccb4c8025",
       "kind": "suspicious_file",
       "path": "keys/id_rsa",
       "severity": "error"
     },
     {
+      "fingerprint": "e34a85d2ae98c2282bf0966deb449470edba292d20c0ca3e2f8c53972fe5fc59",
       "kind": "suspicious_file",
       "path": "vault/archive.kdbx",
       "severity": "error"
