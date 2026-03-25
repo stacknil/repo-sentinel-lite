@@ -1,0 +1,17 @@
+- id: repo-sentinel-error
+  name: repo-sentinel (error)
+  description: Fail when unsuppressed error findings remain.
+  entry: repo-sentinel
+  args: [scan, --fail-on-severity, error, .]
+  language: python
+  pass_filenames: false
+  stages: [pre-commit, pre-push, manual]
+
+- id: repo-sentinel-warning
+  name: repo-sentinel (warning)
+  description: Fail when unsuppressed warning or error findings remain.
+  entry: repo-sentinel
+  args: [scan, --fail-on-severity, warning, .]
+  language: python
+  pass_filenames: false
+  stages: [pre-commit, pre-push, manual]
