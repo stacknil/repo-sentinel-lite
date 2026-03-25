@@ -1,6 +1,24 @@
 name: Pre-Commit Provider Validation
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/pre-commit-provider.yml
+      - .pre-commit-hooks.yaml
+      - README.md
+      - docs/pre-commit.md
+      - pyproject.toml
+      - src/repo_sentinel/**
+      - tests/validate_pre_commit_provider.py
+  push:
+    paths:
+      - .github/workflows/pre-commit-provider.yml
+      - .pre-commit-hooks.yaml
+      - README.md
+      - docs/pre-commit.md
+      - pyproject.toml
+      - src/repo_sentinel/**
+      - tests/validate_pre_commit_provider.py
   workflow_dispatch:
 
 jobs:
