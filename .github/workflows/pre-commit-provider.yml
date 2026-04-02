@@ -1,6 +1,6 @@
 name: Pre-Commit Provider Validation
 
-# Keep this workflow path-filtered so provider-related changes self-validate.
+# Keep this workflow path-filtered so provider-related changes self-validate cleanly.
 
 on:
   pull_request:
