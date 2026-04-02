@@ -57,6 +57,15 @@ repo-sentinel scan \
 repo-sentinel scan --baseline baselines/repo-sentinel-baseline.json .
 ```
 
+## Run with the default committed baseline
+
+If `.reposentinel-baseline.json` exists in the repository root, it is applied
+automatically:
+
+```bash
+repo-sentinel scan .
+```
+
 ## Prune stale baseline entries
 
 ```bash

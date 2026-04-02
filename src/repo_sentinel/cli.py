@@ -7,6 +7,7 @@ from pathlib import Path
 
 from . import __version__
 from .scanner import (
+    DEFAULT_BASELINE_FILENAME,
     apply_baseline,
     format_baseline,
     format_report,
@@ -51,7 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
     scan_parser.add_argument(
         "--baseline",
         type=Path,
-        help="Path to a baseline JSON file whose known findings should be suppressed.",
+        help=(
+            "Path to a baseline JSON file whose known findings should be "
+            "suppressed. Defaults to .reposentinel-baseline.json in the "
+            "scanned repository when present."
+        ),
     )
     scan_parser.add_argument(
         "--write-baseline",
@@ -103,6 +108,13 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _resolve_default_baseline_path(target: Path) -> Path | None:
+    baseline_path = target / DEFAULT_BASELINE_FILENAME
+    if baseline_path.is_file():
+        return baseline_path
+    return None
+
+
 def _run_scan(args: argparse.Namespace) -> int:
     target = Path(args.path)
     if not target.exists():
@@ -113,21 +125,22 @@ def _run_scan(args: argparse.Namespace) -> int:
         return 2
 
     baseline_report: dict[str, object] | None = None
+    baseline_path = args.baseline or _resolve_default_baseline_path(target)
     if args.prune_baseline is not None and args.baseline is None:
         print("--prune-baseline requires --baseline", file=sys.stderr)
         return 2
 
-    if args.baseline is not None:
+    if baseline_path is not None:
         try:
-            baseline_report = load_baseline(args.baseline)
+            baseline_report = load_baseline(baseline_path)
         except FileNotFoundError:
-            print(f"Baseline not found: {args.baseline}", file=sys.stderr)
+            print(f"Baseline not found: {baseline_path}", file=sys.stderr)
             return 2
         except OSError as exc:
-            print(f"Failed to read baseline {args.baseline}: {exc}", file=sys.stderr)
+            print(f"Failed to read baseline {baseline_path}: {exc}", file=sys.stderr)
             return 2
         except ValueError as exc:
-            print(f"Invalid baseline {args.baseline}: {exc}", file=sys.stderr)
+            print(f"Invalid baseline {baseline_path}: {exc}", file=sys.stderr)
             return 2
 
     report = scan_repository(target)

@@ -20,6 +20,7 @@ HIGH_ENTROPY_THRESHOLD = 4.0
 HIGH_ENTROPY_MIN_LENGTH = 20
 TEXT_SAMPLE_SIZE = 8192
 CONFIG_FILENAME = ".reposentinel.toml"
+DEFAULT_BASELINE_FILENAME = ".reposentinel-baseline.json"
 BASELINE_SCHEMA_VERSION = 1
 FINDING_SEVERITIES = {
     "high_entropy": "error",
@@ -84,7 +85,7 @@ class EntropyFinding:
 
 @dataclass(frozen=True)
 class ScanConfig:
-    ignore_globs: tuple[str, ...] = ()
+    ignore_globs: tuple[str, ...] = (DEFAULT_BASELINE_FILENAME,)
     entropy_threshold: float = HIGH_ENTROPY_THRESHOLD
     suspicious_filenames: tuple[str, ...] = SUSPICIOUS_FILENAMES
     required_files: tuple[str, ...] = REQUIRED_FILES
@@ -375,7 +376,9 @@ def _load_scan_config(root: Path) -> ScanConfig:
         return ScanConfig()
 
     return ScanConfig(
-        ignore_globs=_get_string_list(data, "ignore_globs", ()),
+        ignore_globs=_merge_default_ignore_globs(
+            _get_string_list(data, "ignore_globs", ())
+        ),
         entropy_threshold=_get_float(
             data, "entropy_threshold", HIGH_ENTROPY_THRESHOLD
         ),
@@ -517,6 +520,13 @@ def _get_suspicious_filenames(
     if "suspicious_filenames" in data:
         return _get_string_list(data, "suspicious_filenames", default)
     return _get_string_list(data, "suspicious_patterns", default)
+
+
+def _merge_default_ignore_globs(
+    ignore_globs: Sequence[str],
+) -> tuple[str, ...]:
+    ordered_patterns = [DEFAULT_BASELINE_FILENAME, *ignore_globs]
+    return tuple(dict.fromkeys(ordered_patterns))
 
 
 def _sort_key(value: str) -> tuple[str, str]:

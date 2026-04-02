@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from repo_sentinel.scanner import (
+    DEFAULT_BASELINE_FILENAME,
     _baseline_from_report,
     _normalize_report,
     apply_baseline,
@@ -123,6 +124,18 @@ def test_scan_repository_respects_ignored_paths(tmp_path: Path) -> None:
     report = scan_repository(tmp_path)
 
     assert report["suspicious_files"] == [".env"]
+    assert report["high_entropy_findings"] == []
+
+
+def test_scan_repository_ignores_default_baseline_file(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / DEFAULT_BASELINE_FILENAME).write_text(
+        '{"token":"0123456789abcdef0123456789abcdef"}\n',
+        encoding="utf-8",
+    )
+
+    report = scan_repository(tmp_path)
+
     assert report["high_entropy_findings"] == []
 
 

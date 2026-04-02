@@ -807,6 +807,37 @@ def test_scan_command_suppresses_known_findings_with_baseline(
     }
 
 
+def test_scan_command_auto_applies_default_repo_root_baseline(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+    repo_root = tmp_path / "sample_repo"
+    baseline_path = repo_root / ".reposentinel-baseline.json"
+
+    shutil.copytree(fixture_root, repo_root)
+
+    write_exit_code = main(
+        ["scan", "--write-baseline", str(baseline_path), str(repo_root)]
+    )
+    assert write_exit_code == 0
+    capsys.readouterr()
+
+    exit_code = main(["scan", str(repo_root)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert json.loads(captured.out) == {
+        "findings": [],
+        "high_entropy_findings": [],
+        "missing_files": {
+            ".gitignore": False,
+            "LICENSE": False,
+            "README.md": False,
+        },
+        "suspicious_files": [],
+    }
+
+
 def test_scan_command_suppresses_known_findings_with_legacy_baseline(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:

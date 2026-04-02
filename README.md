@@ -55,6 +55,9 @@ Scan with an existing baseline applied:
 repo-sentinel scan --baseline baseline.json path/to/repo
 ```
 
+If the scanned repository already contains `.reposentinel-baseline.json`,
+`repo-sentinel scan` applies it automatically.
+
 Fail with exit code `1` when unsuppressed findings remain:
 
 ```bash

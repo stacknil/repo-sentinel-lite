@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import shutil
 import subprocess
@@ -88,6 +89,25 @@ def main() -> int:
         (consumer_root / "README.md").write_text("# Temp consumer\n", encoding="utf-8")
         (consumer_root / "LICENSE").write_text("temp\n", encoding="utf-8")
         (consumer_root / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
+        (consumer_root / ".env").write_text("PLACEHOLDER=1\n", encoding="utf-8")
+        (consumer_root / ".reposentinel-baseline.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "generated_at": "2026-04-03T00:00:00Z",
+                    "findings": [
+                        {
+                            "kind": "suspicious_file",
+                            "path": ".env",
+                        }
+                    ],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
 
         _run(["git", "init"], cwd=consumer_root, env=env)
         _run(["git", "add", "."], cwd=consumer_root, env=env)
