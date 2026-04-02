@@ -1,5 +1,7 @@
 name: Pre-Commit Provider Validation
 
+# Keep this workflow path-filtered so provider-related changes self-validate.
+
 on:
   pull_request:
     paths:
