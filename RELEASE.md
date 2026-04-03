@@ -17,24 +17,28 @@ python -m twine check dist/*
 ### GitHub Release trigger flow
 
 1. Push to `main`.
-2. Create the release tag locally from `main`, then push the tag:
+2. Update the package version in both `pyproject.toml` and
+   `src/repo_sentinel/__init__.py` to `X.Y.Z`.
+3. Create the release tag locally from `main`, then push the tag:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-3. Create and publish the GitHub Release from the pushed tag:
+4. Create and publish the GitHub Release from the pushed tag:
 
 ```bash
 gh release create vX.Y.Z --verify-tag
 ```
 
-4. Publishing the release triggers `.github/workflows/release.yml`.
-5. The workflow builds the package and publishes to TestPyPI via OIDC.
+5. Publishing the release triggers `.github/workflows/release.yml`.
+6. The workflow builds the package and publishes to TestPyPI via OIDC.
 
 `--verify-tag` keeps release creation from implicitly creating the tag on the
 server. That removes ambiguity about what commit the release actually points to.
+The release workflow also validates that the pushed tag matches the package
+version before it builds distributions.
 
 ### TestPyPI Trusted Publisher values
 

@@ -1,40 +1,18 @@
-# Release Handoff: v0.6.1
+# Release Handoff Record: v0.6.1
+
+This document is a historical handoff artifact for the `v0.6.1` release that
+was already created. Keep it as release context, not as the current release
+SOP.
 
 ## Status
 
-- Upstream fix commit on `main`: `61f8efbf68e7b5d7d1e49ad20e491a065963a307`
-- Downstream adoption commit on `sec-writeups-public/main`: `0ea1c1a20155a498e9aa23c4e8358b635cf103de`
-- Branch protection check for `sec-writeups-public/main`: not protected, so no PR was required
+- Release tag: `v0.6.1`
+- Release commit: `61f8efbf68e7b5d7d1e49ad20e491a065963a307`
+- GitHub release object exists for `v0.6.1`
+- Downstream remote-provider adoption completed on `sec-writeups-public/main`
+- Branch protection check for `sec-writeups-public/main` at handoff time: not protected, so no PR was required
 
-## Next Tag
-
-- Latest existing tag: `v0.6.0`
-- Next patch tag: `v0.6.1`
-
-## Release Checklist
-
-1. Confirm `main` still contains `61f8efbf68e7b5d7d1e49ad20e491a065963a307`.
-2. Run the local preflight from [`RELEASE.md`](D:\OneDrive\Code\repo-sentinel-lite\RELEASE.md):
-
-```bash
-python -m pytest -q
-ruff check .
-python -m build
-python -m twine check dist/*
-```
-
-3. Create and publish GitHub Release `v0.6.1` from `main`.
-4. Verify the TestPyPI publish and entry points:
-
-```bash
-pip install --index-url https://test.pypi.org/simple/ --no-deps repo-sentinel-lite
-repo-sentinel --help
-python -m repo_sentinel --help
-```
-
-5. After the tag is live, update downstream consumers that are pinned to the raw commit SHA.
-
-## Draft Release Notes
+## Release Notes Summary
 
 ### Fixed
 
@@ -60,10 +38,6 @@ python -m pre_commit run repo-sentinel-error --hook-stage manual --all-files
 
 ## Downstream Follow-Up
 
-Once `v0.6.1` is released, replace the raw commit pin in `sec-writeups-public`:
-
-- File: [`.pre-commit-config.yaml`](D:\OneDrive\Code\sec-writeups-public\.pre-commit-config.yaml)
-- Change: `rev: 61f8efbf68e7b5d7d1e49ad20e491a065963a307` -> `rev: v0.6.1`
-- Proposed commit message: `chore(repo-sentinel): pin provider to v0.6.1`
-
-Re-run the same four downstream validation commands after that pin update.
+The downstream raw commit pin was later replaced with `rev: v0.6.1` in
+`sec-writeups-public`, and the same four validation commands were re-run after
+that pin update.

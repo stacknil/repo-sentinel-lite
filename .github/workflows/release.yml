@@ -7,8 +7,8 @@ name: Release
 #   Environment name: testpypi
 #   TestPyPI project: repo-sentinel-lite
 #
-# This workflow is intended for a private GitHub repository and publishes only to
-# TestPyPI, not to the real PyPI service.
+# This workflow currently publishes only to TestPyPI, not to the real PyPI
+# service.
 
 on:
   release:
@@ -25,6 +25,51 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.14"
+
+      - name: Verify release tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import os
+          from importlib.util import module_from_spec, spec_from_file_location
+          from pathlib import Path
+          import tomllib
+
+          release_tag = os.environ["RELEASE_TAG"]
+          expected_version = release_tag.removeprefix("v")
+
+          pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          project_version = pyproject["project"]["version"]
+
+          init_path = Path("src/repo_sentinel/__init__.py")
+          spec = spec_from_file_location("repo_sentinel", init_path)
+          module = module_from_spec(spec)
+          assert spec.loader is not None
+          spec.loader.exec_module(module)
+          package_version = module.__version__
+
+          errors = []
+          if not release_tag.startswith("v"):
+              errors.append(f"Release tag must start with 'v': {release_tag}")
+          if project_version != expected_version:
+              errors.append(
+                  f"pyproject.toml version {project_version} does not match tag {release_tag}"
+              )
+          if package_version != expected_version:
+              errors.append(
+                  f"src/repo_sentinel/__init__.py version {package_version} does not match tag {release_tag}"
+              )
+          if project_version != package_version:
+              errors.append(
+                  f"Version fields disagree: pyproject.toml={project_version}, __init__.py={package_version}"
+              )
+
+          if errors:
+              raise SystemExit("\n".join(errors))
+
+          print(f"Verified release tag {release_tag} matches package version {expected_version}")
+          PY
 
       - name: Build distributions
         run: |
