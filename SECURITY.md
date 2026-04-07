@@ -13,16 +13,8 @@ codebase, release artifacts, and pre-commit provider behavior.
 
 ## Reporting a Vulnerability
 
-If this repository is public and GitHub private vulnerability reporting is
-enabled, please use the GitHub Security Advisory / private vulnerability
-reporting flow for non-public reports.
-
-If the repository is still private, or if private vulnerability reporting is
-not enabled, use the maintainer's preferred private contact method instead.
-
-[Maintainer action required: add preferred fallback contact method before
-making the repository public if private vulnerability reporting will not be
-enabled.]
+For non-public reports, please use GitHub private vulnerability reporting for
+this repository.
 
 ## What to Include
 

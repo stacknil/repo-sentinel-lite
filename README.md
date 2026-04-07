@@ -11,14 +11,16 @@ Minimal repository scanning CLI for deterministic repository hygiene checks.
 It also supports `.reposentinel.toml` overrides and JSON baselines for
 suppressing known findings.
 
-## Installation
+## Install
 
 ```bash
-pip install repo-sentinel-lite
+python -m pip install "git+https://github.com/stacknil/repo-sentinel-lite.git@v0.6.1"
 ```
 
-Note: releases are currently validated through **TestPyPI** before any
-production PyPI release.
+Requires Python 3.14.
+
+`repo-sentinel-lite` is not published on production PyPI yet. Releases are
+currently validated through **TestPyPI** before any production PyPI release.
 
 ## Usage
 
