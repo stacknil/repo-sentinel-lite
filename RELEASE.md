@@ -1,7 +1,8 @@
 # Release SOP
 
-This project currently publishes to **TestPyPI only** via GitHub Releases and
-Trusted Publishing. Keep this document aligned with the working release flow.
+This project publishes GitHub prereleases to **TestPyPI** and stable GitHub
+releases to **PyPI** via GitHub Releases and Trusted Publishing. Keep this
+document aligned with the working release flow.
 
 ### Local preflight
 
@@ -32,8 +33,19 @@ git push origin vX.Y.Z
 gh release create vX.Y.Z --verify-tag
 ```
 
-5. Publishing the release triggers `.github/workflows/release.yml`.
-6. The workflow builds the package and publishes to TestPyPI via OIDC.
+5. For a TestPyPI smoke prerelease, create the GitHub release as a prerelease:
+
+```bash
+gh release create vX.Y.ZrcN --verify-tag --prerelease
+```
+
+6. Publishing the release triggers `.github/workflows/release.yml`.
+7. The workflow builds distributions once, then:
+   - publishes GitHub prereleases to TestPyPI
+   - publishes stable GitHub releases to PyPI
+
+Stable production releases require a matching production PyPI Trusted Publisher
+or pending publisher configuration before the release is published.
 
 `--verify-tag` keeps release creation from implicitly creating the tag on the
 server. That removes ambiguity about what commit the release actually points to.
@@ -50,13 +62,34 @@ Configure the Trusted Publisher in TestPyPI with:
 - Environment name: `testpypi`
 - Project name: `repo-sentinel-lite`
 
+### Production PyPI Trusted Publisher values
+
+Configure the Trusted Publisher or pending publisher in PyPI with:
+
+- GitHub owner: `stacknil`
+- Repository name: `repo-sentinel-lite`
+- Workflow file: `.github/workflows/release.yml`
+- Environment name: `pypi`
+- Project name: `repo-sentinel-lite`
+
+If the production project does not exist yet, the first successful stable
+publish can create it through the pending/new publisher flow.
+
 ### Post-release verification
 
 1. Create a clean virtual environment.
-2. Install from TestPyPI (no deps):
+2. Install from the target index:
+
+For TestPyPI prereleases:
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --no-deps repo-sentinel-lite
+```
+
+For stable production releases:
+
+```bash
+pip install --no-deps repo-sentinel-lite
 ```
 
 3. Verify entry points:

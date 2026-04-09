@@ -1,14 +1,21 @@
 name: Release
 
-# Configure TestPyPI Trusted Publishing with these values before enabling releases:
-#   GitHub owner: stacknil
-#   Repository name: repo-sentinel-lite
-#   Workflow file: .github/workflows/release.yml
-#   Environment name: testpypi
-#   TestPyPI project: repo-sentinel-lite
+# Configure Trusted Publishing with these values before enabling releases:
+#   TestPyPI prereleases:
+#     GitHub owner: stacknil
+#     Repository name: repo-sentinel-lite
+#     Workflow file: .github/workflows/release.yml
+#     Environment name: testpypi
+#     TestPyPI project: repo-sentinel-lite
+#   PyPI stable releases:
+#     GitHub owner: stacknil
+#     Repository name: repo-sentinel-lite
+#     Workflow file: .github/workflows/release.yml
+#     Environment name: pypi
+#     PyPI project: repo-sentinel-lite
 #
-# This workflow currently publishes only to TestPyPI, not to the real PyPI
-# service.
+# GitHub prereleases publish to TestPyPI. Stable GitHub releases publish to
+# PyPI.
 
 on:
   release:
@@ -84,6 +91,7 @@ jobs:
           path: dist/*
 
   publish-testpypi:
+    if: ${{ github.event.release.prerelease }}
     needs: build
     runs-on: ubuntu-latest
     environment:
@@ -103,3 +111,23 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    if: ${{ !github.event.release.prerelease }}
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/repo-sentinel-lite/
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.13.0
