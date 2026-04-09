@@ -14,15 +14,13 @@ known findings, and a pre-commit provider for repository-local enforcement.
 
 ## Install
 
-Install from the latest tagged GitHub source release:
+Install from production PyPI:
 
 ```bash
-python -m pip install "git+https://github.com/stacknil/repo-sentinel-lite.git@v0.6.1"
+python -m pip install repo-sentinel-lite
 ```
 
 Requires Python 3.14.
-
-`repo-sentinel-lite` is not published on production PyPI yet.
 
 ## Usage
 
