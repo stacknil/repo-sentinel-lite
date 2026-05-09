@@ -19,9 +19,24 @@ SUSPICIOUS_FILENAMES = (".env", "*.pem", "*.key", "id_rsa", "*.kdbx")
 HIGH_ENTROPY_THRESHOLD = 4.0
 HIGH_ENTROPY_MIN_LENGTH = 20
 TEXT_SAMPLE_SIZE = 8192
+DEFAULT_MAX_TEXT_FILE_SIZE = 1_048_576
 CONFIG_FILENAME = ".reposentinel.toml"
 DEFAULT_BASELINE_FILENAME = ".reposentinel-baseline.json"
+DEFAULT_IGNORE_GLOBS = (
+    DEFAULT_BASELINE_FILENAME,
+    ".nox",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+)
 BASELINE_SCHEMA_VERSION = 1
+REDACTED_TOKEN_PREFIX = "<redacted:sha256:"
 FINDING_SEVERITIES = {
     "high_entropy": "error",
     "missing_file": "warning",
@@ -85,8 +100,9 @@ class EntropyFinding:
 
 @dataclass(frozen=True)
 class ScanConfig:
-    ignore_globs: tuple[str, ...] = (DEFAULT_BASELINE_FILENAME,)
+    ignore_globs: tuple[str, ...] = DEFAULT_IGNORE_GLOBS
     entropy_threshold: float = HIGH_ENTROPY_THRESHOLD
+    max_text_file_size: int = DEFAULT_MAX_TEXT_FILE_SIZE
     suspicious_filenames: tuple[str, ...] = SUSPICIOUS_FILENAMES
     required_files: tuple[str, ...] = REQUIRED_FILES
 
@@ -125,7 +141,7 @@ def scan_repository(root: Path) -> dict[str, object]:
         if is_suspicious_filename(relative_path, config.suspicious_filenames):
             suspicious_files.append(relative_path)
 
-        text = _read_text_file(path)
+        text = _read_text_file(path, config.max_text_file_size)
         if text is None:
             continue
 
@@ -236,11 +252,16 @@ def update_baseline(
     return prune_baseline(report, baseline)
 
 
-def format_report(report: dict[str, object]) -> str:
-    return json.dumps(report, indent=2, sort_keys=True) + "\n"
+def format_report(
+    report: dict[str, object], *, reveal_secrets: bool = False
+) -> str:
+    rendered_report = report if reveal_secrets else redact_report(report)
+    return json.dumps(rendered_report, indent=2, sort_keys=True) + "\n"
 
 
-def format_text_report(report: dict[str, object]) -> str:
+def format_text_report(
+    report: dict[str, object], *, reveal_secrets: bool = False
+) -> str:
     entropy_findings, missing_files, suspicious_files = _extract_report_components(
         report
     )
@@ -270,7 +291,8 @@ def format_text_report(report: dict[str, object]) -> str:
             (
                 f"- [{_severity_label('high_entropy')}] "
                 f"{finding.file}:{finding.line} "
-                f"entropy={finding.entropy} token={finding.token}"
+                f"entropy={finding.entropy} "
+                f"token={_render_token(finding.token, reveal_secrets)}"
             )
             for finding in entropy_findings
         )
@@ -281,7 +303,9 @@ def format_text_report(report: dict[str, object]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def format_sarif_report(report: dict[str, object]) -> str:
+def format_sarif_report(
+    report: dict[str, object], *, reveal_secrets: bool = False
+) -> str:
     normalized = _normalize_report(report)
     findings = normalized["findings"]
     if not isinstance(findings, list):
@@ -308,6 +332,11 @@ def format_sarif_report(report: dict[str, object]) -> str:
         "version": "2.1.0",
     }
     return json.dumps(sarif, indent=2, sort_keys=True) + "\n"
+
+
+def redact_report(report: dict[str, object]) -> dict[str, object]:
+    normalized = _normalize_report(report)
+    return _redact_report_tokens(normalized)
 
 
 def has_findings(report: dict[str, object]) -> bool:
@@ -338,8 +367,12 @@ def has_findings_at_or_above_severity(
     return False
 
 
-def format_baseline(baseline: dict[str, object]) -> str:
-    return json.dumps(_normalize_baseline(baseline), indent=2, sort_keys=True) + "\n"
+def format_baseline(
+    baseline: dict[str, object], *, reveal_secrets: bool = False
+) -> str:
+    normalized = _normalize_baseline(baseline)
+    rendered = normalized if reveal_secrets else _redact_baseline_tokens(normalized)
+    return json.dumps(rendered, indent=2, sort_keys=True) + "\n"
 
 
 def find_high_entropy_strings(
@@ -364,6 +397,63 @@ def find_high_entropy_strings(
     return findings
 
 
+def _render_token(token: str, reveal_secrets: bool) -> str:
+    if reveal_secrets:
+        return token
+    return _redact_token(token)
+
+
+def _redact_token(token: str) -> str:
+    digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
+    return f"{REDACTED_TOKEN_PREFIX}{digest[:12]}>"
+
+
+def _redact_report_tokens(report: dict[str, object]) -> dict[str, object]:
+    redacted = dict(report)
+
+    findings = redacted.get("findings")
+    if isinstance(findings, list):
+        redacted["findings"] = [_redact_finding_token(item) for item in findings]
+
+    entropy_findings = redacted.get("high_entropy_findings")
+    if isinstance(entropy_findings, list):
+        redacted["high_entropy_findings"] = [
+            _redact_finding_token(item) for item in entropy_findings
+        ]
+
+    return redacted
+
+
+def _redact_baseline_tokens(baseline: dict[str, object]) -> dict[str, object]:
+    redacted = dict(baseline)
+    findings = redacted.get("findings")
+    if isinstance(findings, list):
+        redacted["findings"] = [
+            _redact_baseline_finding_token(item) for item in findings
+        ]
+    return redacted
+
+
+def _redact_baseline_finding_token(finding: object) -> object:
+    if (
+        not isinstance(finding, dict)
+        or "fingerprint" not in finding
+        or not isinstance(finding.get("token"), str)
+    ):
+        return finding
+
+    return _redact_finding_token(finding)
+
+
+def _redact_finding_token(finding: object) -> object:
+    if not isinstance(finding, dict) or not isinstance(finding.get("token"), str):
+        return finding
+
+    redacted = dict(finding)
+    redacted["token"] = _redact_token(str(redacted["token"]))
+    return redacted
+
+
 def _load_scan_config(root: Path) -> ScanConfig:
     config_path = root / CONFIG_FILENAME
     if not config_path.is_file():
@@ -381,6 +471,9 @@ def _load_scan_config(root: Path) -> ScanConfig:
         ),
         entropy_threshold=_get_float(
             data, "entropy_threshold", HIGH_ENTROPY_THRESHOLD
+        ),
+        max_text_file_size=_get_int(
+            data, "max_text_file_size", DEFAULT_MAX_TEXT_FILE_SIZE
         ),
         suspicious_filenames=_get_suspicious_filenames(
             data, SUSPICIOUS_FILENAMES
@@ -430,7 +523,13 @@ def _iter_files(root: Path, ignore_globs: Sequence[str]) -> list[Path]:
     return paths
 
 
-def _read_text_file(path: Path) -> str | None:
+def _read_text_file(path: Path, max_text_file_size: int) -> str | None:
+    try:
+        if path.stat().st_size > max_text_file_size:
+            return None
+    except OSError:
+        return None
+
     try:
         data = path.read_bytes()
     except OSError:
@@ -503,6 +602,15 @@ def _get_float(data: dict[str, object], key: str, default: float) -> float:
     return float(value)
 
 
+def _get_int(data: dict[str, object], key: str, default: int) -> int:
+    value = data.get(key, default)
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{key} must be an integer")
+    if value < 0:
+        raise ValueError(f"{key} must be non-negative")
+    return value
+
+
 def _get_string_list(
     data: dict[str, object], key: str, default: Sequence[str]
 ) -> tuple[str, ...]:
@@ -525,7 +633,7 @@ def _get_suspicious_filenames(
 def _merge_default_ignore_globs(
     ignore_globs: Sequence[str],
 ) -> tuple[str, ...]:
-    ordered_patterns = [DEFAULT_BASELINE_FILENAME, *ignore_globs]
+    ordered_patterns = [*DEFAULT_IGNORE_GLOBS, *ignore_globs]
     return tuple(dict.fromkeys(ordered_patterns))
 
 

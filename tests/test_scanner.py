@@ -57,6 +57,45 @@ def test_scan_repository_skips_binary_files(tmp_path: Path) -> None:
     assert report["high_entropy_findings"] == []
 
 
+def test_scan_repository_skips_oversized_text_files_by_default(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "large.txt").write_text(
+        ("padding\n" * 140_000)
+        + "token=0123456789abcdef0123456789abcdef\n",
+        encoding="utf-8",
+    )
+
+    report = scan_repository(tmp_path)
+
+    assert report["high_entropy_findings"] == []
+
+
+def test_scan_repository_allows_custom_max_text_file_size(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / ".reposentinel.toml").write_text(
+        "max_text_file_size = 64\n", encoding="utf-8"
+    )
+    (tmp_path / "small.txt").write_text(
+        "token=0123456789abcdef0123456789abcdef\n",
+        encoding="utf-8",
+    )
+
+    report = scan_repository(tmp_path)
+
+    assert report["high_entropy_findings"] == [
+        {
+            "entropy": 4.0,
+            "file": "small.txt",
+            "line": 1,
+            "token": "0123456789abcdef0123456789abcdef",
+        }
+    ]
+
+
 def test_scan_repository_uses_default_config_when_config_file_missing(
     tmp_path: Path,
 ) -> None:
@@ -136,6 +175,24 @@ def test_scan_repository_ignores_default_baseline_file(tmp_path: Path) -> None:
 
     report = scan_repository(tmp_path)
 
+    assert report["high_entropy_findings"] == []
+
+
+def test_scan_repository_ignores_common_generated_directories(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    for directory in ("node_modules", ".venv", "dist", "build", ".ruff_cache"):
+        ignored_dir = tmp_path / directory
+        ignored_dir.mkdir()
+        (ignored_dir / "id_rsa").write_text("private-key\n", encoding="utf-8")
+        (ignored_dir / "tokens.txt").write_text(
+            "token=0123456789abcdef0123456789abcdef\n", encoding="utf-8"
+        )
+
+    report = scan_repository(tmp_path)
+
+    assert report["suspicious_files"] == []
     assert report["high_entropy_findings"] == []
 
 

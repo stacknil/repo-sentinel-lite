@@ -14,6 +14,13 @@ repo-sentinel scan --format text .
 repo-sentinel scan --output reports/repo-sentinel.json .
 ```
 
+High-entropy tokens are redacted by default in CLI output and generated
+baselines. To inspect full token values locally:
+
+```bash
+repo-sentinel scan --reveal-secrets .
+```
+
 ## Fail on severity in CI
 
 Fail only when `error` findings remain:
@@ -55,6 +62,27 @@ repo-sentinel scan \
 
 ```bash
 repo-sentinel scan --baseline baselines/repo-sentinel-baseline.json .
+```
+
+## Ignore generated paths
+
+Common generated and dependency directories such as `.venv`, `venv`,
+`node_modules`, `dist`, `build`, `.tox`, `.nox`, `.pytest_cache`, `.ruff_cache`,
+and `__pycache__` are ignored by default. Add project-specific ignores with
+`.reposentinel.toml`:
+
+```toml
+ignore_globs = ["fixtures/*", "tmp/*"]
+```
+
+## Adjust large-file scanning
+
+Text files larger than `max_text_file_size` bytes are skipped for high-entropy
+content scanning. Raise the limit for repositories that need larger text files
+included:
+
+```toml
+max_text_file_size = 2097152
 ```
 
 ## Run with the default committed baseline
