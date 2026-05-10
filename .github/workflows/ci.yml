@@ -45,7 +45,55 @@ jobs:
       - name: Install build
         run: |
           python -m pip install --upgrade pip
-          python -m pip install build
+          python -m pip install build twine
 
       - name: Build package
         run: python -m build
+
+      - name: Check package metadata
+        run: |
+          python -m twine check dist/*
+          python - <<'PY'
+          import tarfile
+          import zipfile
+          from pathlib import Path
+
+          expected = (
+              "Install from production PyPI:",
+              "python -m pip install repo-sentinel-lite",
+          )
+          forbidden = (
+              "Install from the latest tagged GitHub source release:",
+              "git+https://github.com/stacknil/repo-sentinel-lite.git@v0.6.1",
+              "`repo-sentinel-lite` is not published on production PyPI yet.",
+          )
+
+          metadata = []
+          for wheel_path in Path("dist").glob("*.whl"):
+              with zipfile.ZipFile(wheel_path) as archive:
+                  metadata_name = next(
+                      name for name in archive.namelist() if name.endswith("METADATA")
+                  )
+                  metadata.append(archive.read(metadata_name).decode("utf-8"))
+
+          for sdist_path in Path("dist").glob("*.tar.gz"):
+              with tarfile.open(sdist_path, "r:gz") as archive:
+                  metadata_name = next(
+                      name for name in archive.getnames() if name.endswith("PKG-INFO")
+                  )
+                  metadata_file = archive.extractfile(metadata_name)
+                  if metadata_file is None:
+                      raise SystemExit(f"Missing PKG-INFO in {sdist_path}")
+                  metadata.append(metadata_file.read().decode("utf-8"))
+
+          if not metadata:
+              raise SystemExit("No distribution metadata found")
+
+          for text in metadata:
+              for value in expected:
+                  if value not in text:
+                      raise SystemExit(f"Missing metadata text: {value}")
+              for value in forbidden:
+                  if value in text:
+                      raise SystemExit(f"Forbidden metadata text remains: {value}")
+          PY

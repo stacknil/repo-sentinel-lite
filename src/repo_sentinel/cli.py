@@ -7,6 +7,7 @@ from pathlib import Path
 
 from . import __version__
 from .scanner import (
+    CONFIG_FILENAME,
     DEFAULT_BASELINE_FILENAME,
     apply_baseline,
     format_baseline,
@@ -98,6 +99,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Write the selected output format to a file instead of stdout.",
     )
     scan_parser.add_argument(
+        "--reveal-secrets",
+        action="store_true",
+        help="Show full high-entropy tokens in output. Defaults to redacted.",
+    )
+    scan_parser.add_argument(
         "path",
         nargs="?",
         default=".",
@@ -143,7 +149,11 @@ def _run_scan(args: argparse.Namespace) -> int:
             print(f"Invalid baseline {baseline_path}: {exc}", file=sys.stderr)
             return 2
 
-    report = scan_repository(target)
+    try:
+        report = scan_repository(target)
+    except ValueError as exc:
+        print(f"Invalid config {target / CONFIG_FILENAME}: {exc}", file=sys.stderr)
+        return 2
 
     if args.write_baseline is not None:
         try:
@@ -189,7 +199,7 @@ def _run_scan(args: argparse.Namespace) -> int:
         "sarif": format_sarif_report,
         "text": format_text_report,
     }[args.format]
-    rendered = formatter(report)
+    rendered = formatter(report, reveal_secrets=args.reveal_secrets)
     if args.output is None:
         print(rendered, end="")
     else:

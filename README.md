@@ -11,6 +11,8 @@ scanning, and baseline-backed pre-commit validation.
 
 It also supports `.reposentinel.toml` overrides, JSON baselines for suppressing
 known findings, and a pre-commit provider for repository-local enforcement.
+High-entropy tokens are redacted in CLI output and generated baselines by
+default.
 
 ## Install
 
@@ -66,12 +68,25 @@ Fail with exit code `1` when unsuppressed findings remain:
 repo-sentinel scan --fail-on-findings path/to/repo
 ```
 
+Reveal full high-entropy tokens only when you explicitly need to inspect them:
+
+```bash
+repo-sentinel scan --reveal-secrets path/to/repo
+```
+
 Use a `.reposentinel.toml` config to ignore paths or adjust thresholds:
 
 ```toml
 ignore_globs = ["dist/*", ".venv/*"]
 entropy_threshold = 4.2
+max_text_file_size = 1048576
 ```
+
+Common generated and dependency directories such as `.venv`, `venv`,
+`node_modules`, `dist`, `build`, `.tox`, `.nox`, `.pytest_cache`, `.ruff_cache`,
+and `__pycache__` are ignored by default.
+Text files larger than `max_text_file_size` bytes are skipped for high-entropy
+content scanning by default.
 
 ## Local development
 
