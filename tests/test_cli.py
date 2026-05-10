@@ -9,9 +9,42 @@ import pytest
 
 from repo_sentinel import __version__
 from repo_sentinel.cli import main
-from repo_sentinel.scanner import _normalize_report
+from repo_sentinel.scanner import _normalize_report, redact_report
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
+REDACTED_SAMPLE_TOKEN = "<redacted:sha256:3eb1bd439947>"
+
+
+def _expected_sample_repo_json(*, reveal_secrets: bool = False) -> str:
+    report = json.loads(
+        (FIXTURES_DIR / "sample_repo_report.json").read_text(encoding="utf-8")
+    )
+    if not reveal_secrets:
+        report = redact_report(report)
+    return json.dumps(report, indent=2, sort_keys=True) + "\n"
+
+
+def _expected_sample_repo_text(*, reveal_secrets: bool = False) -> str:
+    token = (
+        "0123456789abcdef0123456789abcdef"
+        if reveal_secrets
+        else REDACTED_SAMPLE_TOKEN
+    )
+    return (
+        "Suspicious files (4):\n"
+        "- [ERROR] .env\n"
+        "- [ERROR] certs/service.pem\n"
+        "- [ERROR] keys/id_rsa\n"
+        "- [ERROR] vault/archive.kdbx\n"
+        "\n"
+        "Missing required files (2):\n"
+        "- [WARNING] .gitignore\n"
+        "- [WARNING] LICENSE\n"
+        "\n"
+        "High-entropy findings (1):\n"
+        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
+        f"token={token}\n"
+    )
 
 
 def _expected_sample_repo_sarif() -> dict[str, object]:
@@ -243,15 +276,25 @@ def test_scan_command_emits_stable_json(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     fixture_root = FIXTURES_DIR / "sample_repo"
-    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
-        encoding="utf-8"
-    )
+    expected_output = _expected_sample_repo_json()
 
     exit_code = main(["scan", str(fixture_root)])
     captured = capsys.readouterr()
 
     assert exit_code == 0
     assert captured.out == expected_output
+
+
+def test_scan_command_reveals_secrets_when_requested(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    fixture_root = FIXTURES_DIR / "sample_repo"
+
+    exit_code = main(["scan", "--reveal-secrets", str(fixture_root)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == _expected_sample_repo_json(reveal_secrets=True)
 
 
 def test_scan_command_emits_stable_sarif(
@@ -280,9 +323,7 @@ def test_scan_command_writes_json_output_to_file(
 ) -> None:
     fixture_root = FIXTURES_DIR / "sample_repo"
     output_path = tmp_path / "report.json"
-    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
-        encoding="utf-8"
-    )
+    expected_output = _expected_sample_repo_json()
 
     exit_code = main(
         ["scan", "--output", str(output_path), str(fixture_root)]
@@ -307,21 +348,7 @@ def test_scan_command_writes_text_output_to_file(
 
     assert exit_code == 0
     assert captured.out == ""
-    assert output_path.read_text(encoding="utf-8") == (
-        "Suspicious files (4):\n"
-        "- [ERROR] .env\n"
-        "- [ERROR] certs/service.pem\n"
-        "- [ERROR] keys/id_rsa\n"
-        "- [ERROR] vault/archive.kdbx\n"
-        "\n"
-        "Missing required files (2):\n"
-        "- [WARNING] .gitignore\n"
-        "- [WARNING] LICENSE\n"
-        "\n"
-        "High-entropy findings (1):\n"
-        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
-        "token=0123456789abcdef0123456789abcdef\n"
-    )
+    assert output_path.read_text(encoding="utf-8") == _expected_sample_repo_text()
 
 
 def test_scan_command_writes_sarif_output_to_file(
@@ -352,30 +379,14 @@ def test_scan_command_stdout_behavior_is_unchanged_without_output_flag(
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert captured.out == (
-        "Suspicious files (4):\n"
-        "- [ERROR] .env\n"
-        "- [ERROR] certs/service.pem\n"
-        "- [ERROR] keys/id_rsa\n"
-        "- [ERROR] vault/archive.kdbx\n"
-        "\n"
-        "Missing required files (2):\n"
-        "- [WARNING] .gitignore\n"
-        "- [WARNING] LICENSE\n"
-        "\n"
-        "High-entropy findings (1):\n"
-        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
-        "token=0123456789abcdef0123456789abcdef\n"
-    )
+    assert captured.out == _expected_sample_repo_text()
 
 
 def test_scan_command_returns_success_when_findings_present_and_flag_absent(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
     fixture_root = FIXTURES_DIR / "sample_repo"
-    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
-        encoding="utf-8"
-    )
+    expected_output = _expected_sample_repo_json()
 
     exit_code = main(["scan", str(fixture_root)])
     captured = capsys.readouterr()
@@ -395,21 +406,7 @@ def test_scan_command_returns_failure_when_findings_present_and_flag_enabled(
     captured = capsys.readouterr()
 
     assert exit_code == 1
-    assert captured.out == (
-        "Suspicious files (4):\n"
-        "- [ERROR] .env\n"
-        "- [ERROR] certs/service.pem\n"
-        "- [ERROR] keys/id_rsa\n"
-        "- [ERROR] vault/archive.kdbx\n"
-        "\n"
-        "Missing required files (2):\n"
-        "- [WARNING] .gitignore\n"
-        "- [WARNING] LICENSE\n"
-        "\n"
-        "High-entropy findings (1):\n"
-        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
-        "token=0123456789abcdef0123456789abcdef\n"
-    )
+    assert captured.out == _expected_sample_repo_text()
 
 
 def test_scan_command_writes_output_and_preserves_fail_on_findings_behavior(
@@ -445,9 +442,7 @@ def test_scan_command_returns_failure_when_error_findings_meet_threshold(
     captured = capsys.readouterr()
 
     assert exit_code == 1
-    assert captured.out == (
-        FIXTURES_DIR / "sample_repo_report.json"
-    ).read_text(encoding="utf-8")
+    assert captured.out == _expected_sample_repo_json()
 
 
 def test_scan_command_returns_success_when_only_warnings_remain_at_error_threshold(
@@ -499,21 +494,7 @@ def test_scan_command_emits_concise_text_report(
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert captured.out == (
-        "Suspicious files (4):\n"
-        "- [ERROR] .env\n"
-        "- [ERROR] certs/service.pem\n"
-        "- [ERROR] keys/id_rsa\n"
-        "- [ERROR] vault/archive.kdbx\n"
-        "\n"
-        "Missing required files (2):\n"
-        "- [WARNING] .gitignore\n"
-        "- [WARNING] LICENSE\n"
-        "\n"
-        "High-entropy findings (1):\n"
-        "- [ERROR] notes/tokens.txt:2 entropy=4.0 "
-        "token=0123456789abcdef0123456789abcdef\n"
-    )
+    assert captured.out == _expected_sample_repo_text()
 
 
 def test_scan_command_writes_baseline(
@@ -521,9 +502,7 @@ def test_scan_command_writes_baseline(
 ) -> None:
     fixture_root = FIXTURES_DIR / "sample_repo"
     baseline_path = tmp_path / "baseline.json"
-    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
-        encoding="utf-8"
-    )
+    expected_output = _expected_sample_repo_json()
 
     exit_code = main(
         ["scan", "--write-baseline", str(baseline_path), str(fixture_root)]
@@ -545,7 +524,7 @@ def test_scan_command_writes_baseline(
             ),
             "kind": "high_entropy",
             "line": 2,
-            "token": "0123456789abcdef0123456789abcdef",
+            "token": REDACTED_SAMPLE_TOKEN,
         },
         {
             "fingerprint": (
@@ -661,9 +640,7 @@ def test_scan_command_updates_baseline_to_current_findings_state(
 ) -> None:
     fixture_root = FIXTURES_DIR / "sample_repo"
     updated_path = tmp_path / "updated-baseline.json"
-    expected_output = (FIXTURES_DIR / "sample_repo_report.json").read_text(
-        encoding="utf-8"
-    )
+    expected_output = _expected_sample_repo_json()
 
     exit_code = main(
         ["scan", "--update-baseline", str(updated_path), str(fixture_root)]
@@ -1107,7 +1084,7 @@ def test_scan_command_surfaces_new_findings_outside_baseline(
     captured = capsys.readouterr()
 
     assert exit_code == 0
-    assert json.loads(captured.out) == _normalize_report({
+    assert json.loads(captured.out) == redact_report(_normalize_report({
         "high_entropy_findings": [
             {
                 "entropy": 4.0,
@@ -1122,7 +1099,7 @@ def test_scan_command_surfaces_new_findings_outside_baseline(
             "README.md": False,
         },
         "suspicious_files": ["certs/new.key"],
-    })
+    }))
 
 
 def test_scan_command_returns_success_for_clean_scan_with_flag_enabled(
@@ -1171,6 +1148,22 @@ def test_scan_command_rejects_invalid_baseline_file(
     assert captured.out == ""
     assert f"Invalid baseline {baseline_path}:" in captured.err
     assert "schema_version must be 1" in captured.err
+
+
+def test_scan_command_rejects_invalid_config_file(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    (tmp_path / ".reposentinel.toml").write_text(
+        "entropy_threshold = true\n", encoding="utf-8"
+    )
+
+    exit_code = main(["scan", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert f"Invalid config {tmp_path / '.reposentinel.toml'}:" in captured.err
+    assert "entropy_threshold must be a float" in captured.err
 
 
 def test_scan_command_rejects_unwritable_output_path(
