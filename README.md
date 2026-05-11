@@ -83,8 +83,9 @@ max_text_file_size = 1048576
 ```
 
 Common generated and dependency directories such as `.venv`, `venv`,
-`node_modules`, `dist`, `build`, `.tox`, `.nox`, `.pytest_cache`, `.ruff_cache`,
-and `__pycache__` are ignored by default.
+`.venv-*`, `node_modules`, `dist`, `dist-*`, `build`, `.tox`, `.nox`,
+`.pytest_cache`, `.ruff_cache`, `.mypy_cache`, `*.egg-info`, `coverage`,
+`htmlcov`, and `__pycache__` are ignored by default.
 Text files larger than `max_text_file_size` bytes are skipped for high-entropy
 content scanning by default.
 

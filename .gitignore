@@ -3,11 +3,17 @@ __pycache__/
 
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
 
 build/
 dist/
+dist-*/
 *.egg-info/
 
 .coverage
+coverage/
+htmlcov/
 .venv/
+.venv-*/
 venv/
+%TEMP%/

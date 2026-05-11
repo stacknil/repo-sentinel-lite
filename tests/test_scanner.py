@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+import repo_sentinel.scanner as scanner
 from repo_sentinel.scanner import (
     DEFAULT_BASELINE_FILENAME,
     _baseline_from_report,
@@ -182,9 +183,21 @@ def test_scan_repository_ignores_common_generated_directories(
     tmp_path: Path,
 ) -> None:
     (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
-    for directory in ("node_modules", ".venv", "dist", "build", ".ruff_cache"):
+    for directory in (
+        "%TEMP%",
+        ".mypy_cache",
+        ".venv",
+        ".venv-test",
+        "build",
+        "coverage",
+        "dist",
+        "dist-api-check",
+        "htmlcov",
+        "node_modules",
+        "src/repo_sentinel_lite.egg-info",
+    ):
         ignored_dir = tmp_path / directory
-        ignored_dir.mkdir()
+        ignored_dir.mkdir(parents=True)
         (ignored_dir / "id_rsa").write_text("private-key\n", encoding="utf-8")
         (ignored_dir / "tokens.txt").write_text(
             "token=0123456789abcdef0123456789abcdef\n", encoding="utf-8"
@@ -211,6 +224,51 @@ def test_scan_repository_overrides_required_files_from_config(
     assert report["missing_files"] == {
         "README.md": False,
         "docs/guide.md": False,
+    }
+
+
+def test_scan_repository_matches_required_files_case_insensitively(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "readme.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "license").write_text("MIT\n", encoding="utf-8")
+    (tmp_path / ".GITIGNORE").write_text("dist/\n", encoding="utf-8")
+
+    report = scan_repository(tmp_path)
+
+    assert report["missing_files"] == {
+        ".gitignore": False,
+        "LICENSE": False,
+        "README.md": False,
+    }
+
+
+def test_scan_repository_required_file_check_skips_generated_directories(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("dist/\n", encoding="utf-8")
+    generated_dir = tmp_path / "node_modules"
+    generated_dir.mkdir()
+    (generated_dir / "package.json").write_text("{}\n", encoding="utf-8")
+
+    original_walk = scanner.os.walk
+
+    def guarded_walk(*args: object, **kwargs: object) -> object:
+        for current_root, dirnames, filenames in original_walk(*args, **kwargs):
+            if Path(current_root).name == "node_modules":
+                raise AssertionError("required file detection walked node_modules")
+            yield current_root, dirnames, filenames
+
+    monkeypatch.setattr(scanner.os, "walk", guarded_walk)
+
+    report = scan_repository(tmp_path)
+
+    assert report["missing_files"] == {
+        ".gitignore": False,
+        "LICENSE": False,
+        "README.md": False,
     }
 
 

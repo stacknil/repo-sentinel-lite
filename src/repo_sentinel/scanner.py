@@ -24,14 +24,22 @@ CONFIG_FILENAME = ".reposentinel.toml"
 DEFAULT_BASELINE_FILENAME = ".reposentinel-baseline.json"
 DEFAULT_IGNORE_GLOBS = (
     DEFAULT_BASELINE_FILENAME,
+    "%TEMP%",
+    "*.egg-info",
+    ".coverage",
+    ".mypy_cache",
     ".nox",
     ".pytest_cache",
     ".ruff_cache",
     ".tox",
     ".venv",
+    ".venv-*",
     "__pycache__",
     "build",
+    "coverage",
     "dist",
+    "dist-*",
+    "htmlcov",
     "node_modules",
     "venv",
 )
@@ -483,14 +491,46 @@ def _load_scan_config(root: Path) -> ScanConfig:
 
 
 def _detect_missing_files(root: Path, required_files: Sequence[str]) -> dict[str, bool]:
-    present_files = {
-        _relative_path(path, root).casefold() for path in _iter_files(root, ())
-    }
     return {
-        _normalize_path(filename): _normalize_path(filename).casefold()
-        not in present_files
+        _normalize_path(filename): not _required_file_exists(root, filename)
         for filename in required_files
     }
+
+
+def _required_file_exists(root: Path, logical_path: str) -> bool:
+    normalized_path = _normalize_path(logical_path)
+    parts = PurePosixPath(normalized_path).parts
+    if (
+        not parts
+        or parts[0] == "/"
+        or any(part in {"", ".", ".."} for part in parts)
+    ):
+        return False
+
+    candidate = root.joinpath(*parts)
+    if candidate.is_file():
+        return True
+
+    return _is_file_case_insensitive(root, parts)
+
+
+def _is_file_case_insensitive(root: Path, parts: Sequence[str]) -> bool:
+    current = root
+    for part in parts:
+        try:
+            entries = list(current.iterdir())
+        except OSError:
+            return False
+
+        match = next(
+            (entry for entry in entries if entry.name.casefold() == part.casefold()),
+            None,
+        )
+        if match is None:
+            return False
+        current = match
+
+    return current.is_file()
 
 
 def _iter_files(root: Path, ignore_globs: Sequence[str]) -> list[Path]:
