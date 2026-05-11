@@ -67,9 +67,10 @@ repo-sentinel scan --baseline baselines/repo-sentinel-baseline.json .
 ## Ignore generated paths
 
 Common generated and dependency directories such as `.venv`, `venv`,
-`node_modules`, `dist`, `build`, `.tox`, `.nox`, `.pytest_cache`, `.ruff_cache`,
-and `__pycache__` are ignored by default. Add project-specific ignores with
-`.reposentinel.toml`:
+`.venv-*`, `node_modules`, `dist`, `dist-*`, `build`, `.tox`, `.nox`,
+`.pytest_cache`, `.ruff_cache`, `.mypy_cache`, `*.egg-info`, `coverage`,
+`htmlcov`, and `__pycache__` are ignored by default. Add project-specific
+ignores with `.reposentinel.toml`:
 
 ```toml
 ignore_globs = ["fixtures/*", "tmp/*"]
