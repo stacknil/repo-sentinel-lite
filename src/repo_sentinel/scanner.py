@@ -9,7 +9,7 @@ import os
 import re
 import tomllib
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path, PurePath, PurePosixPath
@@ -533,16 +533,14 @@ def _is_file_case_insensitive(root: Path, parts: Sequence[str]) -> bool:
     return current.is_file()
 
 
-def _iter_files(root: Path, ignore_globs: Sequence[str]) -> list[Path]:
-    paths: list[Path] = []
-
+def _iter_files(root: Path, ignore_globs: Sequence[str]) -> Iterator[Path]:
     for current_root, dirnames, filenames in os.walk(root, topdown=True):
         current_dir = Path(current_root)
         dirnames[:] = [
             name
             for name in dirnames
             if name.casefold() != ".git"
-            and not _matches_globs(
+            and not _matches_directory_ignore(
                 _relative_path(current_dir / name, root), ignore_globs
             )
         ]
@@ -558,9 +556,7 @@ def _iter_files(root: Path, ignore_globs: Sequence[str]) -> list[Path]:
         filenames.sort(key=_sort_key)
 
         for filename in filenames:
-            paths.append(current_dir / filename)
-
-    return paths
+            yield current_dir / filename
 
 
 def _read_text_file(path: Path, max_text_file_size: int) -> str | None:
@@ -630,6 +626,20 @@ def _matches_globs(path: str, patterns: Sequence[str]) -> bool:
         if fnmatch.fnmatchcase(folded_path, folded_pattern):
             return True
         if fnmatch.fnmatchcase(folded_filename, folded_pattern):
+            return True
+
+    return False
+
+
+def _matches_directory_ignore(path: str, patterns: Sequence[str]) -> bool:
+    normalized_path = _normalize_path(path)
+    folded_path = normalized_path.casefold()
+    if _matches_globs(normalized_path, patterns):
+        return True
+
+    for pattern in patterns:
+        folded_pattern = _normalize_path(pattern).casefold()
+        if folded_pattern.endswith("/*") and folded_path == folded_pattern[:-2]:
             return True
 
     return False
