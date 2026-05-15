@@ -167,12 +167,13 @@ def test_scan_repository_respects_ignored_paths(tmp_path: Path) -> None:
     assert report["high_entropy_findings"] == []
 
 
+@pytest.mark.parametrize("ignore_pattern", ["ignored/*", "ignored/**", "ignored/**/*"])
 def test_scan_repository_prunes_directory_when_child_glob_is_ignored(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, ignore_pattern: str
 ) -> None:
     (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
     (tmp_path / ".reposentinel.toml").write_text(
-        'ignore_globs = ["ignored/*"]\n', encoding="utf-8"
+        f'ignore_globs = ["{ignore_pattern}"]\n', encoding="utf-8"
     )
     ignored_dir = tmp_path / "ignored"
     ignored_dir.mkdir()

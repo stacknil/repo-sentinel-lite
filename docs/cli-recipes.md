@@ -73,8 +73,11 @@ Common generated and dependency directories such as `.venv`, `venv`,
 ignores with `.reposentinel.toml`:
 
 ```toml
-ignore_globs = ["fixtures/*", "tmp/*"]
+ignore_globs = ["fixtures/**", "tmp/**"]
 ```
+
+Child-glob patterns such as `fixtures/*`, `fixtures/**`, and `fixtures/**/*`
+prune the matching directory during traversal.
 
 ## Adjust large-file scanning
 
