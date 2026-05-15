@@ -167,6 +167,32 @@ def test_scan_repository_respects_ignored_paths(tmp_path: Path) -> None:
     assert report["high_entropy_findings"] == []
 
 
+def test_scan_repository_prunes_directory_when_child_glob_is_ignored(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / ".reposentinel.toml").write_text(
+        'ignore_globs = ["ignored/*"]\n', encoding="utf-8"
+    )
+    ignored_dir = tmp_path / "ignored"
+    ignored_dir.mkdir()
+    (ignored_dir / "id_rsa").write_text("private-key\n", encoding="utf-8")
+
+    original_walk = scanner.os.walk
+
+    def guarded_walk(*args: object, **kwargs: object) -> object:
+        for current_root, dirnames, filenames in original_walk(*args, **kwargs):
+            if Path(current_root).name == "ignored":
+                raise AssertionError("ignored directory was not pruned")
+            yield current_root, dirnames, filenames
+
+    monkeypatch.setattr(scanner.os, "walk", guarded_walk)
+
+    report = scan_repository(tmp_path)
+
+    assert report["suspicious_files"] == []
+
+
 def test_scan_repository_ignores_default_baseline_file(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
     (tmp_path / DEFAULT_BASELINE_FILENAME).write_text(
