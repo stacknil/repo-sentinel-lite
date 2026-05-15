@@ -88,6 +88,7 @@ _BYTE_ORDER_MARKS = (
     codecs.BOM_UTF32_BE,
     codecs.BOM_UTF32_LE,
 )
+_DIRECTORY_CHILD_GLOB_SUFFIXES = ("/**/*", "/**", "/*")
 
 
 @dataclass(frozen=True, order=True)
@@ -639,8 +640,10 @@ def _matches_directory_ignore(path: str, patterns: Sequence[str]) -> bool:
 
     for pattern in patterns:
         folded_pattern = _normalize_path(pattern).casefold()
-        if folded_pattern.endswith("/*") and folded_path == folded_pattern[:-2]:
-            return True
+        for suffix in _DIRECTORY_CHILD_GLOB_SUFFIXES:
+            directory_root = folded_pattern[: -len(suffix)]
+            if folded_pattern.endswith(suffix) and folded_path == directory_root:
+                return True
 
     return False
 

@@ -77,10 +77,13 @@ repo-sentinel scan --reveal-secrets path/to/repo
 Use a `.reposentinel.toml` config to ignore paths or adjust thresholds:
 
 ```toml
-ignore_globs = ["dist/*", ".venv/*"]
+ignore_globs = ["dist/**", ".venv/**"]
 entropy_threshold = 4.2
 max_text_file_size = 1048576
 ```
+
+Child-glob ignores such as `fixtures/*`, `fixtures/**`, and `fixtures/**/*`
+prune the matching directory during traversal.
 
 Common generated and dependency directories such as `.venv`, `venv`,
 `.venv-*`, `node_modules`, `dist`, `dist-*`, `build`, `.tox`, `.nox`,
