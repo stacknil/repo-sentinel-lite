@@ -62,6 +62,12 @@ repo-sentinel scan --baseline baseline.json path/to/repo
 If the scanned repository already contains `.reposentinel-baseline.json`,
 `repo-sentinel scan` applies it automatically.
 
+Temporarily scan without the repository-root default baseline:
+
+```bash
+repo-sentinel scan --no-default-baseline path/to/repo
+```
+
 Fail with exit code `1` when unsuppressed findings remain:
 
 ```bash
