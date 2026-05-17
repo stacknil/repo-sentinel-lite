@@ -60,6 +60,14 @@ def build_parser() -> argparse.ArgumentParser:
         ),
     )
     scan_parser.add_argument(
+        "--no-default-baseline",
+        action="store_true",
+        help=(
+            "Do not auto-apply .reposentinel-baseline.json from the scanned "
+            "repository. Explicit --baseline still applies."
+        ),
+    )
+    scan_parser.add_argument(
         "--write-baseline",
         type=Path,
         help="Path to write the current findings as a baseline JSON file.",
@@ -131,7 +139,9 @@ def _run_scan(args: argparse.Namespace) -> int:
         return 2
 
     baseline_report: dict[str, object] | None = None
-    baseline_path = args.baseline or _resolve_default_baseline_path(target)
+    baseline_path = args.baseline
+    if baseline_path is None and not args.no_default_baseline:
+        baseline_path = _resolve_default_baseline_path(target)
     if args.prune_baseline is not None and args.baseline is None:
         print("--prune-baseline requires --baseline", file=sys.stderr)
         return 2

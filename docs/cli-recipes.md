@@ -98,6 +98,13 @@ automatically:
 repo-sentinel scan .
 ```
 
+Temporarily ignore the repository-root default baseline and show all current
+findings:
+
+```bash
+repo-sentinel scan --no-default-baseline .
+```
+
 ## Prune stale baseline entries
 
 ```bash
