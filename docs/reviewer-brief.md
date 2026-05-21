@@ -14,6 +14,14 @@ Small repositories still need basic hygiene checks, secret-adjacent scanning, an
 
 It supports `.reposentinel.toml` config, JSON baselines, redacted output by default, and pre-commit integration.
 
+## Reviewer Evidence
+
+- Reproducible command: `repo-sentinel scan --format json .`
+- Deterministic outputs: stable JSON findings, text summaries, and baseline files with redacted high-entropy tokens by default.
+- Tests / CI: local `python -m pytest -q` and `ruff check .`; GitHub Actions CI mirrors the documented dev workflow.
+- Release evidence: production PyPI package, release workflow documentation, and release-day notes under `docs/`.
+- Non-goals: full SAST, enterprise secret management, semantic code analysis, remote reporting, or centralized dashboards.
+
 ## Quick run
 
 ```bash
@@ -57,4 +65,6 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 
 ## Next milestone
 
-Finish the remaining release-hardening steps needed for a fully confident production PyPI go-live.
+Keep production PyPI releases boring and reproducible: maintain CI, package
+metadata, pre-commit provider behavior, baseline compatibility, and redaction
+defaults across small version bumps.
