@@ -63,8 +63,13 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 - no remote service, dashboard, or centralized triage workflow
 - entropy findings still require human review
 
+## Current release posture
+
+`repo-sentinel-lite` is already published to production PyPI. The current
+focus is release hardening: keeping package metadata, baseline behavior,
+redaction defaults, pre-commit integration, and CI validation stable across
+small version bumps.
+
 ## Next milestone
 
-Keep production PyPI releases boring and reproducible: maintain CI, package
-metadata, pre-commit provider behavior, baseline compatibility, and redaction
-defaults across small version bumps.
+Keep production releases boring, reproducible, and documented.
