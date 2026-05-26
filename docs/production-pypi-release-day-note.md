@@ -1,4 +1,8 @@
-# Production PyPI Release-Day Note
+# Historical Production PyPI Release-Day Note
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. This note is retained as release-day history, not current
+> go-live guidance.
 
 - exact commit prepared for release day: the single release-prep commit with
   message `chore(release): prepare 0.6.2 production release candidate`

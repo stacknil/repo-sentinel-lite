@@ -1,14 +1,20 @@
-# Production PyPI Go / No-Go Decision
+# Historical Production PyPI Go / No-Go Decision
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. This document is preserved as pre-launch decision evidence,
+> not current go-live guidance. Current work should focus on release hardening
+> and reproducible maintenance releases.
 
 ## Executive Summary
 
-`repo-sentinel-lite` is **not** ready for an immediate production PyPI publish
- today, but it is close. The repository has strong evidence that its packaging
- and GitHub Actions release flow work end to end because the real TestPyPI
- smoke release for `0.6.2rc1` succeeded via GitHub Releases, GitHub Actions,
- Trusted Publishing, and a clean install from TestPyPI.
+At the time of this decision, `repo-sentinel-lite` was **not** ready for an
+immediate production PyPI publish, but it was close. The repository had strong
+evidence that its packaging and GitHub Actions release flow work end to end
+because the real TestPyPI smoke release for `0.6.2rc1` succeeded via GitHub
+Releases, GitHub Actions, Trusted Publishing, and a clean install from
+TestPyPI.
 
-The remaining gaps are production-specific rather than structural:
+The remaining gaps were production-specific rather than structural:
 
 - production PyPI Trusted Publisher configuration cannot be confirmed from the
   repository alone
@@ -64,8 +70,8 @@ This is strong evidence that the package builds correctly, uploads correctly via
 
 ## Assessment of Workflow Readiness
 
-The current workflow in
-[`release.yml`](D:/OneDrive/Code/repo-sentinel-lite/.github/workflows/release.yml)
+The workflow in
+[`release.yml`](../.github/workflows/release.yml)
 is production-compatible **in shape**:
 
 - it builds distributions in one job and publishes in a separate job
@@ -133,7 +139,7 @@ still a small operational timing risk until the first production publish lands.
 ## Package Metadata and README Assessment
 
 Package metadata in
-[`pyproject.toml`](D:/OneDrive/Code/repo-sentinel-lite/pyproject.toml) looks
+[`pyproject.toml`](../pyproject.toml) looks
 acceptable for a first production release:
 
 - project name present
@@ -145,7 +151,7 @@ acceptable for a first production release:
 - console script entry point is present
 - repository version metadata is now prepared at `0.6.2`
 
-The README in [README.md](D:/OneDrive/Code/repo-sentinel-lite/README.md) is
+The README in [README.md](../README.md) is
 PyPI-friendly enough for a first release:
 
 - short description is clear
@@ -170,19 +176,20 @@ Why:
 - no evidence suggests a structural issue that requires skipping to `0.6.3`
 - promoting from `0.6.2rc1` to `0.6.2` is the cleanest first production target
 
-## Top Remaining Risks
+## Historical Top Remaining Risks
 
-1. Production Trusted Publisher status is still unverified manually.
-2. The `pypi` GitHub environment still needs to be created or confirmed to
+1. Production Trusted Publisher status was still unverified manually.
+2. The `pypi` GitHub environment still needed to be created or confirmed to
    match the PyPI configuration.
-3. The production project does not exist yet, so the first publish is also a
-   project-creation event.
-4. The README install section will be stale immediately after production publish
-   unless updated as part of the release wrap-up.
+3. The production project did not appear to exist yet, so the first publish was
+   also a project-creation event.
+4. The README install section needed a release-wrap-up update after a
+   successful production publish. That update has since landed.
 
-## Clear Final Recommendation
+## Historical Final Recommendation
 
-Proceed toward a first production PyPI release **only after minimal prep**:
+The pre-launch recommendation was to proceed toward a first production PyPI
+release **only after minimal prep**:
 
 1. confirm or create the production PyPI Trusted Publisher configuration
 2. create or confirm the `pypi` GitHub environment so it matches the PyPI

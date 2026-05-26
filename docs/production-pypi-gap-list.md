@@ -1,4 +1,8 @@
-# Production PyPI Gap List
+# Historical Production PyPI Gap List
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. These were first-publish gaps and should not be read as the
+> current release posture.
 
 ## Gap 1
 

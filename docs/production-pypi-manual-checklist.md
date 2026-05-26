@@ -1,4 +1,8 @@
-# Production PyPI Manual Checklist
+# Historical Production PyPI Manual Checklist
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. This checklist is retained as release history, not current
+> go-live guidance.
 
 - Confirm whether the production PyPI project `repo-sentinel-lite` already
   exists.

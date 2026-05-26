@@ -1,4 +1,9 @@
-# First Production PyPI Release Plan
+# Historical First Production PyPI Release Plan
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. This checklist is preserved as first-release history, not
+> current publishing guidance. Current release work should keep production
+> releases boring, reproducible, and documented.
 
 1. Confirm production PyPI Trusted Publisher configuration.
    Ensure the GitHub owner, repository, workflow filename, and any production
