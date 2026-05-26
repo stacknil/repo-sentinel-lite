@@ -1,4 +1,8 @@
-# Production PyPI Release Candidate Note
+# Historical Production PyPI Release Candidate Note
+
+> Current status: Superseded. `repo-sentinel-lite` is already published to
+> production PyPI. This note is retained as release-candidate evidence, not
+> current pre-publish guidance.
 
 `0.6.2` is the recommended first stable production candidate because the real
 TestPyPI smoke already succeeded for `0.6.2rc1`, making `0.6.2` the cleanest
