@@ -62,10 +62,22 @@ jobs:
               "Install from production PyPI:",
               "python -m pip install repo-sentinel-lite",
           )
+          old_source_install_heading = (
+              "Install from the latest tagged GitHub "
+              "source release:"
+          )
+          old_v061_source_url = (
+              "git+https://github.com/stacknil/"
+              "repo-sentinel-lite.git@v0.6.1"
+          )
+          old_pre_pypi_note = (
+              "`repo-sentinel-lite` is not "
+              "published on production PyPI yet."
+          )
           forbidden = (
-              "Install from the latest tagged GitHub source release:",
-              "git+https://github.com/stacknil/repo-sentinel-lite.git@v0.6.1",
-              "`repo-sentinel-lite` is not published on production PyPI yet.",
+              old_source_install_heading,
+              old_v061_source_url,
+              old_pre_pypi_note,
           )
 
           metadata = []
