@@ -1,22 +1,27 @@
 # Public Readiness Review v0.1
 
+> Current status: Superseded. The repository is already public, and current
+> package metadata has moved beyond this pre-public review. This document is
+> retained as historical audit evidence, not current launch guidance.
+
 ## Executive Summary
 
-Status: ready pending GitHub-side actions
+Historical status: ready pending GitHub-side actions
 
 No tracked secrets or real credentials were found in the repository contents
 reviewed during this pass, and the most obvious public-facing hygiene issues
 were addressed locally:
 
-- `main` version metadata now aligns with `0.6.1`
-- the release workflow now fails early if the pushed tag and package version
-  disagree
+- at the time of this review, `main` version metadata aligned with `0.6.1`
+- the release workflow was updated to fail early if the pushed tag and package
+  version disagree
 - the committed `v0.6.1` handoff doc no longer embeds local absolute filesystem
   paths
-- a minimal `SECURITY.md` now exists for future public reporting guidance
+- a minimal `SECURITY.md` was added for future public reporting guidance
 
-The repository is not blocked from public visibility by any confirmed secret
-leak. The remaining concerns are mostly governance and release-process hygiene:
+At the time of this review, the repository was not blocked from public
+visibility by any confirmed secret leak. The remaining concerns were mostly
+governance and release-process hygiene:
 the `v0.6.1` release workflow failure is not rerunnable as-is, and the remaining
 work is mostly GitHub-side configuration and presentation after a visibility
 change.
@@ -27,10 +32,10 @@ change.
 | --- | --- | --- | --- | --- |
 | secrets audit | No tracked secrets, tokens, or real credentials were found. Secret-like test fixtures under `tests/fixtures/sample_repo/` are placeholder-only and appear intentionally synthetic. | low | Keep fixture contents obviously fake and continue treating secret-like samples as test data only. | no |
 | release workflow | Release run `23914337264` built `repo_sentinel_lite-0.6.0-*` from tag `v0.6.1` and failed with TestPyPI `HTTP 400`. This was a tag/version mismatch, not a permissions or network problem. | high | Do not rerun `23914337264`. Cut the next release from a commit whose tag and package version are intentionally aligned. | no |
-| version hygiene | Before this pass, `main` still reported `0.6.0` even though the latest release/tag was `v0.6.1`. This is now corrected on `main`, but the historical `v0.6.1` tagged commit remains mismatched. | medium | Keep version bumps explicit before tagging, and let the workflow guard enforce this. | no |
-| community docs | `LICENSE` and `SECURITY.md` now exist. `CONTRIBUTING.md` and `CODEOWNERS` are still absent, but neither looks mandatory for an initial public visibility flip. | low | Consider adding lightweight contributor guidance later if outside contributions become a goal. | no |
+| version hygiene | Before this pass, `main` still reported `0.6.0` even though the latest release/tag was `v0.6.1`. This was corrected during the pass, but the historical `v0.6.1` tagged commit remains mismatched. | medium | Keep version bumps explicit before tagging, and let the workflow guard enforce this. | no |
+| community docs | `LICENSE` and `SECURITY.md` existed after this pass. `CONTRIBUTING.md` and `CODEOWNERS` were still absent, but neither looked mandatory for an initial public visibility flip. | low | Consider adding lightweight contributor guidance later if outside contributions become a goal. | no |
 | release docs | `docs/release-handoff-v0.6.1.md` is maintainer-oriented and references a downstream consumer repo. The worst part, local absolute paths, was fixed in this pass, but the document is still internal-leaning. | low | Keep it if release artifacts are intentionally public, or move future handoff notes into a clearly maintenance-only area such as `docs/releases/`. | no |
-| workflows and logs | Historical Actions logs reviewed for the failed release expose runner paths, artifact names, attestation output, and standard GitHub metadata, but no secret material was observed. | low | Acceptable to expose if the repo becomes public; no log scrubbing action identified from current evidence. | no |
+| workflows and logs | Historical Actions logs reviewed for the failed release expose runner paths, artifact names, attestation output, and standard GitHub metadata, but no secret material was observed. | low | Acceptable to expose if the repo becomes public; no log scrubbing action was identified from this evidence. | no |
 | release workflow wording | `release.yml` previously described the workflow as intended for a private repo. This was misleading for a possible public future and was corrected in this pass. | low | Keep workflow comments neutral and repo-state-agnostic. | no |
 
 ## Release Workflow Failure Analysis
@@ -62,12 +67,12 @@ What this is not:
 - not a missing release tag
 - not an artifact download or upload-artifact failure
 
-What was changed in this pass:
+What was changed in this historical pass:
 
-- `main` now reports package version `0.6.1`
-- `.github/workflows/release.yml` now verifies that the release tag matches both
-  version definition points before building distributions
-- `RELEASE.md` now makes version bumping an explicit prerequisite
+- `main` reported package version `0.6.1`
+- `.github/workflows/release.yml` was updated to verify that the release tag
+  matches both version definition points before building distributions
+- `RELEASE.md` was updated to make version bumping an explicit prerequisite
 
 Rerun guidance:
 
@@ -77,7 +82,7 @@ Rerun guidance:
 - The correct next step is a future intentional release from a commit/tag pair
   that already agrees on version.
 
-## Proposed Minimal Next Actions
+## Historical Proposed Minimal Next Actions
 
 1. Decide whether GitHub private vulnerability reporting will be enabled at the
    visibility flip; if not, replace the placeholder fallback-contact line in
@@ -96,7 +101,7 @@ gh release create vX.Y.Z --verify-tag
 4. After the next successful release, confirm TestPyPI and release notes from a
    clean environment.
 
-## Recommended Go-Public Checklist
+## Historical Recommended Go-Public Checklist
 
 1. Confirm the `SECURITY.md` reporting path is ready for public use:
    enable GitHub private vulnerability reporting, or replace the placeholder
@@ -111,7 +116,7 @@ gh release create vX.Y.Z --verify-tag
 6. Sanity-check the public docs tree for anything that is maintainer-only or too
    operationally specific.
 
-## Recommended Post-Public Checklist
+## Historical Recommended Post-Public Checklist
 
 1. Enable or verify GitHub security features appropriate for a public repo
    (security advisories, private vulnerability reporting, dependency alerts).
@@ -134,7 +139,7 @@ Items to keep non-public are the local-only workspace artifacts that already sit
 outside version control, such as virtual environments, build outputs, caches,
 and `%TEMP%` scratch content in the local checkout.
 
-The main thing to settle before public visibility is GitHub-side governance
-surface area, not secret leakage: specifically, decide the final reporting path
-referenced by `SECURITY.md` and keep the next release intentionally
+The main thing to settle before public visibility was GitHub-side governance
+surface area, not secret leakage: specifically, deciding the final reporting
+path referenced by `SECURITY.md` and keeping the next release intentionally
 version-aligned.
