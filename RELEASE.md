@@ -44,8 +44,9 @@ gh release create vX.Y.ZrcN --verify-tag --prerelease
    - publishes GitHub prereleases to TestPyPI
    - publishes stable GitHub releases to PyPI
 
-Stable production releases require a matching production PyPI Trusted Publisher
-or pending publisher configuration before the release is published.
+Stable production releases require the production PyPI Trusted Publisher
+configuration to match the workflow, repository, and `pypi` environment before
+the release is published.
 
 `--verify-tag` keeps release creation from implicitly creating the tag on the
 server. That removes ambiguity about what commit the release actually points to.
@@ -64,7 +65,7 @@ Configure the Trusted Publisher in TestPyPI with:
 
 ### Production PyPI Trusted Publisher values
 
-Configure the Trusted Publisher or pending publisher in PyPI with:
+Configure the Trusted Publisher in PyPI with:
 
 - GitHub owner: `stacknil`
 - Repository name: `repo-sentinel-lite`
@@ -72,8 +73,8 @@ Configure the Trusted Publisher or pending publisher in PyPI with:
 - Environment name: `pypi`
 - Project name: `repo-sentinel-lite`
 
-If the production project does not exist yet, the first successful stable
-publish can create it through the pending/new publisher flow.
+If the production PyPI project or Trusted Publisher settings change, update
+this SOP in the same maintenance pass so the release path remains auditable.
 
 ### Post-release verification
 
