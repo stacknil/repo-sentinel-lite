@@ -119,8 +119,9 @@ gh release create vX.Y.Z --verify-tag
    place.
 3. Consider adding `CONTRIBUTING.md` and lightweight issue / PR templates if you
    want outside contributions.
-4. Revisit release automation after the first successful post-public release and
-   confirm TestPyPI-only publishing still matches project intent.
+4. Revisit release automation after each stable release and confirm the
+   prerelease-to-TestPyPI and stable-to-PyPI routing still matches project
+   intent.
 5. Check the public Actions tab and release pages visually for presentation and
    clarity.
 

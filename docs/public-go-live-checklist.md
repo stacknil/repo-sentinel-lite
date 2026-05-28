@@ -1,5 +1,8 @@
 # Public Go-Live Checklist
 
+> Current status: Superseded. The repository is already public. This checklist
+> is retained as visibility-flip history, not current go-live guidance.
+
 ## Pre-Flip Checks
 
 1. Confirm the latest public-readiness commit is present on `origin/main`.

@@ -1,5 +1,8 @@
 # Public Go-Live Plan
 
+> Current status: Superseded. The repository is already public. This plan is
+> retained as visibility-flip history, not current go-live guidance.
+
 ## Minimal Change Sequence
 
 1. Commit and push the current public-readiness pass, including `SECURITY.md`,

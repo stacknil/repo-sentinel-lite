@@ -158,13 +158,13 @@ PyPI-friendly enough for a first release:
 - usage examples are compact
 - long description rendered cleanly enough for `twine check` to pass
 
-Minor caveat:
+Historical caveat:
 
-- the install example still points to an older GitHub tag and explicitly says
-  production PyPI is not available yet
+- the install example still pointed to an older GitHub tag and described the
+  package as not yet available from production PyPI
 
-That wording is correct today, but it should be updated after a successful
- production publish.
+That wording has since been updated. The README now documents installation
+from production PyPI.
 
 ## Recommended Next Stable Version
 
