@@ -102,7 +102,7 @@ python -m repo_sentinel --help
 
 ### SARIF fallback workflow
 
-When GitHub code scanning is unavailable for this private repository, use
+When GitHub code scanning is unavailable or not configured, use
 `.github/workflows/code-scanning.yml` as the fallback path.
 
 1. Open the repository `Actions` tab.
