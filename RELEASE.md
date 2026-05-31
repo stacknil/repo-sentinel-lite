@@ -17,30 +17,34 @@ python -m twine check dist/*
 
 ### GitHub Release trigger flow
 
-1. Push to `main`.
-2. Update the package version in both `pyproject.toml` and
+1. Update the package version in both `pyproject.toml` and
    `src/repo_sentinel/__init__.py` to `X.Y.Z`.
-3. Create the release tag locally from `main`, then push the tag:
+   For a TestPyPI smoke prerelease, use `X.Y.ZrcN` in both files.
+2. Run the local preflight commands above.
+3. Commit the version bump and any release-note changes.
+4. Push the release-prep commit to `main`.
+5. Create the release tag locally from the updated `main`, then push the tag.
+   Use `vX.Y.ZrcN` instead for TestPyPI smoke prerelease tags:
 
 ```bash
 git tag -a vX.Y.Z -m "vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
-4. Create and publish the GitHub Release from the pushed tag:
+6. Create and publish the GitHub Release from the pushed tag:
 
 ```bash
 gh release create vX.Y.Z --verify-tag
 ```
 
-5. For a TestPyPI smoke prerelease, create the GitHub release as a prerelease:
+7. For a TestPyPI smoke prerelease, create the GitHub release as a prerelease:
 
 ```bash
 gh release create vX.Y.ZrcN --verify-tag --prerelease
 ```
 
-6. Publishing the release triggers `.github/workflows/release.yml`.
-7. The workflow builds distributions once, then:
+8. Publishing the release triggers `.github/workflows/release.yml`.
+9. The workflow builds distributions once, then:
    - publishes GitHub prereleases to TestPyPI
    - publishes stable GitHub releases to PyPI
 
