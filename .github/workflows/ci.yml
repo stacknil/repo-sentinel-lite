@@ -62,22 +62,26 @@ jobs:
               "Install from production PyPI:",
               "python -m pip install repo-sentinel-lite",
           )
-          old_source_install_heading = (
-              "Install from the latest tagged GitHub "
-              "source release:"
+          deprecated_readme_fragments = (
+              (
+                  "Install from the latest tagged ",
+                  "GitHub source release:",
+              ),
+              (
+                  "git+https://github.com/stacknil/",
+                  "repo-sentinel-lite.git@v",
+                  "0.",
+                  "6.",
+                  "1",
+              ),
+              (
+                  "`repo-sentinel-lite` is not published on ",
+                  "production ",
+                  "PyPI yet.",
+              ),
           )
-          old_v061_source_url = (
-              "git+https://github.com/stacknil/"
-              "repo-sentinel-lite.git@v0.6.1"
-          )
-          old_pre_pypi_note = (
-              "`repo-sentinel-lite` is not "
-              "published on production PyPI yet."
-          )
-          forbidden = (
-              old_source_install_heading,
-              old_v061_source_url,
-              old_pre_pypi_note,
+          forbidden = tuple(
+              "".join(fragment) for fragment in deprecated_readme_fragments
           )
 
           metadata = []
