@@ -44,7 +44,11 @@ gh release create vX.Y.ZrcN --verify-tag --prerelease
 ```
 
 8. Publishing the release triggers `.github/workflows/release.yml`.
-9. The workflow builds distributions once, then:
+9. The workflow verifies the tag, package version, and GitHub Release routing
+   before building:
+   - `vX.Y.ZrcN` tags must be GitHub prereleases and publish to TestPyPI
+   - `vX.Y.Z` tags must be stable GitHub releases and publish to PyPI
+10. The workflow builds distributions once, then:
    - publishes GitHub prereleases to TestPyPI
    - publishes stable GitHub releases to PyPI
 
@@ -55,7 +59,7 @@ the release is published.
 `--verify-tag` keeps release creation from implicitly creating the tag on the
 server. That removes ambiguity about what commit the release actually points to.
 The release workflow also validates that the pushed tag matches the package
-version before it builds distributions.
+version and the GitHub Release prerelease flag before it builds distributions.
 
 ### TestPyPI Trusted Publisher values
 
