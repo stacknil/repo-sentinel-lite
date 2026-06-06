@@ -36,15 +36,19 @@ jobs:
       - name: Verify release tag matches package version
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           python - <<'PY'
           import os
+          import re
           from importlib.util import module_from_spec, spec_from_file_location
           from pathlib import Path
           import tomllib
 
           release_tag = os.environ["RELEASE_TAG"]
+          release_is_prerelease = os.environ["RELEASE_PRERELEASE"] == "true"
           expected_version = release_tag.removeprefix("v")
+          version_is_rc = re.search(r"rc[0-9]+$", expected_version) is not None
 
           pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
           project_version = pyproject["project"]["version"]
@@ -71,11 +75,22 @@ jobs:
               errors.append(
                   f"Version fields disagree: pyproject.toml={project_version}, __init__.py={package_version}"
               )
+          if version_is_rc and not release_is_prerelease:
+              errors.append(
+                  f"Release tag {release_tag} is an rc version but the GitHub Release is not marked as a prerelease"
+              )
+          if release_is_prerelease and not version_is_rc:
+              errors.append(
+                  f"GitHub Release is marked as a prerelease but tag {release_tag} is not an rc version"
+              )
 
           if errors:
               raise SystemExit("\n".join(errors))
 
-          print(f"Verified release tag {release_tag} matches package version {expected_version}")
+          print(
+              f"Verified release tag {release_tag} matches package version "
+              f"{expected_version} and release routing"
+          )
           PY
 
       - name: Build distributions
