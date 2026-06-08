@@ -19,7 +19,7 @@ What `0.6.2rc1` already proved on TestPyPI:
 - both `repo-sentinel --help` and `python -m repo_sentinel --help` work after
   install
 
-What still must be manually verified before a real production publish:
+What still had to be manually verified before the real production publish:
 
 - whether production PyPI already has a matching Trusted Publisher or pending
   publisher configured
