@@ -16,12 +16,12 @@ TestPyPI.
 
 The remaining gaps were production-specific rather than structural:
 
-- production PyPI Trusted Publisher configuration cannot be confirmed from the
-  repository alone
-- the production project `repo-sentinel-lite` does not currently exist on
-  production PyPI
-- the first stable release still requires explicit maintainer action to push,
-  tag, and publish from the prepared repository state
+- production PyPI Trusted Publisher configuration could not be confirmed from
+  the repository alone
+- the production project `repo-sentinel-lite` did not appear to exist on
+  production PyPI at decision time
+- the first stable release required explicit maintainer action to push, tag,
+  and publish from the prepared repository state
 
 ## Final Classification
 
@@ -49,8 +49,8 @@ The remaining gaps were production-specific rather than structural:
 | Package metadata | Acceptable | Name, version, README, license, URLs, Python requirement, and console script are present |
 | README / long description | Acceptable with minor follow-up | `twine check` passed; install instructions should be updated after a successful production publish |
 | Stable version candidate | Prepared | Repository metadata is now aligned to `0.6.2` |
-| Production Trusted Publisher | Unknown, needs manual confirmation | Cannot be proven locally; current repo only shows TestPyPI environment/config alignment |
-| Production package-name risk | Manageable but real | Production project does not appear to exist yet, so first publish likely needs the pending/new publisher path |
+| Production Trusted Publisher | Unknown, needed manual confirmation | Could not be proven locally; the repo only showed TestPyPI environment/config alignment at decision time |
+| Production package-name risk | Manageable but real | Production project did not appear to exist yet, so first publish likely needed the pending/new publisher path |
 
 ## Evidence From the Successful TestPyPI Smoke
 
@@ -64,9 +64,10 @@ The remaining gaps were production-specific rather than structural:
   - `repo-sentinel --help`
   - `python -m repo_sentinel --help`
 
-This is strong evidence that the package builds correctly, uploads correctly via
- OIDC-based publishing, and installs cleanly for users. It is not, by itself,
- evidence that production PyPI Trusted Publisher configuration already exists.
+This is strong evidence that the package builds correctly, uploads correctly
+via OIDC-based publishing, and installs cleanly for users. It was not, by
+itself, evidence that production PyPI Trusted Publisher configuration already
+existed.
 
 ## Assessment of Workflow Readiness
 
@@ -95,7 +96,7 @@ manual GitHub/PyPI-side confirmations rather than additional repo refactoring.
 
 - GitHub-side TestPyPI release automation works
 - the repository has a `testpypi` environment in GitHub
-- the repository does not yet have a `pypi` environment in GitHub
+- the repository did not yet have a `pypi` environment in GitHub
 - Trusted Publishing to TestPyPI has already succeeded
 
 ### What is inferred
@@ -104,7 +105,7 @@ manual GitHub/PyPI-side confirmations rather than additional repo refactoring.
   production publisher cleanly
 - the repository-side workflow path is now prepared for a first stable publish
 
-### What still requires manual verification
+### What still required manual verification
 
 - whether production PyPI already has a matching Trusted Publisher configured
 - if configured, whether the production publisher matches:
@@ -116,25 +117,26 @@ manual GitHub/PyPI-side confirmations rather than additional repo refactoring.
   - a pending publisher path
   - or a newly created publisher on first successful use
 
-Because this cannot be proven from the repo alone, this remains a real blocker
- to `GO NOW`.
+Because this could not be proven from the repo alone, it remained a real
+blocker to `GO NOW`.
 
 ## Assessment of Package Name / Project Creation Risk
 
-The production project name `repo-sentinel-lite` does **not** appear to be a
-live production PyPI project:
+The production project name `repo-sentinel-lite` did **not** appear to be a
+live production PyPI project at decision time:
 
 - `https://pypi.org/pypi/repo-sentinel-lite/json` returned `404`
 - `https://pypi.org/simple/repo-sentinel-lite/` returned `404`
 - `https://pypi.org/simple/repo_sentinel_lite/` returned `404`
 
-That is good news in one sense: there is no visible existing production package
- colliding with the expected project metadata. It also means the first
- production publish likely has to create the project through the pending/new
- publisher flow, and that publisher setup should be verified before release day.
+That was good news in one sense: there was no visible existing production
+package colliding with the expected project metadata. It also meant the first
+production publish likely had to create the project through the pending/new
+publisher flow, and that publisher setup needed verification before release
+day.
 
-Because pending publishers do not reserve names before first publish, there is
-still a small operational timing risk until the first production publish lands.
+Because pending publishers do not reserve names before first publish, there was
+a small operational timing risk until the first production publish landed.
 
 ## Package Metadata and README Assessment
 
@@ -197,6 +199,6 @@ release **only after minimal prep**:
 3. run the normal preflight checks against the prepared `0.6.2` metadata
 4. publish the first stable production release and verify install
 
-This repository is close enough that a production release looks reasonable, but
-the remaining gaps are real enough that calling it `GO NOW` would be too
+This repository was close enough that a production release looked reasonable,
+but the remaining gaps were real enough that calling it `GO NOW` would be too
 optimistic.

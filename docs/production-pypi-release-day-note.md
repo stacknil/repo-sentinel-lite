@@ -8,7 +8,7 @@
   message `chore(release): prepare 0.6.2 production release candidate`
 - exact version prepared: `0.6.2`
 
-Manual confirmations still required before push/tag:
+Manual confirmations that were required before push/tag:
 
 - production PyPI Trusted Publisher or pending publisher exists for:
   - owner `stacknil`
