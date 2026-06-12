@@ -25,3 +25,37 @@ def test_superseded_production_pypi_docs_do_not_use_current_go_live_phrasing() -
                 stale_matches.append(f"{path.relative_to(ROOT)}: {fragment}")
 
     assert stale_matches == []
+
+
+def test_release_workflow_and_sop_keep_publisher_targets_aligned() -> None:
+    release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+    release_sop = (ROOT / "RELEASE.md").read_text(encoding="utf-8")
+
+    assert "before enabling releases" not in release_workflow
+
+    expected_values = (
+        "GitHub owner: `stacknil`",
+        "Repository name: `repo-sentinel-lite`",
+        "Workflow file: `.github/workflows/release.yml`",
+        "Environment name: `testpypi`",
+        "Environment name: `pypi`",
+        "Project name: `repo-sentinel-lite`",
+    )
+    for value in expected_values:
+        assert value in release_sop
+
+    workflow_values = (
+        "Environment name: testpypi",
+        "Environment name: pypi",
+        "TestPyPI project: repo-sentinel-lite",
+        "PyPI project: repo-sentinel-lite",
+        "name: testpypi",
+        "url: https://test.pypi.org/project/repo-sentinel-lite/",
+        "repository-url: https://test.pypi.org/legacy/",
+        "name: pypi",
+        "url: https://pypi.org/project/repo-sentinel-lite/",
+    )
+    for value in workflow_values:
+        assert value in release_workflow

@@ -1,6 +1,6 @@
 name: Release
 
-# Configure Trusted Publishing with these values before enabling releases:
+# Trusted Publishing must stay aligned with these values:
 #   TestPyPI prereleases:
 #     GitHub owner: stacknil
 #     Repository name: repo-sentinel-lite
