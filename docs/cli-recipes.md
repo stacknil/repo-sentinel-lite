@@ -41,6 +41,9 @@ repo-sentinel scan --fail-on-severity warning .
 repo-sentinel scan --write-baseline baselines/repo-sentinel-baseline.json .
 ```
 
+For baseline review expectations, redaction behavior, and a synthetic example,
+see [`baseline-review.md`](baseline-review.md).
+
 ## Update a baseline
 
 Write a refreshed canonical baseline for the current findings state:

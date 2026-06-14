@@ -28,6 +28,8 @@ Requires Python 3.14.
 
 More copy-pasteable CLI workflows are in
 [`docs/cli-recipes.md`](docs/cli-recipes.md).
+For baseline review expectations and a sample baseline, see
+[`docs/baseline-review.md`](docs/baseline-review.md).
 
 Scan the current repository. This defaults to deterministic JSON output:
 
