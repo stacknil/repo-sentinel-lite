@@ -66,10 +66,11 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 ## Current release posture
 
 `repo-sentinel-lite` is already published to production PyPI. The current
-focus is release hardening: keeping package metadata, baseline behavior,
-redaction defaults, pre-commit integration, and CI validation stable across
-small version bumps.
+release posture is adoption hardening: Python 3.11+ support, stable package
+metadata, baseline behavior, redaction defaults, pre-commit integration, and
+CI validation across Python 3.11 through 3.14.
 
 ## Next milestone
 
-Keep production releases boring, reproducible, and documented.
+v0.7 Adoption Release: dogfood `repo-sentinel-lite` in `LogLens`,
+`telemetry-lab`, and `sec-writeups-public` as a portfolio hygiene gate.
