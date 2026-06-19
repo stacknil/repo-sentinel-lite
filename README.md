@@ -22,7 +22,7 @@ Install from production PyPI:
 python -m pip install repo-sentinel-lite
 ```
 
-Requires Python 3.14.
+Requires Python 3.11 or newer.
 
 ## Usage
 
@@ -102,7 +102,7 @@ content scanning by default.
 
 ## Local development
 
-Use Python 3.14, then run:
+Use Python 3.11 or newer, then run:
 
 ```bash
 python -m pip install --upgrade pip
