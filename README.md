@@ -30,6 +30,8 @@ More copy-pasteable CLI workflows are in
 [`docs/cli-recipes.md`](docs/cli-recipes.md).
 For baseline review expectations and a sample baseline, see
 [`docs/baseline-review.md`](docs/baseline-review.md).
+For pre-commit provider setup, see
+[`docs/pre-commit-integration.md`](docs/pre-commit-integration.md).
 For before-and-after scanner examples, see [`examples/`](examples/).
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
