@@ -1,0 +1,34 @@
+{
+  "findings": [
+    {
+      "entropy": 4.0,
+      "file": ".env",
+      "fingerprint": "786e00a51f39d7d41402a54e10f9aba2125dda4884dac6778f645b0f9d38e3bb",
+      "kind": "high_entropy",
+      "line": 1,
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "fingerprint": "2268e39db2ef51eba92c7640986350d5843da88ece2739c97ec7ab0b3e267a93",
+      "kind": "missing_file",
+      "path": ".gitignore"
+    },
+    {
+      "fingerprint": "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e",
+      "kind": "missing_file",
+      "path": "LICENSE"
+    },
+    {
+      "fingerprint": "a6eba87257d11d0a165ac41d54729cdcd8300281102b58776ee8b453eea0138c",
+      "kind": "suspicious_file",
+      "path": ".env"
+    },
+    {
+      "fingerprint": "6390a898ab48ec364cf6d20670499f7564a066c675154438c51655dea013dd7e",
+      "kind": "suspicious_file",
+      "path": "secrets/service.pem"
+    }
+  ],
+  "generated_at": "2026-06-19T00:00:00Z",
+  "schema_version": 1
+}

@@ -1,0 +1,10 @@
+Suspicious files (2):
+- [ERROR] .env
+- [ERROR] secrets/service.pem
+
+Missing required files (2):
+- [WARNING] .gitignore
+- [WARNING] LICENSE
+
+High-entropy findings (1):
+- [ERROR] .env:1 entropy=4.0 token=<redacted:sha256:3eb1bd439947>
