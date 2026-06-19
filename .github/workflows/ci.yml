@@ -12,6 +12,11 @@ jobs:
         os:
           - windows-latest
           - ubuntu-latest
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+          - "3.14"
 
     steps:
       - uses: actions/checkout@v5
@@ -19,7 +24,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
@@ -40,7 +45,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.14"
+          python-version: "3.11"
 
       - name: Install build
         run: |
@@ -61,6 +66,11 @@ jobs:
           expected = (
               "Install from production PyPI:",
               "python -m pip install repo-sentinel-lite",
+              "Requires-Python: >=3.11",
+              "Classifier: Programming Language :: Python :: 3.11",
+              "Classifier: Programming Language :: Python :: 3.12",
+              "Classifier: Programming Language :: Python :: 3.13",
+              "Classifier: Programming Language :: Python :: 3.14",
           )
           deprecated_readme_fragments = (
               (

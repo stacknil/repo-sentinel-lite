@@ -9,7 +9,7 @@ description = "Minimal repository scanning CLI."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = []
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -17,6 +17,9 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Quality Assurance",
 ]
@@ -42,7 +45,7 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 88
 src = ["src", "tests"]
-target-version = "py314"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
