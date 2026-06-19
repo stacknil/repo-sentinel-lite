@@ -59,3 +59,17 @@ def test_release_workflow_and_sop_keep_publisher_targets_aligned() -> None:
     )
     for value in workflow_values:
         assert value in release_workflow
+
+
+def test_docs_do_not_include_profile_positioning_notes() -> None:
+    forbidden_names = {
+        "profile-pin-note.md",
+    }
+
+    committed_notes = [
+        path.relative_to(ROOT).as_posix()
+        for path in sorted((ROOT / "docs").rglob("*.md"))
+        if path.name in forbidden_names
+    ]
+
+    assert committed_notes == []
