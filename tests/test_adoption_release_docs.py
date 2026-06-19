@@ -19,11 +19,14 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     assert "Python 3.11, 3.12, 3.13, and 3.14" in plan
     assert "Python 3.14-only experimental posture" in plan
     assert "## RSL-03 example-repo-before-after" in plan
+    assert "## RSL-04 pre-commit-integration-guide" in plan
     assert "v0.7 Adoption Release" in reviewer_brief
     assert "examples/dirty-repo" in reviewer_brief
     assert "examples/clean-repo" in reviewer_brief
     assert "examples/outputs/" in reviewer_brief
+    assert "docs/pre-commit-integration.md" in reviewer_brief
     assert "examples/" in readme
+    assert "docs/pre-commit-integration.md" in readme
     assert "docs/v0.7-adoption-release.md" in readme
 
     for target in ("LogLens", "telemetry-lab", "sec-writeups-public"):
@@ -43,5 +46,8 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
         "examples/outputs/clean-baseline.json",
         "examples/outputs/clean-fail-on-findings.txt",
         "--fail-on-findings",
+        "repo-sentinel-error",
+        "repo-sentinel-warning",
+        ".reposentinel-baseline.json",
     ):
         assert command in plan

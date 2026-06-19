@@ -8,7 +8,7 @@ on:
       - .github/workflows/pre-commit-provider.yml
       - .pre-commit-hooks.yaml
       - README.md
-      - docs/pre-commit.md
+      - docs/pre-commit-integration.md
       - pyproject.toml
       - src/repo_sentinel/**
       - tests/validate_pre_commit_provider.py
@@ -17,7 +17,7 @@ on:
       - .github/workflows/pre-commit-provider.yml
       - .pre-commit-hooks.yaml
       - README.md
-      - docs/pre-commit.md
+      - docs/pre-commit-integration.md
       - pyproject.toml
       - src/repo_sentinel/**
       - tests/validate_pre_commit_provider.py
