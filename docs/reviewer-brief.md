@@ -18,6 +18,7 @@ It supports `.reposentinel.toml` config, JSON baselines, redacted output by defa
 
 - Reproducible command: `repo-sentinel scan --format json .`
 - Deterministic outputs: stable JSON findings, text summaries, and baseline files with redacted high-entropy tokens by default.
+- Before-and-after examples: `examples/dirty-repo`, `examples/clean-repo`, and checked outputs under `examples/outputs/`.
 - Tests / CI: local `python -m pytest -q` and `ruff check .`; GitHub Actions CI mirrors the documented dev workflow.
 - Release evidence: production PyPI package, release workflow documentation, and release-day notes under `docs/`.
 - Non-goals: full SAST, enterprise secret management, semantic code analysis, remote reporting, or centralized dashboards.
@@ -72,5 +73,6 @@ CI validation across Python 3.11 through 3.14.
 
 ## Next milestone
 
-v0.7 Adoption Release: dogfood `repo-sentinel-lite` in `LogLens`,
-`telemetry-lab`, and `sec-writeups-public` as a portfolio hygiene gate.
+v0.7 Adoption Release: keep before-and-after examples checked, then dogfood
+`repo-sentinel-lite` in `LogLens`, `telemetry-lab`, and
+`sec-writeups-public` as a portfolio hygiene gate.

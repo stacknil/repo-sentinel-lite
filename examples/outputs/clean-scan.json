@@ -1,0 +1,10 @@
+{
+  "findings": [],
+  "high_entropy_findings": [],
+  "missing_files": {
+    ".gitignore": false,
+    "LICENSE": false,
+    "README.md": false
+  },
+  "suspicious_files": []
+}
