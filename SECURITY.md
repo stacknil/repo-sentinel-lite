@@ -3,6 +3,9 @@
 `repo-sentinel-lite` welcomes responsible security reports related to the
 codebase, release artifacts, and pre-commit provider behavior.
 
+For security boundaries, non-goals, and threat assumptions, see
+[`docs/threat-model.md`](docs/threat-model.md).
+
 ## Supported Versions
 
 | Version | Status |
