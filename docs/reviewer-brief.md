@@ -21,6 +21,8 @@ It supports `.reposentinel.toml` config, JSON baselines, redacted output by defa
 - Before-and-after examples: `examples/dirty-repo`, `examples/clean-repo`, and checked outputs under `examples/outputs/`.
 - Pre-commit integration guide: `docs/pre-commit-integration.md` documents
   install, hook config, failure behavior, baseline review, and CI reuse.
+- Threat model: `docs/threat-model.md` states that the tool is not enterprise
+  secret scanning and cannot guarantee absence of leaks.
 - Tests / CI: local `python -m pytest -q` and `ruff check .`; GitHub Actions CI mirrors the documented dev workflow.
 - Release evidence: production PyPI package, release workflow documentation, and release-day notes under `docs/`.
 - Non-goals: full SAST, enterprise secret management, semantic code analysis, remote reporting, or centralized dashboards.
@@ -62,6 +64,9 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 ## Limitations
 
 - heuristics are intentionally lightweight and conservative
+- not a replacement for enterprise secret scanning
+- does not guarantee that no credentials or sensitive material leaked
+- does not identify every credential format
 - no semantic code analysis
 - no remote service, dashboard, or centralized triage workflow
 - entropy findings still require human review
@@ -75,6 +80,7 @@ CI validation across Python 3.11 through 3.14.
 
 ## Next milestone
 
-v0.7 Adoption Release: keep before-and-after examples and pre-commit
-integration docs checked, then dogfood `repo-sentinel-lite` in `LogLens`,
-`telemetry-lab`, and `sec-writeups-public` as a portfolio hygiene gate.
+v0.7 Adoption Release: keep before-and-after examples, pre-commit integration
+docs, and threat-model boundaries checked, then dogfood `repo-sentinel-lite` in
+`LogLens`, `telemetry-lab`, and `sec-writeups-public` as a portfolio hygiene
+gate.

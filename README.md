@@ -32,6 +32,8 @@ For baseline review expectations and a sample baseline, see
 [`docs/baseline-review.md`](docs/baseline-review.md).
 For pre-commit provider setup, see
 [`docs/pre-commit-integration.md`](docs/pre-commit-integration.md).
+For threat model boundaries and non-goals, see
+[`docs/threat-model.md`](docs/threat-model.md).
 For before-and-after scanner examples, see [`examples/`](examples/).
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
