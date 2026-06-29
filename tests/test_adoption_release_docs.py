@@ -28,6 +28,8 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     assert "docs/pre-commit-integration.md" in reviewer_brief
     assert "docs/threat-model.md" in reviewer_brief
     assert "docs/self-dogfooding.md" in reviewer_brief
+    assert "CI-integrated" in reviewer_brief
+    assert "accidental sensitive filename" in reviewer_brief
     assert "examples/" in readme
     assert "docs/pre-commit-integration.md" in readme
     assert "docs/threat-model.md" in readme
