@@ -27,9 +27,11 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     assert "examples/outputs/" in reviewer_brief
     assert "docs/pre-commit-integration.md" in reviewer_brief
     assert "docs/threat-model.md" in reviewer_brief
+    assert "docs/self-dogfooding.md" in reviewer_brief
     assert "examples/" in readme
     assert "docs/pre-commit-integration.md" in readme
     assert "docs/threat-model.md" in readme
+    assert "docs/self-dogfooding.md" in readme
     assert "docs/v0.7-adoption-release.md" in readme
 
     for target in ("LogLens", "telemetry-lab", "sec-writeups-public"):
@@ -54,5 +56,6 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
         ".reposentinel-baseline.json",
         "enterprise secret scanning",
         "does not identify every credential format",
+        "self-dogfooding.md",
     ):
         assert command in plan
