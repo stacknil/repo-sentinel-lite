@@ -25,9 +25,30 @@ def test_self_dogfooding_doc_records_sec_writeups_evidence() -> None:
         assert required in doc
 
 
+def test_self_dogfooding_doc_records_loglens_evidence() -> None:
+    doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
+
+    for required in (
+        "`LogLens` | Integrated",
+        "PR #74",
+        "`stacknil/LogLens`",
+        ".github/workflows/repo-sentinel.yml",
+        "Repo Sentinel",
+        "production PyPI under Python",
+        "Python 3.14",
+        "no `.reposentinel-baseline.json` was added",
+        "repository hygiene and accidental sensitive",
+        "max_text_file_size = 0",
+        "entropy_threshold = 999.0",
+        "C++ build artifacts",
+        "Python 3.11+ metadata",
+    ):
+        assert required in doc
+
+
 def test_self_dogfooding_doc_keeps_pending_targets_visible() -> None:
     doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
 
-    for target in ("`LogLens`", "`telemetry-lab`"):
+    for target in ("`telemetry-lab`",):
         assert target in doc
         assert "Pending" in doc
