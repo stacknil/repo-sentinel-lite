@@ -39,6 +39,8 @@ For self-dogfooding status, see
 For before-and-after scanner examples, see [`examples/`](examples/).
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
+Release notes for v0.7.0 are tracked in
+[`docs/release-notes-v0.7.0.md`](docs/release-notes-v0.7.0.md).
 
 Scan the current repository. This defaults to deterministic JSON output:
 
