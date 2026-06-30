@@ -5,6 +5,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_self_dogfooding_matrix_records_adoption_boundaries() -> None:
+    doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
+
+    for required in (
+        "## Adoption Matrix",
+        "| Repository | Configuration strategy | Baseline present? "
+        "| Why paths are ignored |",
+        "`sec-writeups-public` | Project-specific",
+        "Yes: `.reposentinel-baseline.json`",
+        "`LogLens` | Filename and repository hygiene only",
+        "No: the first reviewed run passed without one",
+        "`telemetry-lab` | Filename and high-entropy scanning",
+        "No: the reviewed source tree passed without one",
+        "source, configs, and raw sample inputs remain in scope",
+    ):
+        assert required in doc
+
+
 def test_self_dogfooding_doc_records_sec_writeups_evidence() -> None:
     doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
 
@@ -14,7 +32,7 @@ def test_self_dogfooding_doc_records_sec_writeups_evidence() -> None:
         ".reposentinel.toml",
         ".reposentinel-baseline.json",
         "tracked on `origin/main`",
-        "Review latest baseline drift",
+        "review latest baseline drift",
         "repo-sentinel scan \\",
         "--baseline .reposentinel-baseline.json",
         "--fail-on-severity error",
@@ -29,7 +47,7 @@ def test_self_dogfooding_doc_records_loglens_evidence() -> None:
     doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
 
     for required in (
-        "`LogLens` | Integrated",
+        "`LogLens` | Filename and repository hygiene only",
         "PR #74",
         "`stacknil/LogLens`",
         ".github/workflows/repo-sentinel.yml",
@@ -50,7 +68,7 @@ def test_self_dogfooding_doc_records_telemetry_lab_evidence() -> None:
     doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
 
     for required in (
-        "`telemetry-lab` | Integrated",
+        "`telemetry-lab` | Filename and high-entropy scanning",
         "PR #71",
         "`stacknil/telemetry-lab`",
         "repo-sentinel-lite==0.6.3",
