@@ -84,9 +84,11 @@ release posture is adoption hardening: Python 3.11+ support, stable package
 metadata, baseline behavior, redaction defaults, pre-commit integration, and
 CI validation across Python 3.11 through 3.14.
 
+The v0.7.0 theme is:
+
+Adoption release for portfolio-level repository hygiene enforcement.
+
 ## Next milestone
 
-v0.7 Adoption Release: keep before-and-after examples, pre-commit integration
-docs, threat-model boundaries, and self-dogfooding evidence checked while
-dogfooding `repo-sentinel-lite` in `LogLens`, `telemetry-lab`, and
-`sec-writeups-public` as a portfolio hygiene gate.
+Keep production releases boring, reproducible, and documented while updating
+consumer pins deliberately after each stable package release.

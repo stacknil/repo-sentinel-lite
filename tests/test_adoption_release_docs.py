@@ -13,6 +13,9 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     reviewer_brief = (ROOT / "docs" / "reviewer-brief.md").read_text(
         encoding="utf-8"
     )
+    release_notes = (ROOT / "docs" / "release-notes-v0.7.0.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "Decision: choose scheme A." in plan
     assert "supports Python 3.11 and newer" in plan
@@ -21,7 +24,10 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     assert "## RSL-03 example-repo-before-after" in plan
     assert "## RSL-04 pre-commit-integration-guide" in plan
     assert "## RSL-05 threat-model" in plan
-    assert "v0.7 Adoption Release" in reviewer_brief
+    assert "The v0.7.0 theme is:" in reviewer_brief
+    assert "Keep production releases boring, reproducible, and documented" in (
+        reviewer_brief
+    )
     assert "examples/dirty-repo" in reviewer_brief
     assert "examples/clean-repo" in reviewer_brief
     assert "examples/outputs/" in reviewer_brief
@@ -32,15 +38,28 @@ def test_v07_adoption_plan_records_policy_and_dogfooding_targets() -> None:
     assert "accidental sensitive filename" in reviewer_brief
     assert "generated artifacts ignored" in reviewer_brief
     assert "source, configs, and sample inputs remain" in reviewer_brief
+    assert (
+        "Adoption release for portfolio-level repository hygiene enforcement."
+        in reviewer_brief
+    )
     assert "examples/" in readme
     assert "docs/pre-commit-integration.md" in readme
     assert "docs/threat-model.md" in readme
     assert "docs/self-dogfooding.md" in readme
     assert "docs/v0.7-adoption-release.md" in readme
+    assert "docs/release-notes-v0.7.0.md" in readme
+    assert "release-notes-v0.7.0.md" in plan
+    assert (
+        "Adoption release for portfolio-level repository hygiene enforcement."
+        in release_notes
+    )
+    assert "## Adoption Evidence" in release_notes
+    assert "## Scanner Behavior Since 0.6.3" in release_notes
 
     for target in ("LogLens", "telemetry-lab", "sec-writeups-public"):
         assert f"`{target}`" in plan
         assert f"`{target}`" in reviewer_brief
+        assert f"`{target}`" in release_notes
 
     for command in (
         "repo-sentinel scan --fail-on-severity error .",
