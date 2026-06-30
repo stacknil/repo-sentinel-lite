@@ -46,9 +46,25 @@ def test_self_dogfooding_doc_records_loglens_evidence() -> None:
         assert required in doc
 
 
-def test_self_dogfooding_doc_keeps_pending_targets_visible() -> None:
+def test_self_dogfooding_doc_records_telemetry_lab_evidence() -> None:
     doc = (ROOT / "docs" / "self-dogfooding.md").read_text(encoding="utf-8")
 
-    for target in ("`telemetry-lab`",):
-        assert target in doc
-        assert "Pending" in doc
+    for required in (
+        "`telemetry-lab` | Integrated",
+        "PR #71",
+        "`stacknil/telemetry-lab`",
+        "repo-sentinel-lite==0.6.3",
+        "no `.reposentinel-baseline.json` was added",
+        "`data/processed/**`",
+        "`demos/*/artifacts/**`",
+        "`src/**`",
+        "`configs/**`",
+        "`data/raw/**`",
+        "reviewed threshold",
+        "`4.5`",
+        "6-bit-entropy probe",
+        "177 tests",
+        "23 strict artifacts",
+        "6 visual snapshots",
+    ):
+        assert required in doc
