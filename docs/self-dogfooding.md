@@ -13,13 +13,13 @@ Self-dogfooding evidence should stay boring and auditable:
 - record the gate command used for local or CI validation
 - record any remaining baseline drift follow-up
 
-## Status
+## Adoption Matrix
 
-| Repository | Status | Evidence | Next action |
+| Repository | Configuration strategy | Baseline present? | Why paths are ignored |
 | --- | --- | --- | --- |
-| `sec-writeups-public` | Bootstrapped | `.reposentinel.toml` and `.reposentinel-baseline.json` are tracked on `origin/main` | Review latest baseline drift and converge the gate back to a clean run |
-| `LogLens` | Integrated | PR #74 added `.reposentinel.toml` and a `Repo Sentinel` GitHub Actions gate from production PyPI | Keep the gate narrow and move it to the normal Python policy after the next production release publishes Python 3.11+ metadata |
-| `telemetry-lab` | Integrated | PR #71 added `.reposentinel.toml` and a pinned production-PyPI `Repo Sentinel` gate | Keep generated-output ignores narrow and bump the pinned scanner version deliberately |
+| `sec-writeups-public` | Project-specific `.reposentinel.toml` plus a reviewed suppression baseline | Yes: `.reposentinel-baseline.json` | Generated reports are derived output; ignoring them avoids scanning duplicate evidence while authored material remains reviewable. |
+| `LogLens` | Filename and repository hygiene only; high-entropy content scanning is disabled | No: the first reviewed run passed without one | C++ build trees, binaries, CMake metadata, and generated reports are local or reproducible output outside the narrow hygiene gate. |
+| `telemetry-lab` | Filename and high-entropy scanning at a reviewed `4.5` threshold; CI pins production `repo-sentinel-lite==0.6.3` | No: the reviewed source tree passed without one | Processed data, demo artifacts, and regeneration scratch paths are reproducible; source, configs, and raw sample inputs remain in scope. |
 
 ## sec-writeups-public
 
