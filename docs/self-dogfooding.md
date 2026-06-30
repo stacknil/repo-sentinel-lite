@@ -19,7 +19,7 @@ Self-dogfooding evidence should stay boring and auditable:
 | --- | --- | --- | --- |
 | `sec-writeups-public` | Bootstrapped | `.reposentinel.toml` and `.reposentinel-baseline.json` are tracked on `origin/main` | Review latest baseline drift and converge the gate back to a clean run |
 | `LogLens` | Integrated | PR #74 added `.reposentinel.toml` and a `Repo Sentinel` GitHub Actions gate from production PyPI | Keep the gate narrow and move it to the normal Python policy after the next production release publishes Python 3.11+ metadata |
-| `telemetry-lab` | Pending | No integration evidence recorded here yet | Add a small local or CI hygiene gate |
+| `telemetry-lab` | Integrated | PR #71 added `.reposentinel.toml` and a pinned production-PyPI `Repo Sentinel` gate | Keep generated-output ignores narrow and bump the pinned scanner version deliberately |
 
 ## sec-writeups-public
 
@@ -89,6 +89,33 @@ because the currently published package metadata still requires Python 3.14.
 After the next production release publishes the Python 3.11+ metadata, LogLens
 should move this workflow back to the normal supported Python policy. This is
 release-hardening follow-up, not a blocker for the narrow LogLens hygiene gate.
+
+## telemetry-lab
+
+Observed on 2026-06-30:
+
+- repository: `stacknil/telemetry-lab`
+- integration evidence: PR #71 merged `.github/workflows/repo-sentinel.yml`
+  as a `Repo Sentinel` GitHub Actions gate
+- package evidence: the workflow installs `repo-sentinel-lite==0.6.3` from
+  production PyPI under Python 3.14
+- gate command: `repo-sentinel scan --fail-on-severity error --format text .`
+- baseline evidence: no `.reposentinel-baseline.json` was added; the reviewed
+  source tree passed without suppressions
+- generated-output ignores: `data/processed/**`, `demos/*/artifacts/**`,
+  `.artifact-regeneration-tmp/**`, and `.pytest-artifacts*/**`
+- in-scope evidence: `src/**`, `configs/**`, `demos/*/config/**`, `data/raw/**`,
+  and `demos/*/data/raw/**` remain scanned
+
+The default entropy threshold produced 137 redacted false positives from long
+identifiers and schema vocabulary. The integration uses a reviewed threshold
+of `4.5` instead of checking in a noise-heavy baseline. A deterministic
+6-bit-entropy probe still produced a finding at that threshold, while the real
+repository scan returned `No findings`.
+
+Local validation also passed 177 tests and confirmed that 23 strict artifacts
+matched regenerated output while 6 visual snapshots regenerated successfully.
+The GitHub Actions `CI` and `Repo Sentinel` checks passed before merge.
 
 ## Review Expectations
 

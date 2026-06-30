@@ -26,7 +26,9 @@ It supports `.reposentinel.toml` config, JSON baselines, redacted output by defa
 - Self-dogfooding: `docs/self-dogfooding.md` records
   `sec-writeups-public` as bootstrapped with tracked repo-sentinel config and
   baseline files, and `LogLens` as CI-integrated for repository hygiene and
-  accidental sensitive filename checks.
+  accidental sensitive filename checks. `telemetry-lab` is CI-integrated with
+  generated artifacts ignored while source, configs, and sample inputs remain
+  scanned.
 - Tests / CI: local `python -m pytest -q` and `ruff check .`; GitHub Actions CI mirrors the documented dev workflow.
 - Release evidence: production PyPI package, release workflow documentation, and release-day notes under `docs/`.
 - Non-goals: full SAST, enterprise secret management, semantic code analysis, remote reporting, or centralized dashboards.
