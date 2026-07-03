@@ -15,11 +15,11 @@ Self-dogfooding evidence should stay boring and auditable:
 
 ## Adoption Matrix
 
-| Repository | Configuration strategy | Baseline present? | Why paths are ignored |
-| --- | --- | --- | --- |
-| `sec-writeups-public` | Project-specific `.reposentinel.toml` plus a reviewed suppression baseline | Yes: `.reposentinel-baseline.json` | Generated reports are derived output; ignoring them avoids scanning duplicate evidence while authored material remains reviewable. |
-| `LogLens` | Filename and repository hygiene only; high-entropy content scanning is disabled | No: the first reviewed run passed without one | C++ build trees, binaries, CMake metadata, and generated reports are local or reproducible output outside the narrow hygiene gate. |
-| `telemetry-lab` | Filename and high-entropy scanning at a reviewed `4.5` threshold; CI pins production `repo-sentinel-lite==0.6.3` | No: the reviewed source tree passed without one | Processed data, demo artifacts, and regeneration scratch paths are reproducible; source, configs, and raw sample inputs remain in scope. |
+| Repository | Configuration strategy | Baseline present? | Why paths are ignored | Command |
+| --- | --- | --- | --- | --- |
+| `sec-writeups-public` | Project-specific `.reposentinel.toml` plus a reviewed suppression baseline | Yes: `.reposentinel-baseline.json` | Generated reports are derived output; ignoring them avoids scanning duplicate evidence while authored material remains reviewable. | `repo-sentinel scan --baseline .reposentinel-baseline.json --fail-on-severity error --format text .` |
+| `LogLens` | Filename and repository hygiene only; high-entropy content scanning is disabled | No: the first reviewed run passed without one | C++ build trees, binaries, CMake metadata, and generated reports are local or reproducible output outside the narrow hygiene gate. | `repo-sentinel scan --fail-on-severity error --format text .` |
+| `telemetry-lab` | Filename and high-entropy scanning at a reviewed `4.5` threshold; CI pins production `repo-sentinel-lite==0.6.3` | No: the reviewed source tree passed without one | Processed data, demo artifacts, and regeneration scratch paths are reproducible; source, configs, and raw sample inputs remain in scope. | `repo-sentinel scan --fail-on-severity error --format text .` |
 
 ## sec-writeups-public
 

@@ -518,15 +518,18 @@ def _required_file_exists(root: Path, logical_path: str) -> bool:
 def _is_file_case_insensitive(root: Path, parts: Sequence[str]) -> bool:
     current = root
     for part in parts:
+        folded_part = part.casefold()
         try:
-            entries = list(current.iterdir())
+            match = next(
+                (
+                    entry
+                    for entry in current.iterdir()
+                    if entry.name.casefold() == folded_part
+                ),
+                None,
+            )
         except OSError:
             return False
-
-        match = next(
-            (entry for entry in entries if entry.name.casefold() == part.casefold()),
-            None,
-        )
         if match is None:
             return False
         current = match

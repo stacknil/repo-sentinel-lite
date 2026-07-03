@@ -10,6 +10,13 @@ The checked-in outputs under `examples/outputs/` are static review fixtures.
 They demonstrate scanner output, baseline output, and fail-on-findings behavior
 without requiring a reviewer to infer the CLI contract from tests alone.
 
+## Expected Output Summary
+
+| Fixture | Scan summary | Baseline summary | Fail-on-findings behavior |
+| --- | --- | --- | --- |
+| `dirty-repo` | 2 suspicious files, 2 missing required files, 1 redacted high-entropy finding | 5 reviewable findings with the high-entropy token redacted | exits `1` and prints the text finding summary |
+| `clean-repo` | no findings | empty baseline | exits `0` and prints `No findings.` |
+
 ## Dirty Repository
 
 Run a JSON scan:

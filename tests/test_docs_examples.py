@@ -82,6 +82,23 @@ def test_example_outputs_are_redacted() -> None:
         assert raw_token not in output_path.read_text(encoding="utf-8")
 
 
+def test_examples_readme_summarizes_expected_outputs() -> None:
+    readme = (ROOT / "examples" / "README.md").read_text(encoding="utf-8")
+
+    for required in (
+        "## Expected Output Summary",
+        "| Fixture | Scan summary | Baseline summary | Fail-on-findings behavior |",
+        "`dirty-repo` | 2 suspicious files, 2 missing required files, "
+        "1 redacted high-entropy finding",
+        "5 reviewable findings with the high-entropy token redacted",
+        "exits `1` and prints the text finding summary",
+        "`clean-repo` | no findings",
+        "empty baseline",
+        "exits `0` and prints `No findings.`",
+    ):
+        assert required in readme
+
+
 def _example_output(filename: str) -> str:
     return (ROOT / "examples" / "outputs" / filename).read_text(
         encoding="utf-8"

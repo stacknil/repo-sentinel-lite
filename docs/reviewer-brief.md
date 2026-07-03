@@ -84,9 +84,12 @@ release posture is adoption hardening: Python 3.11+ support, stable package
 metadata, baseline behavior, redaction defaults, pre-commit integration, and
 CI validation across Python 3.11 through 3.14.
 
-The v0.7.0 theme is:
+The v0.7 line theme is:
 
 Adoption release for portfolio-level repository hygiene enforcement.
+
+v0.7.1 is a polish release that keeps the PyPI README, GitHub README, release
+notes, examples, and self-dogfooding evidence aligned.
 
 ## Next milestone
 

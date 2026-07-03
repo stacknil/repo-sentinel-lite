@@ -28,6 +28,8 @@ Requires Python 3.11 or newer.
 
 More copy-pasteable CLI workflows are in
 [`docs/cli-recipes.md`](docs/cli-recipes.md).
+For the shortest consumer setup path, see
+[`docs/consumer-minimal-setup.md`](docs/consumer-minimal-setup.md).
 For baseline review expectations and a sample baseline, see
 [`docs/baseline-review.md`](docs/baseline-review.md).
 For pre-commit provider setup, see
@@ -39,8 +41,8 @@ For self-dogfooding status, see
 For before-and-after scanner examples, see [`examples/`](examples/).
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
-Release notes for v0.7.0 are tracked in
-[`docs/release-notes-v0.7.0.md`](docs/release-notes-v0.7.0.md).
+Release notes for v0.7.1 are tracked in
+[`docs/release-notes-v0.7.1.md`](docs/release-notes-v0.7.1.md).
 
 Scan the current repository. This defaults to deterministic JSON output:
 
