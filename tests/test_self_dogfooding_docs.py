@@ -11,11 +11,14 @@ def test_self_dogfooding_matrix_records_adoption_boundaries() -> None:
     for required in (
         "## Adoption Matrix",
         "| Repository | Configuration strategy | Baseline present? "
-        "| Why paths are ignored |",
+        "| Why paths are ignored | Command |",
         "`sec-writeups-public` | Project-specific",
         "Yes: `.reposentinel-baseline.json`",
+        "`repo-sentinel scan --baseline .reposentinel-baseline.json "
+        "--fail-on-severity error --format text .`",
         "`LogLens` | Filename and repository hygiene only",
         "No: the first reviewed run passed without one",
+        "`repo-sentinel scan --fail-on-severity error --format text .`",
         "`telemetry-lab` | Filename and high-entropy scanning",
         "No: the reviewed source tree passed without one",
         "source, configs, and raw sample inputs remain in scope",
