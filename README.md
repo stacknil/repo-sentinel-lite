@@ -42,6 +42,7 @@ For self-dogfooding status, see
 [`docs/self-dogfooding.md`](docs/self-dogfooding.md).
 For the short external case study, see
 [How repo-sentinel-lite Dogfoods Repository Hygiene](docs/case-study-self-dogfooding.md).
+For near-term review boundaries, see [`ROADMAP.md`](ROADMAP.md).
 For before-and-after scanner examples, see [`examples/`](examples/).
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
