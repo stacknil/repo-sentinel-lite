@@ -12,7 +12,14 @@ python -m pip install repo-sentinel-lite
 
 ## First Scan
 
-Run the error-level gate from the repository root:
+Run a scan from the repository root:
+
+```bash
+repo-sentinel scan .
+```
+
+Run the error-level gate when the command should fail CI or a local check on
+unsuppressed error findings:
 
 ```bash
 repo-sentinel scan --fail-on-severity error --format text .
@@ -84,3 +91,36 @@ pre-commit run repo-sentinel-error --hook-stage manual --all-files
 
 For the fuller pre-commit and CI guide, see
 [`pre-commit-integration.md`](pre-commit-integration.md).
+
+## Optional CI
+
+For a simple GitHub Actions gate, add `.github/workflows/repo-sentinel.yml` to
+the consumer repository:
+
+```yaml
+name: Repo Sentinel
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  repo-sentinel:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: python -m pip install repo-sentinel-lite==0.7.1
+      - run: repo-sentinel scan --fail-on-severity error --format text .
+```
+
+This template is intentionally repository-neutral. Add `.reposentinel.toml`
+only for consumer-specific generated paths, and keep source, configuration,
+sample inputs, and authored documentation in scope.
+
+When CI should preserve outputs for review, see
+[`output-format-stability.md`](output-format-stability.md).
