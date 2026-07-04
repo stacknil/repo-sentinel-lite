@@ -10,6 +10,12 @@ def test_self_dogfooding_matrix_records_adoption_boundaries() -> None:
 
     for required in (
         "## Adoption Matrix",
+        "## Version Posture",
+        "Current source metadata requires Python 3.11 or newer",
+        "production package metadata was",
+        "confirmed as Python 3.11+",
+        "pin or install the intended package version",
+        "current package metadata evidence",
         "| Repository | Configuration strategy | Baseline present? "
         "| Why paths are ignored | Command |",
         "`sec-writeups-public` | Project-specific",
@@ -20,6 +26,7 @@ def test_self_dogfooding_matrix_records_adoption_boundaries() -> None:
         "No: the first reviewed run passed without one",
         "`repo-sentinel scan --fail-on-severity error --format text .`",
         "`telemetry-lab` | Filename and high-entropy scanning",
+        "follow-up should update to the intended package version",
         "No: the reviewed source tree passed without one",
         "source, configs, and raw sample inputs remain in scope",
     ):
@@ -62,7 +69,8 @@ def test_self_dogfooding_doc_records_loglens_evidence() -> None:
         "max_text_file_size = 0",
         "entropy_threshold = 999.0",
         "C++ build artifacts",
-        "Python 3.11+ metadata",
+        "Current source and production package metadata require Python 3.11",
+        "pin or install the intended package version",
     ):
         assert required in doc
 
@@ -74,7 +82,8 @@ def test_self_dogfooding_doc_records_telemetry_lab_evidence() -> None:
         "`telemetry-lab` | Filename and high-entropy scanning",
         "PR #71",
         "`stacknil/telemetry-lab`",
-        "repo-sentinel-lite==0.6.3",
+        "initial workflow installed `repo-sentinel-lite==0.6.3`",
+        "normal Python 3.11+ policy",
         "no `.reposentinel-baseline.json` was added",
         "`data/processed/**`",
         "`demos/*/artifacts/**`",

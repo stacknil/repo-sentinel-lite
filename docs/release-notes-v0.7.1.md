@@ -13,6 +13,8 @@ Polish release for the v0.7 adoption story.
 - Keeps GitHub README, PyPI README, and release notes aligned around production
   PyPI installation, Python 3.11+ support, redaction defaults, baseline review,
   pre-commit integration, and self-dogfooding evidence.
+- Documents a repository-neutral GitHub Actions consumer template and output
+  stability guidance for CI artifacts.
 
 ## Package And Release Posture
 
@@ -20,6 +22,7 @@ Polish release for the v0.7 adoption story.
 - Updates pre-commit provider examples to pin `rev: v0.7.1`.
 - Preserves the v0.7 compatibility contract: Python 3.11 or newer, no baseline
   schema migration, and no new large feature surface.
+- Adds no new scanning rules.
 
 ## Code Polish
 

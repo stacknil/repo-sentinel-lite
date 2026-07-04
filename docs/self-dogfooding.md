@@ -13,13 +13,25 @@ Self-dogfooding evidence should stay boring and auditable:
 - record the gate command used for local or CI validation
 - record any remaining baseline drift follow-up
 
+## Version Posture
+
+Current source metadata requires Python 3.11 or newer. Production PyPI metadata
+must be checked before each consumer workflow update; after the v0.7.0 adoption
+release and the v0.7.1 polish release, production package metadata was
+confirmed as Python 3.11+.
+
+Dogfooding workflows should pin or install the intended package version
+deliberately. A workflow that uses Python 3.14 or an older
+`repo-sentinel-lite` pin should be treated as a consumer follow-up, not as
+current package metadata evidence.
+
 ## Adoption Matrix
 
 | Repository | Configuration strategy | Baseline present? | Why paths are ignored | Command |
 | --- | --- | --- | --- | --- |
 | `sec-writeups-public` | Project-specific `.reposentinel.toml` plus a reviewed suppression baseline | Yes: `.reposentinel-baseline.json` | Generated reports are derived output; ignoring them avoids scanning duplicate evidence while authored material remains reviewable. | `repo-sentinel scan --baseline .reposentinel-baseline.json --fail-on-severity error --format text .` |
 | `LogLens` | Filename and repository hygiene only; high-entropy content scanning is disabled | No: the first reviewed run passed without one | C++ build trees, binaries, CMake metadata, and generated reports are local or reproducible output outside the narrow hygiene gate. | `repo-sentinel scan --fail-on-severity error --format text .` |
-| `telemetry-lab` | Filename and high-entropy scanning at a reviewed `4.5` threshold; CI pins production `repo-sentinel-lite==0.6.3` | No: the reviewed source tree passed without one | Processed data, demo artifacts, and regeneration scratch paths are reproducible; source, configs, and raw sample inputs remain in scope. | `repo-sentinel scan --fail-on-severity error --format text .` |
+| `telemetry-lab` | Filename and high-entropy scanning at a reviewed `4.5` threshold; initial CI pinned production `repo-sentinel-lite==0.6.3`, and follow-up should update to the intended package version | No: the reviewed source tree passed without one | Processed data, demo artifacts, and regeneration scratch paths are reproducible; source, configs, and raw sample inputs remain in scope. | `repo-sentinel scan --fail-on-severity error --format text .` |
 
 ## sec-writeups-public
 
@@ -84,10 +96,10 @@ entropy_threshold = 999.0
 That scope keeps fixture logs and C++ build artifacts out of the gate while
 still checking for missing standard files and suspicious filenames.
 
-The workflow installs `repo-sentinel-lite` from production PyPI under Python 3.14
-because the currently published package metadata still requires Python 3.14.
-After the next production release publishes the Python 3.11+ metadata, LogLens
-should move this workflow back to the normal supported Python policy. This is
+The initial workflow used Python 3.14 while production PyPI metadata was being
+hardened. Current source and production package metadata require Python 3.11 or
+newer, so LogLens should move this workflow back to the normal supported Python
+policy and pin or install the intended package version. This is
 release-hardening follow-up, not a blocker for the narrow LogLens hygiene gate.
 
 ## telemetry-lab
@@ -97,8 +109,9 @@ Observed on 2026-06-30:
 - repository: `stacknil/telemetry-lab`
 - integration evidence: PR #71 merged `.github/workflows/repo-sentinel.yml`
   as a `Repo Sentinel` GitHub Actions gate
-- package evidence: the workflow installs `repo-sentinel-lite==0.6.3` from
-  production PyPI under Python 3.14
+- package evidence: the initial workflow installed `repo-sentinel-lite==0.6.3`
+  from production PyPI under Python 3.14; a follow-up should pin or install the
+  intended current package version under the normal Python 3.11+ policy
 - gate command: `repo-sentinel scan --fail-on-severity error --format text .`
 - baseline evidence: no `.reposentinel-baseline.json` was added; the reviewed
   source tree passed without suppressions

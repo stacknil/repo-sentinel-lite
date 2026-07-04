@@ -32,6 +32,8 @@ For the shortest consumer setup path, see
 [`docs/consumer-minimal-setup.md`](docs/consumer-minimal-setup.md).
 For baseline review expectations and a sample baseline, see
 [`docs/baseline-review.md`](docs/baseline-review.md).
+For output stability and CI artifact guidance, see
+[`docs/output-format-stability.md`](docs/output-format-stability.md).
 For pre-commit provider setup, see
 [`docs/pre-commit-integration.md`](docs/pre-commit-integration.md).
 For threat model boundaries and non-goals, see
