@@ -61,6 +61,12 @@ repo-sentinel scan \
   .
 ```
 
+Audit the committed baseline without writing a replacement file:
+
+```bash
+repo-sentinel baseline audit --baseline baselines/repo-sentinel-baseline.json .
+```
+
 ## Run with baseline suppression
 
 ```bash
@@ -81,6 +87,15 @@ ignore_globs = ["fixtures/**", "tmp/**"]
 
 Child-glob patterns such as `fixtures/*`, `fixtures/**`, and `fixtures/**/*`
 prune the matching directory during traversal.
+
+Use narrow allowlists when a fixture should not be emitted as a finding:
+
+```toml
+[allowlist]
+paths = ["fixtures/**"]
+rules = ["repo.suspicious_filename"]
+token_hashes = ["sha256:3eb1bd439947"]
+```
 
 ## Adjust large-file scanning
 
@@ -121,4 +136,12 @@ repo-sentinel scan \
 
 ```bash
 repo-sentinel scan --format sarif --output reports/repo-sentinel.sarif .
+```
+
+## Scan changed files
+
+Use this only when the caller already has a trusted changed-file list:
+
+```bash
+repo-sentinel scan --changed-files . src/app.py docs/example.md
 ```

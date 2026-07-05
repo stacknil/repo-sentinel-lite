@@ -43,7 +43,11 @@ def _prepare_provider_snapshot(temp_root: Path, env: dict[str, str]) -> Path:
     ):
         shutil.copy2(REPO_ROOT / relative_path, snapshot_root / relative_path)
 
-    shutil.copytree(REPO_ROOT / "src", snapshot_root / "src")
+    shutil.copytree(
+        REPO_ROOT / "src",
+        snapshot_root / "src",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.egg-info"),
+    )
 
     _run(["git", "init"], cwd=snapshot_root, env=env)
     _run(["git", "add", "."], cwd=snapshot_root, env=env)
@@ -128,6 +132,28 @@ def main() -> int:
                 "try-repo",
                 str(snapshot_root),
                 "repo-sentinel-warning",
+                "--all-files",
+            ],
+            cwd=consumer_root,
+            env=env,
+        )
+        _run(
+            [
+                *pre_commit_command,
+                "try-repo",
+                str(snapshot_root),
+                "repo-sentinel-error-changed",
+                "--all-files",
+            ],
+            cwd=consumer_root,
+            env=env,
+        )
+        _run(
+            [
+                *pre_commit_command,
+                "try-repo",
+                str(snapshot_root),
+                "repo-sentinel-warning-changed",
                 "--all-files",
             ],
             cwd=consumer_root,

@@ -10,7 +10,9 @@ from .scanner import (
     CONFIG_FILENAME,
     DEFAULT_BASELINE_FILENAME,
     apply_baseline,
+    audit_baseline,
     format_baseline,
+    format_baseline_audit,
     format_report,
     format_sarif_report,
     format_text_report,
@@ -112,12 +114,58 @@ def build_parser() -> argparse.ArgumentParser:
         help="Show full high-entropy tokens in output. Defaults to redacted.",
     )
     scan_parser.add_argument(
+        "--changed-files",
+        action="store_true",
+        help=(
+            "Scan only the changed file paths listed after the repository path. "
+            "Repository-level required-file checks still run."
+        ),
+    )
+    scan_parser.add_argument(
         "path",
         nargs="?",
         default=".",
         help="Repository path to scan. Defaults to the current directory.",
     )
+    scan_parser.add_argument(
+        "changed_paths",
+        nargs="*",
+        help="Changed file paths relative to path. Used only with --changed-files.",
+    )
     scan_parser.set_defaults(handler=_run_scan)
+
+    baseline_parser = subparsers.add_parser(
+        "baseline",
+        help="Inspect and maintain repo-sentinel baseline files.",
+    )
+    baseline_subparsers = baseline_parser.add_subparsers(
+        dest="baseline_command", required=True
+    )
+    audit_parser = baseline_subparsers.add_parser(
+        "audit",
+        help="Classify baseline entries as active, stale, ambiguous, or unmatched.",
+    )
+    audit_parser.add_argument(
+        "--format",
+        choices=("json", "text"),
+        default="text",
+        help="Output format. Defaults to text.",
+    )
+    audit_parser.add_argument(
+        "--baseline",
+        type=Path,
+        help=(
+            "Path to the baseline JSON file. Defaults to "
+            ".reposentinel-baseline.json in the scanned repository."
+        ),
+    )
+    audit_parser.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Repository path to audit. Defaults to the current directory.",
+    )
+    audit_parser.set_defaults(handler=_run_baseline_audit)
 
     return parser
 
@@ -145,6 +193,9 @@ def _run_scan(args: argparse.Namespace) -> int:
     if args.prune_baseline is not None and args.baseline is None:
         print("--prune-baseline requires --baseline", file=sys.stderr)
         return 2
+    if args.changed_paths and not args.changed_files:
+        print("changed file paths require --changed-files", file=sys.stderr)
+        return 2
 
     if baseline_path is not None:
         try:
@@ -160,7 +211,10 @@ def _run_scan(args: argparse.Namespace) -> int:
             return 2
 
     try:
-        report = scan_repository(target)
+        report = scan_repository(
+            target,
+            changed_paths=args.changed_paths if args.changed_files else None,
+        )
     except ValueError as exc:
         print(f"Invalid config {target / CONFIG_FILENAME}: {exc}", file=sys.stderr)
         return 2
@@ -225,6 +279,49 @@ def _run_scan(args: argparse.Namespace) -> int:
         and has_findings_at_or_above_severity(report, args.fail_on_severity)
     ):
         return 1
+    return 0
+
+
+def _run_baseline_audit(args: argparse.Namespace) -> int:
+    target = Path(args.path)
+    if not target.exists():
+        print(f"Path not found: {target}", file=sys.stderr)
+        return 2
+    if not target.is_dir():
+        print(f"Path is not a directory: {target}", file=sys.stderr)
+        return 2
+
+    baseline_path = args.baseline or _resolve_default_baseline_path(target)
+    if baseline_path is None:
+        print(
+            f"Baseline not found: {target / DEFAULT_BASELINE_FILENAME}",
+            file=sys.stderr,
+        )
+        return 2
+
+    try:
+        baseline_report = load_baseline(baseline_path)
+    except FileNotFoundError:
+        print(f"Baseline not found: {baseline_path}", file=sys.stderr)
+        return 2
+    except OSError as exc:
+        print(f"Failed to read baseline {baseline_path}: {exc}", file=sys.stderr)
+        return 2
+    except ValueError as exc:
+        print(f"Invalid baseline {baseline_path}: {exc}", file=sys.stderr)
+        return 2
+
+    try:
+        report = scan_repository(target)
+    except ValueError as exc:
+        print(f"Invalid config {target / CONFIG_FILENAME}: {exc}", file=sys.stderr)
+        return 2
+
+    rendered = format_baseline_audit(
+        audit_baseline(report, baseline_report),
+        output_format=args.format,
+    )
+    print(rendered, end="")
     return 0
 
 

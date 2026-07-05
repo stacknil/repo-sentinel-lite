@@ -26,6 +26,9 @@ def test_threat_model_states_secret_scanning_boundaries() -> None:
     for evidence_path in (
         "src/repo_sentinel/cli.py",
         "src/repo_sentinel/scanner.py",
+        "src/repo_sentinel/rules/",
+        "src/repo_sentinel/baseline.py",
+        "src/repo_sentinel/config.py",
         ".pre-commit-hooks.yaml",
         "docs/baseline-review.md",
         "docs/pre-commit-integration.md",

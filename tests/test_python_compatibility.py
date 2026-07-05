@@ -28,6 +28,17 @@ def test_python_support_metadata_docs_and_ci_are_aligned() -> None:
         assert f'          - "{version}"' in ci
 
 
+def test_package_description_is_hygiene_and_secret_adjacent() -> None:
+    pyproject = tomllib.loads(
+        (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    )
+
+    assert pyproject["project"]["description"] == (
+        "Lightweight repository hygiene and secret-adjacent scanning CLI."
+    )
+    assert pyproject["project"]["description"] != "Minimal repository scanning CLI."
+
+
 def test_release_and_support_workflows_run_on_lowest_supported_python() -> None:
     workflow_paths = (
         ROOT / ".github" / "workflows" / "code-scanning.yml",

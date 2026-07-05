@@ -1,18 +1,25 @@
 # repo-sentinel-lite
 
-Deterministic Python CLI for repository hygiene checks, lightweight secret
-scanning, and baseline-backed pre-commit validation.
+Deterministic Python CLI for repository hygiene checks, lightweight
+secret-adjacent scanning, and baseline-backed pre-commit validation.
 
 `repo-sentinel-lite` scans a repository and emits stable JSON for:
 
 - suspicious filenames such as `.env`, `*.pem`, `id_rsa`, and `*.kdbx`
 - high-entropy strings that look like secrets
+- structured secret-adjacent patterns such as PEM private-key headers,
+  GitHub-token-like prefixes, AWS access-key-like prefixes, and generic
+  `token=` or `api_key=` assignment contexts
 - missing standard files such as `README.md`, `LICENSE`, and `.gitignore`
 
-It also supports `.reposentinel.toml` overrides, JSON baselines for suppressing
-known findings, and a pre-commit provider for repository-local enforcement.
-High-entropy tokens are redacted in CLI output and generated baselines by
-default.
+It also supports `.reposentinel.toml` overrides, scoped allowlists, JSON
+baselines for suppressing known findings, baseline drift audits, changed-file
+scans, and a pre-commit provider for repository-local enforcement. Token-like
+values are redacted in CLI output and generated baselines by default.
+
+The detector set is intentionally heuristic. A clean scan is useful repository
+hygiene evidence, not proof that no credential exists in the repository or its
+history.
 
 ## Install
 
@@ -38,6 +45,8 @@ For pre-commit provider setup, see
 [`docs/pre-commit-integration.md`](docs/pre-commit-integration.md).
 For threat model boundaries and non-goals, see
 [`docs/threat-model.md`](docs/threat-model.md).
+For the v0.8 synthetic performance envelope, see
+[`docs/performance-envelope-v0.8.md`](docs/performance-envelope-v0.8.md).
 For self-dogfooding status, see
 [`docs/self-dogfooding.md`](docs/self-dogfooding.md).
 For the short external case study, see
@@ -48,6 +57,8 @@ The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
 Release notes for v0.7.1 are tracked in
 [`docs/release-notes-v0.7.1.md`](docs/release-notes-v0.7.1.md).
+Release notes for v0.8.0 are tracked in
+[`docs/release-notes-v0.8.0.md`](docs/release-notes-v0.8.0.md).
 
 Scan the current repository. This defaults to deterministic JSON output:
 
@@ -79,6 +90,12 @@ Scan with an existing baseline applied:
 repo-sentinel scan --baseline baseline.json path/to/repo
 ```
 
+Audit baseline drift without suppressing the classification output:
+
+```bash
+repo-sentinel baseline audit --baseline baseline.json path/to/repo
+```
+
 If the scanned repository already contains `.reposentinel-baseline.json`,
 `repo-sentinel scan` applies it automatically.
 
@@ -106,7 +123,14 @@ Use a `.reposentinel.toml` config to ignore paths or adjust thresholds:
 ignore_globs = ["dist/**", ".venv/**"]
 entropy_threshold = 4.2
 max_text_file_size = 1048576
+
+[allowlist]
+paths = ["fixtures/**"]
+rules = ["repo.suspicious_filename"]
+token_hashes = ["sha256:3eb1bd439947"]
 ```
+
+Use `rule_id` values from JSON findings when writing rule-scoped allowlists.
 
 Child-glob ignores such as `fixtures/*`, `fixtures/**`, and `fixtures/**/*`
 prune the matching directory during traversal.
@@ -117,6 +141,13 @@ Common generated and dependency directories such as `.venv`, `venv`,
 `htmlcov`, and `__pycache__` are ignored by default.
 Text files larger than `max_text_file_size` bytes are skipped for high-entropy
 content scanning by default.
+
+For pre-commit or local review paths that already know the changed files, scan
+only those files while keeping repository-level required-file checks:
+
+```bash
+repo-sentinel scan --changed-files path/to/repo src/app.py docs/example.md
+```
 
 ## Local development
 

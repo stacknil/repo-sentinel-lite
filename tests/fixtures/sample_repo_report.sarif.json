@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "notes/tokens.txt"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "High-entropy string detected: notes/tokens.txt:2"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "9d32570586e37a6005c9ce58edd091a56032dc3f38ae5c907033c17661286129"
+          },
+          "properties": {
+            "kind": "high_entropy",
+            "ruleVersion": "1"
+          },
+          "ruleId": "secret.high_entropy"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".gitignore"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Required file missing: .gitignore"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "2268e39db2ef51eba92c7640986350d5843da88ece2739c97ec7ab0b3e267a93"
+          },
+          "properties": {
+            "kind": "missing_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.required_file_missing"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "LICENSE"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Required file missing: LICENSE"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e"
+          },
+          "properties": {
+            "kind": "missing_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.required_file_missing"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".env"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Suspicious file detected: .env"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "a6eba87257d11d0a165ac41d54729cdcd8300281102b58776ee8b453eea0138c"
+          },
+          "properties": {
+            "kind": "suspicious_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.suspicious_filename"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "certs/service.pem"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Suspicious file detected: certs/service.pem"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "16217ed2c8122262f2faf42e00ab7ae26888cf35b22de840faefe6cae9c03834"
+          },
+          "properties": {
+            "kind": "suspicious_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.suspicious_filename"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "keys/id_rsa"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Suspicious file detected: keys/id_rsa"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "d14152416103f5602ac35e2bb4c0c7006bc25c646512361c1b5d056ccb4c8025"
+          },
+          "properties": {
+            "kind": "suspicious_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.suspicious_filename"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "vault/archive.kdbx"
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Suspicious file detected: vault/archive.kdbx"
+          },
+          "partialFingerprints": {
+            "repoSentinelFingerprint": "e34a85d2ae98c2282bf0966deb449470edba292d20c0ca3e2f8c53972fe5fc59"
+          },
+          "properties": {
+            "kind": "suspicious_file",
+            "ruleVersion": "1"
+          },
+          "ruleId": "repo.suspicious_filename"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "repo-sentinel-lite",
+          "rules": [
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "fullDescription": {
+                "text": "Detects required repository files that are missing."
+              },
+              "id": "repo.required_file_missing",
+              "name": "Missing Required File",
+              "properties": {
+                "kind": "missing_file",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "Required repository file missing."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "Detects suspicious filenames commonly associated with secrets."
+              },
+              "id": "repo.suspicious_filename",
+              "name": "Suspicious Filename",
+              "properties": {
+                "kind": "suspicious_file",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "Suspicious filename detected."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "fullDescription": {
+                "text": "Detects assignment contexts such as token=, api_key=, or password= with a non-placeholder value."
+              },
+              "id": "secret.assignment_context",
+              "name": "Secret Assignment Context",
+              "properties": {
+                "kind": "assignment_context",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "Secret-like assignment context detected."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "Detects AWS access-key-like identifiers by provider prefix and length. This is a heuristic and does not validate the credential."
+              },
+              "id": "secret.aws_access_key_id",
+              "name": "AWS Access Key ID Pattern",
+              "properties": {
+                "kind": "aws_access_key_id",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "AWS access-key-like identifier detected."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "Detects GitHub token-like prefixes such as ghp_, gho_, ghs_, ghr_, ghu_, and github_pat_. This is a prefix heuristic."
+              },
+              "id": "secret.github_token",
+              "name": "GitHub Token Prefix",
+              "properties": {
+                "kind": "github_token",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "GitHub token-like prefix detected."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "Detects high-entropy strings that may indicate secrets."
+              },
+              "id": "secret.high_entropy",
+              "name": "High Entropy",
+              "properties": {
+                "kind": "high_entropy",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "High-entropy string detected."
+              }
+            },
+            {
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "fullDescription": {
+                "text": "Detects PEM private-key headers. This does not parse the full key but flags the strongest local evidence quickly."
+              },
+              "id": "secret.pem_private_key",
+              "name": "PEM Private Key Header",
+              "properties": {
+                "kind": "pem_private_key",
+                "ruleVersion": "1"
+              },
+              "shortDescription": {
+                "text": "PEM private-key header detected."
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
