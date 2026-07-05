@@ -15,6 +15,15 @@ A baseline suppresses findings that match entries in the baseline JSON file.
 - `missing_file`: a required repository file that is absent
 - `suspicious_file`: a suspicious filename such as `.env`, `*.pem`, `*.key`,
   `id_rsa`, or `*.kdbx`
+- `pem_private_key`: a PEM private-key header
+- `github_token`: a GitHub-token-like prefix
+- `aws_access_key_id`: an AWS access-key-like identifier
+- `assignment_context`: a secret-adjacent assignment context such as
+  `token=` or `api_key=`
+
+Each current finding also includes `rule_id`, `rule_version`, `severity`,
+`fingerprint`, `evidence`, and `remediation_hint`. The legacy `kind` field is
+kept so older baseline entries remain readable.
 
 When a baseline entry has a `fingerprint`, matching prefers that fingerprint.
 Legacy entries without fingerprints still match by finding identity, such as
@@ -110,6 +119,49 @@ repo-sentinel scan \
   --prune-baseline .reposentinel-baseline.pruned.json \
   .
 ```
+
+6. Audit the committed baseline when you need classification instead of a
+   rewritten candidate file:
+
+```bash
+repo-sentinel baseline audit --baseline .reposentinel-baseline.json .
+```
+
+The audit output groups entries as:
+
+- `active`: a baseline entry still matches a current finding
+- `stale`: a baseline entry no longer matches any current finding
+- `ambiguous`: a baseline entry points at the same rule and location but no
+  longer has a matching fingerprint
+- `unmatched`: a current finding is not covered by the baseline
+
+Treat `ambiguous` and `unmatched` entries as review prompts. Do not silently
+refresh them without checking why the fingerprint or rule evidence changed.
+
+## Allowlists and Scoped Exceptions
+
+Use a baseline for reviewed findings that should remain visible as committed
+suppression state. Use an allowlist only for narrower exceptions where the
+finding should not be emitted at all for that repository configuration.
+
+`.reposentinel.toml` supports:
+
+```toml
+[allowlist]
+paths = ["fixtures/**"]
+rules = ["repo.suspicious_filename"]
+token_hashes = ["sha256:3eb1bd439947"]
+```
+
+Inline scoped comments are also supported for one-line fixture exceptions:
+
+```text
+# repo-sentinel: allow secret.assignment_context
+api_key=example_fixture_value
+```
+
+Prefer the narrowest exception that explains the fixture. Avoid broad
+rule-level allowlists in repositories that still need secret-adjacent review.
 
 ## How fail-on-findings behaves
 

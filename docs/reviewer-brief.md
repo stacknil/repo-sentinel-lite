@@ -10,9 +10,13 @@ Small repositories still need basic hygiene checks, secret-adjacent scanning, an
 
 - suspicious filenames such as `.env`, `*.pem`, and `id_rsa`
 - high-entropy strings that may look like secrets
+- structured secret-adjacent patterns such as PEM private-key headers,
+  provider-prefix token shapes, and assignment contexts
 - missing standard files such as `README.md`, `LICENSE`, and `.gitignore`
 
-It supports `.reposentinel.toml` config, JSON baselines, redacted output by default, and pre-commit integration.
+It supports `.reposentinel.toml` config, narrow allowlists, JSON baselines,
+baseline audit output, redacted output by default, changed-files scans, and
+pre-commit integration.
 
 ## Reviewer Evidence
 
@@ -23,6 +27,9 @@ It supports `.reposentinel.toml` config, JSON baselines, redacted output by defa
   install, hook config, failure behavior, baseline review, and CI reuse.
 - Threat model: `docs/threat-model.md` states that the tool is not enterprise
   secret scanning and cannot guarantee absence of leaks.
+- Rule and baseline semantics: `docs/release-notes-v0.8.0.md` documents
+  `rule_id`, `rule_version`, structured evidence, baseline audit
+  classifications, allowlists, and changed-files mode.
 - Self-dogfooding: `docs/self-dogfooding.md` records
   `sec-writeups-public` as bootstrapped with tracked repo-sentinel config and
   baseline files, and `LogLens` as CI-integrated for repository hygiene and
@@ -48,10 +55,15 @@ The CLI emits deterministic JSON or concise text summaries that surface:
 
 - suspicious filename findings
 - high-entropy findings with token bodies redacted by default
+- structured secret-adjacent findings with `rule_id`, `rule_version`,
+  `evidence`, and `remediation_hint`
 - missing-standard-file findings
 - baseline-suppressed versus unsuppressed results
 
-The baseline path is intentionally reviewable: a previously accepted finding can be checked back in and applied locally without changing scanner behavior.
+The baseline path is intentionally reviewable: a previously accepted finding
+can be checked back in and applied locally without changing scanner behavior.
+`repo-sentinel baseline audit` classifies drift as active, stale, ambiguous, or
+unmatched.
 
 ## What this proves
 
@@ -63,7 +75,7 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 ## Safety / boundaries
 
 - local repository scanning only
-- redaction is on by default for high-entropy findings
+- redaction is on by default for token-like findings
 - no credential exfiltration or remote reporting behavior
 - not positioned as a full SAST or enterprise secret-management platform
 
@@ -75,14 +87,14 @@ The baseline path is intentionally reviewable: a previously accepted finding can
 - does not identify every credential format
 - no semantic code analysis
 - no remote service, dashboard, or centralized triage workflow
-- entropy findings still require human review
+- entropy and structured heuristic findings still require human review
 
 ## Current release posture
 
 `repo-sentinel-lite` is already published to production PyPI. The current
-release posture is adoption hardening: Python 3.11+ support, stable package
-metadata, baseline behavior, redaction defaults, pre-commit integration, and
-CI validation across Python 3.11 through 3.14.
+source posture is v0.8 preparation: rule semantics, baseline audit,
+allowlists, changed-files mode, and module boundaries are being hardened
+without claiming enterprise secret-scanning coverage.
 
 The v0.7 line theme is:
 
@@ -90,6 +102,10 @@ Adoption release for portfolio-level repository hygiene enforcement.
 
 v0.7.1 is a polish release that keeps the PyPI README, GitHub README, release
 notes, examples, and self-dogfooding evidence aligned.
+
+The v0.8 source theme is:
+
+Rule and Baseline Semantics Release.
 
 ## Next milestone
 

@@ -32,6 +32,20 @@ For the same repository tree, configuration, baseline, and package version, the
 JSON report uses sorted findings and deterministic fingerprints. It is suitable
 for CI artifacts, reviewer attachments, and local diffing.
 
+In v0.8 and newer, each entry in `findings` includes:
+
+- `rule_id`: stable rule identifier such as `secret.high_entropy`
+- `rule_version`: rule semantics version for audit context
+- `severity`: `warning` or `error`
+- `fingerprint`: deterministic finding identity for baselines
+- `evidence`: structured, redaction-safe evidence for the finding
+- `remediation_hint`: concise review guidance
+
+Treat `rule_id`, `rule_version`, `severity`, `fingerprint`, and redacted
+`evidence` as the CI artifact contract. The compatibility sections
+`high_entropy_findings`, `missing_files`, and `suspicious_files` remain present
+for older consumers, but new integrations should prefer `findings`.
+
 A clean JSON report means no unsuppressed findings matched the configured
 heuristics. It does not prove that the repository contains no leaked secret or
 credential.
@@ -61,3 +75,13 @@ repo-sentinel scan \
 
 Do not treat a baseline as proof that findings are safe. A baseline suppresses
 reviewed findings so new drift remains visible.
+
+For drift review without rewriting a candidate file, use:
+
+```bash
+repo-sentinel baseline audit --format json --baseline .reposentinel-baseline.json .
+```
+
+The JSON audit groups findings into `active`, `stale`, `ambiguous`, and
+`unmatched`. It is suitable as a CI artifact when teams want reviewer evidence
+without automatically changing a committed baseline.

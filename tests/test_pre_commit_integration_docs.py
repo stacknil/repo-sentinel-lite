@@ -30,6 +30,8 @@ def test_pre_commit_integration_guide_covers_adoption_workflow() -> None:
         "rev: v0.7.1",
         "id: repo-sentinel-error",
         "id: repo-sentinel-warning",
+        "id: repo-sentinel-error-changed",
+        "repo-sentinel scan --changed-files . src/app.py docs/example.md",
         "pre-commit run repo-sentinel-error --hook-stage manual --all-files",
         "repo-sentinel scan --fail-on-severity error examples/dirty-repo",
         "repo-sentinel scan --write-baseline .reposentinel-baseline.json .",
@@ -39,5 +41,8 @@ def test_pre_commit_integration_guide_covers_adoption_workflow() -> None:
         assert command in guide
 
     assert "pass_filenames: false" in guide
+    assert "pass_filenames: true" in (ROOT / ".pre-commit-hooks.yaml").read_text(
+        encoding="utf-8"
+    )
     assert "baseline-review.md" in guide
     assert "docs/pre-commit-integration.md" in workflow

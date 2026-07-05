@@ -2,21 +2,47 @@
   "findings": [
     {
       "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 2,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
       "file": "config/example.env",
       "fingerprint": "6fb4a3d8baec70b3b24e3c098b204958c4eecfe663f334991ddabc49acf01847",
       "kind": "high_entropy",
       "line": 2,
+      "path": "config/example.env",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
       "token": "<redacted:sha256:3eb1bd439947>"
     },
     {
+      "evidence": {
+        "path": "LICENSE",
+        "required": true
+      },
       "fingerprint": "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e",
       "kind": "missing_file",
-      "path": "LICENSE"
+      "path": "LICENSE",
+      "remediation_hint": "Add the required file or adjust required_files in .reposentinel.toml for this repository.",
+      "rule_id": "repo.required_file_missing",
+      "rule_version": "1",
+      "severity": "warning"
     },
     {
+      "evidence": {
+        "path": "secrets/service.pem",
+        "pattern_family": "suspicious filename"
+      },
       "fingerprint": "6390a898ab48ec364cf6d20670499f7564a066c675154438c51655dea013dd7e",
       "kind": "suspicious_file",
-      "path": "secrets/service.pem"
+      "path": "secrets/service.pem",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
     }
   ],
   "generated_at": "2026-06-14T00:00:00Z",

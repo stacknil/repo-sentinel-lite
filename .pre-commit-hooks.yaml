@@ -15,3 +15,21 @@
   language: python
   pass_filenames: false
   stages: [pre-commit, pre-push, manual]
+
+- id: repo-sentinel-error-changed
+  name: repo-sentinel (error, changed files)
+  description: Fail when unsuppressed error findings remain in changed files.
+  entry: repo-sentinel
+  args: [scan, --changed-files, --fail-on-severity, error, .]
+  language: python
+  pass_filenames: true
+  stages: [pre-commit, manual]
+
+- id: repo-sentinel-warning-changed
+  name: repo-sentinel (warning, changed files)
+  description: Fail when warning or error findings remain in changed files.
+  entry: repo-sentinel
+  args: [scan, --changed-files, --fail-on-severity, warning, .]
+  language: python
+  pass_filenames: true
+  stages: [pre-commit, manual]

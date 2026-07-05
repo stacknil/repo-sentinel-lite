@@ -48,202 +48,11 @@ def _expected_sample_repo_text(*, reveal_secrets: bool = False) -> str:
 
 
 def _expected_sample_repo_sarif() -> dict[str, object]:
-    return {
-        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "results": [
-                    {
-                        "level": "error",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {
-                                        "uri": "notes/tokens.txt"
-                                    },
-                                    "region": {"startLine": 2},
-                                }
-                            }
-                        ],
-                        "message": {
-                            "text": (
-                                "High-entropy string detected: "
-                                "notes/tokens.txt:2"
-                            )
-                        },
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "9d32570586e37a6005c9ce58edd091a56032dc3f38ae5c907033c17661286129"
-                            )
-                        },
-                        "ruleId": "high_entropy",
-                    },
-                    {
-                        "level": "warning",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {"uri": ".gitignore"}
-                                }
-                            }
-                        ],
-                        "message": {"text": "Required file missing: .gitignore"},
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "2268e39db2ef51eba92c7640986350d5843da88ece2739c97ec7ab0b3e267a93"
-                            )
-                        },
-                        "ruleId": "missing_file",
-                    },
-                    {
-                        "level": "warning",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {"uri": "LICENSE"}
-                                }
-                            }
-                        ],
-                        "message": {"text": "Required file missing: LICENSE"},
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e"
-                            )
-                        },
-                        "ruleId": "missing_file",
-                    },
-                    {
-                        "level": "error",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {"uri": ".env"}
-                                }
-                            }
-                        ],
-                        "message": {"text": "Suspicious file detected: .env"},
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "a6eba87257d11d0a165ac41d54729cdcd8300281102b58776ee8b453eea0138c"
-                            )
-                        },
-                        "ruleId": "suspicious_file",
-                    },
-                    {
-                        "level": "error",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {
-                                        "uri": "certs/service.pem"
-                                    }
-                                }
-                            }
-                        ],
-                        "message": {
-                            "text": "Suspicious file detected: certs/service.pem"
-                        },
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "16217ed2c8122262f2faf42e00ab7ae26888cf35b22de840faefe6cae9c03834"
-                            )
-                        },
-                        "ruleId": "suspicious_file",
-                    },
-                    {
-                        "level": "error",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {"uri": "keys/id_rsa"}
-                                }
-                            }
-                        ],
-                        "message": {
-                            "text": "Suspicious file detected: keys/id_rsa"
-                        },
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "d14152416103f5602ac35e2bb4c0c7006bc25c646512361c1b5d056ccb4c8025"
-                            )
-                        },
-                        "ruleId": "suspicious_file",
-                    },
-                    {
-                        "level": "error",
-                        "locations": [
-                            {
-                                "physicalLocation": {
-                                    "artifactLocation": {
-                                        "uri": "vault/archive.kdbx"
-                                    }
-                                }
-                            }
-                        ],
-                        "message": {
-                            "text": "Suspicious file detected: vault/archive.kdbx"
-                        },
-                        "partialFingerprints": {
-                            "repoSentinelFingerprint": (
-                                "e34a85d2ae98c2282bf0966deb449470edba292d20c0ca3e2f8c53972fe5fc59"
-                            )
-                        },
-                        "ruleId": "suspicious_file",
-                    },
-                ],
-                "tool": {
-                    "driver": {
-                        "name": "repo-sentinel-lite",
-                        "rules": [
-                            {
-                                "defaultConfiguration": {"level": "error"},
-                                "fullDescription": {
-                                    "text": (
-                                        "Detects high-entropy strings that may "
-                                        "indicate secrets."
-                                    )
-                                },
-                                "id": "high_entropy",
-                                "name": "High Entropy",
-                                "shortDescription": {
-                                    "text": "High-entropy string detected."
-                                },
-                            },
-                            {
-                                "defaultConfiguration": {"level": "warning"},
-                                "fullDescription": {
-                                    "text": (
-                                        "Detects required repository files that "
-                                        "are missing."
-                                    )
-                                },
-                                "id": "missing_file",
-                                "name": "Missing File",
-                                "shortDescription": {
-                                    "text": "Required file missing."
-                                },
-                            },
-                            {
-                                "defaultConfiguration": {"level": "error"},
-                                "fullDescription": {
-                                    "text": (
-                                        "Detects suspicious filenames commonly "
-                                        "associated with secrets."
-                                    )
-                                },
-                                "id": "suspicious_file",
-                                "name": "Suspicious File",
-                                "shortDescription": {
-                                    "text": "Suspicious file detected."
-                                },
-                            },
-                        ],
-                    }
-                },
-            }
-        ],
-        "version": "2.1.0",
-    }
+    return json.loads(
+        (FIXTURES_DIR / "sample_repo_report.sarif.json").read_text(
+            encoding="utf-8"
+        )
+    )
 
 
 def test_help_command_succeeds(capsys: pytest.CaptureFixture[str]) -> None:
@@ -515,60 +324,7 @@ def test_scan_command_writes_baseline(
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
 
     assert baseline["schema_version"] == 1
-    assert baseline["findings"] == [
-        {
-            "entropy": 4.0,
-            "file": "notes/tokens.txt",
-            "fingerprint": (
-                "9d32570586e37a6005c9ce58edd091a56032dc3f38ae5c907033c17661286129"
-            ),
-            "kind": "high_entropy",
-            "line": 2,
-            "token": REDACTED_SAMPLE_TOKEN,
-        },
-        {
-            "fingerprint": (
-                "2268e39db2ef51eba92c7640986350d5843da88ece2739c97ec7ab0b3e267a93"
-            ),
-            "kind": "missing_file",
-            "path": ".gitignore",
-        },
-        {
-            "fingerprint": (
-                "efcd9b83e1c3bef283a2e4f5dbd6a6dfa4fc691f54653643445778f35d2f501e"
-            ),
-            "kind": "missing_file",
-            "path": "LICENSE",
-        },
-        {
-            "fingerprint": (
-                "a6eba87257d11d0a165ac41d54729cdcd8300281102b58776ee8b453eea0138c"
-            ),
-            "kind": "suspicious_file",
-            "path": ".env",
-        },
-        {
-            "fingerprint": (
-                "16217ed2c8122262f2faf42e00ab7ae26888cf35b22de840faefe6cae9c03834"
-            ),
-            "kind": "suspicious_file",
-            "path": "certs/service.pem",
-        },
-        {
-            "fingerprint": (
-                "d14152416103f5602ac35e2bb4c0c7006bc25c646512361c1b5d056ccb4c8025"
-            ),
-            "kind": "suspicious_file",
-            "path": "keys/id_rsa",
-        },
-        {
-            "fingerprint": (
-                "e34a85d2ae98c2282bf0966deb449470edba292d20c0ca3e2f8c53972fe5fc59"
-            ),
-            "kind": "suspicious_file",
-            "path": "vault/archive.kdbx",
-        },
-    ]
+    assert baseline["findings"] == json.loads(expected_output)["findings"]
     assert isinstance(baseline["generated_at"], str)
     assert baseline["generated_at"].endswith("Z")
     assert datetime.fromisoformat(
@@ -979,9 +735,13 @@ def test_scan_command_emits_empty_sarif_results_after_baseline_suppression(
     assert sarif["version"] == "2.1.0"
     assert sarif["runs"][0]["results"] == []
     assert [rule["id"] for rule in sarif["runs"][0]["tool"]["driver"]["rules"]] == [
-        "high_entropy",
-        "missing_file",
-        "suspicious_file",
+        "repo.required_file_missing",
+        "repo.suspicious_filename",
+        "secret.assignment_context",
+        "secret.aws_access_key_id",
+        "secret.github_token",
+        "secret.high_entropy",
+        "secret.pem_private_key",
     ]
 
 

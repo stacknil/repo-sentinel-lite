@@ -10,6 +10,10 @@ It exposes two hooks:
 - `repo-sentinel-error`: fails when unsuppressed `error` findings remain
 - `repo-sentinel-warning`: fails when unsuppressed `warning` or `error`
   findings remain
+- `repo-sentinel-error-changed`: opt-in changed-files variant for `error`
+  findings
+- `repo-sentinel-warning-changed`: opt-in changed-files variant for
+  `warning` or `error` findings
 
 ## Install
 
@@ -74,6 +78,27 @@ file lists from pre-commit:
 ignore_globs = ["fixtures/**", "generated/**"]
 ```
 
+For advanced local hooks that manage their own file list, v0.8 adds explicit
+changed-files hooks:
+
+```yaml
+repos:
+  - repo: https://github.com/stacknil/repo-sentinel-lite
+    rev: v0.7.1
+    hooks:
+      - id: repo-sentinel-error-changed
+```
+
+The same mode is available directly:
+
+```bash
+repo-sentinel scan --changed-files . src/app.py docs/example.md
+```
+
+This mode scans only the listed files for file and token rules while still
+checking repository-level required files. The built-in provider keeps the
+root-scan behavior so existing consumers do not lose coverage by upgrading.
+
 ## Trigger a Failure
 
 Use the checked dirty example when you want to see the failure contract without
@@ -132,6 +157,12 @@ repo-sentinel scan \
   --baseline .reposentinel-baseline.json \
   --update-baseline .reposentinel-baseline.next.json \
   .
+```
+
+When you need classification rather than a rewritten candidate, run:
+
+```bash
+repo-sentinel baseline audit --baseline .reposentinel-baseline.json .
 ```
 
 For the full baseline review model, see
