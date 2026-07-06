@@ -53,6 +53,42 @@ def test_assignment_context_does_not_duplicate_high_entropy_tokens(
     assert "secret.assignment_context" not in rule_ids
 
 
+def test_assignment_context_skips_source_expression_values(tmp_path: Path) -> None:
+    _write_required_files(tmp_path)
+    (tmp_path / "scanner.py").write_text(
+        "\n".join(
+            [
+                'token = value.get("token")',
+                'token = match.group("value").rstrip(",)")',
+                'message = f"token={render_token(token, reveal_secrets)}"',
+                'token=str(finding["token"]),',
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    report = scan_repository(tmp_path)
+
+    assert report["findings"] == []
+
+
+def test_assignment_context_keeps_literal_config_values(tmp_path: Path) -> None:
+    _write_required_files(tmp_path)
+    (tmp_path / "settings.toml").write_text(
+        'api_key = "shorttok9"\npassword: plainpass9\n', encoding="utf-8"
+    )
+
+    report = scan_repository(tmp_path)
+
+    assert [
+        (finding["rule_id"], finding["token"]) for finding in report["findings"]
+    ] == [
+        ("secret.assignment_context", "shorttok9"),
+        ("secret.assignment_context", "plainpass9"),
+    ]
+
+
 def test_allowlist_supports_path_rule_and_token_hash(tmp_path: Path) -> None:
     _write_required_files(tmp_path)
     token = "shorttok9"

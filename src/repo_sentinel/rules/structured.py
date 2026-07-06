@@ -21,8 +21,10 @@ GITHUB_TOKEN_PATTERN = re.compile(
 AWS_ACCESS_KEY_ID_PATTERN = re.compile(r"\b(?:AKIA|ASIA)[A-Z0-9]{16}\b")
 ASSIGNMENT_PATTERN = re.compile(
     r"(?i)\b(?P<name>token|secret|api[_-]?key|password|passwd|credential|"
-    r"access[_-]?key)\b\s*[:=]\s*[\"']?(?P<value>[^\"'\s#;]{8,})"
+    r"access[_-]?key)\b\s*[:=]\s*(?P<quote>[\"']?)(?P<value>[^\"'\s#;]{8,})"
 )
+SOURCE_EXPRESSION_DEREFERENCE_PATTERN = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\.")
+SOURCE_EXPRESSION_MARKERS = frozenset("()[]{}")
 PLACEHOLDER_VALUES = {
     "changeme",
     "dummy",
@@ -133,6 +135,8 @@ def _assignment_context_findings(
     findings: list[dict[str, object]] = []
     for match in ASSIGNMENT_PATTERN.finditer(line):
         token = match.group("value").rstrip(",)")
+        if not match.group("quote") and _looks_like_source_expression(token):
+            continue
         if _is_placeholder_value(token):
             continue
         if _is_high_entropy_token(token):
@@ -184,6 +188,12 @@ def _is_placeholder_value(value: str) -> bool:
         or normalized.startswith("placeholder_")
         or normalized.startswith("sample_")
         or normalized.startswith("test_")
+    )
+
+
+def _looks_like_source_expression(value: str) -> bool:
+    return any(marker in value for marker in SOURCE_EXPRESSION_MARKERS) or bool(
+        SOURCE_EXPRESSION_DEREFERENCE_PATTERN.search(value)
     )
 
 
