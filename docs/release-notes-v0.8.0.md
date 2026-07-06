@@ -29,6 +29,9 @@ Theme: Rule and Baseline Semantics Release.
   Changed-files mode is explicit opt-in.
 - Assignment-context findings intentionally do not duplicate high-entropy
   findings for the same token value.
+- Assignment-context findings skip obvious source-code expression values such
+  as function calls and object dereferences while still flagging literal
+  configuration-style assignments.
 
 ## Boundary
 
