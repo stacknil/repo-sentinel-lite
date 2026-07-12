@@ -22,7 +22,9 @@ without requiring a reviewer to infer the CLI contract from tests alone.
 Run a JSON scan:
 
 ```bash
-repo-sentinel scan --format json examples/dirty-repo
+repo-sentinel scan --format json \
+  --output examples/outputs/dirty-scan.json \
+  examples/dirty-repo
 ```
 
 Expected output:
@@ -46,7 +48,9 @@ examples/outputs/dirty-baseline.json
 Fail when unsuppressed findings remain:
 
 ```bash
-repo-sentinel scan --format text --fail-on-findings examples/dirty-repo
+repo-sentinel scan --format text --fail-on-findings \
+  --output examples/outputs/dirty-fail-on-findings.txt \
+  examples/dirty-repo
 ```
 
 Expected output and exit behavior:
