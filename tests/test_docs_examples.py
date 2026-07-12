@@ -99,6 +99,22 @@ def test_examples_readme_summarizes_expected_outputs() -> None:
         assert required in readme
 
 
+def test_examples_readme_pins_dirty_output_reproduction_commands() -> None:
+    readme = (ROOT / "examples" / "README.md").read_text(encoding="utf-8")
+
+    for command_fragment in (
+        "repo-sentinel scan --format json \\",
+        "--output examples/outputs/dirty-scan.json \\",
+        "repo-sentinel scan --format text --fail-on-findings \\",
+        "--output examples/outputs/dirty-fail-on-findings.txt \\",
+        "examples/dirty-repo",
+        "exit code: 1",
+    ):
+        assert command_fragment in readme
+
+    assert "repo_sentinel scan" not in readme
+
+
 def _example_output(filename: str) -> str:
     return (ROOT / "examples" / "outputs" / filename).read_text(
         encoding="utf-8"
