@@ -1003,6 +1003,22 @@ def test_scan_command_returns_success_for_clean_scan_with_flag_enabled(
     }
 
 
+def test_scan_coverage_is_informational_for_exit_status(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("dist/\n", encoding="utf-8")
+    (tmp_path / "asset.bin").write_bytes(b"\x00\x01\x02\x03")
+
+    exit_code = main(["scan", "--fail-on-findings", str(tmp_path)])
+    report = json.loads(capsys.readouterr().out)
+
+    assert exit_code == 0
+    assert report["findings"] == []
+    assert report["coverage"]["skipped_by_reason"] == {"binary": 1}
+
+
 def test_scan_command_rejects_invalid_baseline_file(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
