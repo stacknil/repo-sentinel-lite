@@ -5,6 +5,7 @@ import json
 from collections.abc import Sequence
 
 from .config import normalize_path, sort_key, token_sha256
+from .coverage import extract_coverage, normalize_coverage
 from .redaction import redact_report, render_token
 from .rules.entropy import EntropyFinding
 from .rules.registry import RULE_DEFINITIONS, SEVERITY_RANKS, rule_for_kind
@@ -13,6 +14,8 @@ from .rules.registry import RULE_DEFINITIONS, SEVERITY_RANKS, rule_for_kind
 def build_report(
     findings: Sequence[dict[str, object]],
     missing_files: dict[str, bool],
+    *,
+    coverage: object | None = None,
 ) -> dict[str, object]:
     normalized_findings = [_report_finding(finding) for finding in findings]
     normalized_findings.sort(key=baseline_finding_sort_key)
@@ -28,7 +31,7 @@ def build_report(
         if finding["kind"] == "suspicious_file"
     ]
 
-    return {
+    report: dict[str, object] = {
         "findings": normalized_findings,
         "high_entropy_findings": entropy_findings,
         "missing_files": {
@@ -39,6 +42,9 @@ def build_report(
         },
         "suspicious_files": sorted(suspicious_files, key=sort_key),
     }
+    if coverage is not None:
+        report["coverage"] = normalize_coverage(coverage)
+    return report
 
 
 def normalize_report(report: object) -> dict[str, object]:
@@ -64,7 +70,8 @@ def normalize_report(report: object) -> dict[str, object]:
             for path in suspicious_files
         )
 
-    return build_report(findings, missing_files)
+    coverage = extract_coverage(report)
+    return build_report(findings, missing_files, coverage=coverage)
 
 
 def format_report(
@@ -83,6 +90,7 @@ def format_text_report(
         normalized
     )
     findings = extract_findings(normalized)
+    coverage = extract_coverage(normalized)
     missing_paths = [path for path, is_missing in missing_files.items() if is_missing]
     structured_findings = [
         finding
@@ -132,7 +140,21 @@ def format_text_report(
         )
 
     if not lines:
-        return "No findings.\n"
+        lines.append("No findings.")
+
+    if coverage is not None and int(coverage["files_skipped"]) > 0:
+        lines.append("")
+        lines.append(
+            "Coverage: inspected "
+            f"{coverage['files_inspected']} of {coverage['files_considered']} files; "
+            f"skipped {coverage['files_skipped']}."
+        )
+        skipped_files = coverage["skipped_files"]
+        if not isinstance(skipped_files, list):
+            raise ValueError("coverage skipped_files must be a list")
+        lines.extend(
+            f"- [{skip['reason']}] {skip['path']}" for skip in skipped_files
+        )
 
     return "\n".join(lines) + "\n"
 
