@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 
+from .coverage import extract_coverage
 from .report import extract_findings, normalize_report
 from .rules.registry import RULE_DEFINITIONS, rule_for_kind
 
@@ -11,25 +12,27 @@ def format_sarif_report(
 ) -> str:
     normalized = normalize_report(report)
     findings = extract_findings(normalized)
+    coverage = extract_coverage(normalized)
 
+    run: dict[str, object] = {
+        "results": [_sarif_result(finding) for finding in findings],
+        "tool": {
+            "driver": {
+                "name": "repo-sentinel-lite",
+                "rules": [
+                    _sarif_rule(rule.kind)
+                    for rule in sorted(
+                        RULE_DEFINITIONS, key=lambda item: item.rule_id
+                    )
+                ],
+            }
+        },
+    }
+    if coverage is not None:
+        run["properties"] = {"repoSentinelCoverage": coverage}
     sarif = {
         "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
-        "runs": [
-            {
-                "results": [_sarif_result(finding) for finding in findings],
-                "tool": {
-                    "driver": {
-                        "name": "repo-sentinel-lite",
-                        "rules": [
-                            _sarif_rule(rule.kind)
-                            for rule in sorted(
-                                RULE_DEFINITIONS, key=lambda item: item.rule_id
-                            )
-                        ],
-                    }
-                },
-            }
-        ],
+        "runs": [run],
         "version": "2.1.0",
     }
     return json.dumps(sarif, indent=2, sort_keys=True) + "\n"

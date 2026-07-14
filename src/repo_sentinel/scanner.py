@@ -30,6 +30,7 @@ from .config import (
     load_scan_config,
     relative_path,
 )
+from .coverage import build_coverage
 from .redaction import (
     REDACTED_TOKEN_PREFIX,
     redact_report,
@@ -57,7 +58,7 @@ from .rules import (
     suspicious_file_finding,
 )
 from .sarif import format_sarif_report
-from .walk import iter_files, read_text_file
+from .walk import TextReadSkipped, inspect_text_file, iter_files, read_text_file
 
 os = _walk.os
 
@@ -68,6 +69,8 @@ def scan_repository(
     resolved_root = root.resolve()
     config = load_scan_config(resolved_root)
     findings: list[dict[str, object]] = []
+    files_inspected = 0
+    skipped_files: list[dict[str, object]] = []
 
     for path in iter_files(
         resolved_root,
@@ -83,9 +86,12 @@ def scan_repository(
                 config.allowlist,
             )
 
-        text = read_text_file(path, config.max_text_file_size)
-        if text is None:
+        read_result = inspect_text_file(path, config.max_text_file_size)
+        if isinstance(read_result, TextReadSkipped):
+            skipped_files.append({"path": relative, "reason": read_result.reason})
             continue
+        files_inspected += 1
+        text = read_result.text
 
         for finding in detect_high_entropy_findings(
             relative, text, threshold=config.entropy_threshold
@@ -101,7 +107,8 @@ def scan_repository(
             continue
         findings.append(finding)
 
-    return build_report(findings, missing_files)
+    coverage = build_coverage(files_inspected, skipped_files) if skipped_files else None
+    return build_report(findings, missing_files, coverage=coverage)
 
 
 def _append_if_not_allowlisted(
@@ -149,6 +156,7 @@ __all__ = [
     "load_baseline",
     "normalize_report",
     "prune_baseline",
+    "read_text_file",
     "redact_report",
     "scan_repository",
     "update_baseline",

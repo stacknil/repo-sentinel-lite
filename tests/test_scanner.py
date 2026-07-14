@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,9 @@ from repo_sentinel.scanner import (
     _normalize_report,
     apply_baseline,
     calculate_shannon_entropy,
+    format_report,
+    format_sarif_report,
+    format_text_report,
     is_suspicious_filename,
     prune_baseline,
     scan_repository,
@@ -56,6 +60,13 @@ def test_scan_repository_skips_binary_files(tmp_path: Path) -> None:
     report = scan_repository(tmp_path)
 
     assert report["high_entropy_findings"] == []
+    assert report["coverage"] == {
+        "files_considered": 2,
+        "files_inspected": 1,
+        "files_skipped": 1,
+        "skipped_by_reason": {"binary": 1},
+        "skipped_files": [{"path": "binary.txt", "reason": "binary"}],
+    }
 
 
 def test_scan_repository_skips_oversized_text_files_by_default(
@@ -71,6 +82,9 @@ def test_scan_repository_skips_oversized_text_files_by_default(
     report = scan_repository(tmp_path)
 
     assert report["high_entropy_findings"] == []
+    assert report["coverage"]["skipped_files"] == [
+        {"path": "large.txt", "reason": "oversize"}
+    ]
 
 
 def test_scan_repository_allows_custom_max_text_file_size(
@@ -356,6 +370,20 @@ def test_scan_repository_skips_unreadable_files(
     report = scan_repository(tmp_path)
 
     assert report["high_entropy_findings"] == []
+    assert report["coverage"]["skipped_files"] == [
+        {"path": "blocked.txt", "reason": "unreadable"}
+    ]
+
+
+def test_scan_repository_reports_unsupported_encoding(tmp_path: Path) -> None:
+    (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (tmp_path / "unknown.txt").write_bytes(b"\x81")
+
+    report = scan_repository(tmp_path)
+
+    assert report["coverage"]["skipped_files"] == [
+        {"path": "unknown.txt", "reason": "unsupported_encoding"}
+    ]
 
 
 def test_scan_repository_does_not_read_symlinked_file_contents(
@@ -378,6 +406,119 @@ def test_scan_repository_does_not_read_symlinked_file_contents(
 
     assert report["suspicious_files"] == [".env"]
     assert report["high_entropy_findings"] == []
+    assert report["coverage"]["skipped_files"] == [
+        {"path": ".env", "reason": "symlink_policy"}
+    ]
+
+
+def test_scan_coverage_is_preserved_across_baseline_suppression() -> None:
+    coverage = {
+        "files_considered": 2,
+        "files_inspected": 1,
+        "files_skipped": 1,
+        "skipped_by_reason": {"binary": 1},
+        "skipped_files": [{"path": "asset.bin", "reason": "binary"}],
+    }
+    report = {
+        "coverage": coverage,
+        "high_entropy_findings": [],
+        "missing_files": {"README.md": False},
+        "suspicious_files": ["secrets/private.key"],
+    }
+    baseline = {
+        "schema_version": 1,
+        "generated_at": "2026-07-14T00:00:00Z",
+        "findings": [{"kind": "suspicious_file", "path": "secrets/private.key"}],
+    }
+
+    filtered = apply_baseline(report, baseline)
+
+    assert filtered["suspicious_files"] == []
+    assert filtered["coverage"] == coverage
+
+
+def test_scan_coverage_projects_to_text_and_sarif() -> None:
+    report = {
+        "coverage": {
+            "files_considered": 3,
+            "files_inspected": 1,
+            "files_skipped": 2,
+            "skipped_by_reason": {"binary": 1, "oversize": 1},
+            "skipped_files": [
+                {"path": "asset.bin", "reason": "binary"},
+                {"path": "large.txt", "reason": "oversize"},
+            ],
+        },
+        "high_entropy_findings": [],
+        "missing_files": {"README.md": False},
+        "suspicious_files": [],
+    }
+
+    text = format_text_report(report)
+    sarif = json.loads(format_sarif_report(report))
+
+    assert text == (
+        "No findings.\n\n"
+        "Coverage: inspected 1 of 3 files; skipped 2.\n"
+        "- [binary] asset.bin\n"
+        "- [oversize] large.txt\n"
+    )
+    assert sarif["runs"][0]["properties"]["repoSentinelCoverage"] == report[
+        "coverage"
+    ]
+
+
+def test_scan_coverage_json_is_deterministic_and_repo_relative() -> None:
+    report = {
+        "coverage": {
+            "files_considered": 4,
+            "files_inspected": 2,
+            "files_skipped": 2,
+            "skipped_by_reason": {"oversize": 1, "binary": 1},
+            "skipped_files": [
+                {"path": "z\\asset.bin", "reason": "binary"},
+                {"path": "a/large.txt", "reason": "oversize"},
+            ],
+        },
+        "high_entropy_findings": [],
+        "missing_files": {"README.md": False},
+        "suspicious_files": [],
+    }
+    reversed_report = {
+        **report,
+        "coverage": {
+            **report["coverage"],
+            "skipped_files": list(reversed(report["coverage"]["skipped_files"])),
+        },
+    }
+
+    rendered = format_report(report)
+
+    assert rendered == format_report(reversed_report)
+    assert json.loads(rendered)["coverage"]["skipped_files"] == [
+        {"path": "a/large.txt", "reason": "oversize"},
+        {"path": "z/asset.bin", "reason": "binary"},
+    ]
+
+
+def test_scan_coverage_rejects_private_absolute_paths() -> None:
+    report = {
+        "coverage": {
+            "files_considered": 1,
+            "files_inspected": 0,
+            "files_skipped": 1,
+            "skipped_by_reason": {"binary": 1},
+            "skipped_files": [
+                {"path": "C:\\Users\\user\\private.bin", "reason": "binary"}
+            ],
+        },
+        "high_entropy_findings": [],
+        "missing_files": {},
+        "suspicious_files": [],
+    }
+
+    with pytest.raises(ValueError, match="repository-relative"):
+        format_report(report)
 
 
 def test_apply_baseline_compares_findings_deterministically() -> None:

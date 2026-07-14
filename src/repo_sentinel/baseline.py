@@ -54,7 +54,11 @@ def apply_baseline(
             continue
         remaining_findings.append(finding)
 
-    return build_report(remaining_findings, missing_files)
+    return build_report(
+        remaining_findings,
+        missing_files,
+        coverage=normalized_report.get("coverage"),
+    )
 
 
 def prune_baseline(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import codecs
 import os
 from collections.abc import Iterable, Iterator, Sequence
+from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
 from .config import (
@@ -12,6 +13,7 @@ from .config import (
     relative_path,
     sort_key,
 )
+from .coverage import CoverageSkipReason
 
 TEXT_SAMPLE_SIZE = 8192
 _TEXT_CONTROL_BYTES = {7, 8, 9, 10, 12, 13, 27}
@@ -22,6 +24,20 @@ _BYTE_ORDER_MARKS = (
     codecs.BOM_UTF32_BE,
     codecs.BOM_UTF32_LE,
 )
+_TEXT_ENCODINGS = ("utf-8", "utf-8-sig", "utf-16", "cp1252")
+
+
+@dataclass(frozen=True, slots=True)
+class TextReadSuccess:
+    text: str
+
+
+@dataclass(frozen=True, slots=True)
+class TextReadSkipped:
+    reason: CoverageSkipReason
+
+
+TextReadResult = TextReadSuccess | TextReadSkipped
 
 
 def iter_files(
@@ -60,27 +76,36 @@ def iter_files(
 
 
 def read_text_file(path: Path, max_text_file_size: int) -> str | None:
-    try:
-        if path.is_symlink() or path.stat().st_size > max_text_file_size:
-            return None
-    except OSError:
+    result = inspect_text_file(path, max_text_file_size)
+    if isinstance(result, TextReadSkipped):
         return None
+    return result.text
+
+
+def inspect_text_file(path: Path, max_text_file_size: int) -> TextReadResult:
+    try:
+        if path.is_symlink():
+            return TextReadSkipped("symlink_policy")
+        if path.stat().st_size > max_text_file_size:
+            return TextReadSkipped("oversize")
+    except OSError:
+        return TextReadSkipped("unreadable")
 
     try:
         data = path.read_bytes()
     except OSError:
-        return None
+        return TextReadSkipped("unreadable")
 
     if not _is_probably_text(data[:TEXT_SAMPLE_SIZE]):
-        return None
+        return TextReadSkipped("binary")
 
-    for encoding in ("utf-8", "utf-8-sig", "utf-16", "cp1252", "latin-1"):
+    for encoding in _TEXT_ENCODINGS:
         try:
-            return data.decode(encoding)
+            return TextReadSuccess(data.decode(encoding))
         except UnicodeDecodeError:
             continue
 
-    return None
+    return TextReadSkipped("unsupported_encoding")
 
 
 def _iter_changed_files(
