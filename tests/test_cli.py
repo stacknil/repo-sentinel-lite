@@ -499,6 +499,66 @@ def test_scan_command_updates_baseline_from_legacy_input(
     assert all("fingerprint" in finding for finding in refreshed["findings"])
 
 
+def test_scan_command_update_candidate_includes_new_current_findings(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    reviewed_token = "0123456789abcdef0123456789abcdef"
+    new_token = "abcdefghijklmnopqrstuvwxyzABCDEF"
+    repo_root = tmp_path / "repo"
+    repo_root.mkdir()
+    (repo_root / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    (repo_root / "LICENSE").write_text("Fixture license\n", encoding="utf-8")
+    (repo_root / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
+    (repo_root / "reviewed.txt").write_text(
+        f"token={reviewed_token}\n", encoding="utf-8"
+    )
+    (repo_root / "new.txt").write_text(f"token={new_token}\n", encoding="utf-8")
+    baseline_path = tmp_path / "baseline.json"
+    updated_path = tmp_path / "updated-baseline.json"
+    baseline_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "generated_at": "2026-03-23T00:00:00Z",
+                "findings": [
+                    {
+                        "entropy": 4.0,
+                        "file": "reviewed.txt",
+                        "kind": "high_entropy",
+                        "line": 1,
+                        "token": reviewed_token,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(
+        [
+            "scan",
+            "--baseline",
+            str(baseline_path),
+            "--update-baseline",
+            str(updated_path),
+            str(repo_root),
+        ]
+    )
+    captured = capsys.readouterr()
+    displayed = json.loads(captured.out)
+    updated_text = updated_path.read_text(encoding="utf-8")
+    refreshed = json.loads(updated_text)
+
+    assert exit_code == 0
+    assert [finding["path"] for finding in displayed["findings"]] == ["new.txt"]
+    assert [finding["path"] for finding in refreshed["findings"]] == [
+        "new.txt",
+        "reviewed.txt",
+    ]
+    assert reviewed_token not in updated_text
+    assert new_token not in updated_text
+
+
 def test_scan_command_rejects_prune_baseline_without_baseline(
     capsys: pytest.CaptureFixture[str], tmp_path: Path
 ) -> None:
