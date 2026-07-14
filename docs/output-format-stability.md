@@ -82,6 +82,12 @@ reasons are:
 - `unsupported_encoding`: bytes pass the text heuristic but cannot be decoded
   as UTF-8, UTF-16, or CP1252
 
+When traversal prunes one or more directory symlinks, `coverage` additionally
+contains `directories_skipped` and a sorted `skipped_directories` list. These
+fields are omitted when no directory link is skipped, preserving the existing
+file-only shape. `files_considered`, `files_skipped`, `skipped_files`, and
+`skipped_by_reason` continue to describe files only.
+
 The previous permissive Latin-1 fallback is intentionally not used because it
 would make `unsupported_encoding` unreachable and could classify arbitrary
 bytes as text.
@@ -99,6 +105,9 @@ gain `coverage` (plus the text or SARIF projection). Strict-schema consumers
 should allow this optional field. Its absence does not claim complete
 repository coverage: ignored paths and a `--changed-files` selection remain
 outside the considered-file count.
+
+See the [symlink policy](symlink-policy.md) for the full-scan and changed-file
+containment matrix.
 
 A clean JSON report means no unsuppressed findings matched the configured
 heuristics. It does not prove that the repository contains no leaked secret or

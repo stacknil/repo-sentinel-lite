@@ -58,7 +58,13 @@ from .rules import (
     suspicious_file_finding,
 )
 from .sarif import format_sarif_report
-from .walk import TextReadSkipped, inspect_text_file, iter_files, read_text_file
+from .walk import (
+    TextReadSkipped,
+    WalkSkipped,
+    inspect_text_file,
+    iter_files,
+    read_text_file,
+)
 
 os = _walk.os
 
@@ -71,11 +77,34 @@ def scan_repository(
     findings: list[dict[str, object]] = []
     files_inspected = 0
     skipped_files: list[dict[str, object]] = []
+    skipped_directories: list[dict[str, object]] = []
+    recorded_directories: set[str] = set()
+
+    def record_walk_skip(skipped: WalkSkipped) -> None:
+        relative = relative_path(skipped.path, resolved_root)
+        diagnostic = {
+            "path": relative,
+            "reason": skipped.reason,
+        }
+        if skipped.entry_type == "directory":
+            if relative in recorded_directories:
+                return
+            recorded_directories.add(relative)
+            skipped_directories.append(diagnostic)
+            if is_suspicious_path(relative, config.suspicious_filenames):
+                _append_if_not_allowlisted(
+                    findings,
+                    suspicious_file_finding(relative),
+                    config.allowlist,
+                )
+        else:
+            skipped_files.append(diagnostic)
 
     for path in iter_files(
         resolved_root,
         config.ignore_globs,
         changed_paths=changed_paths,
+        on_skip=record_walk_skip,
     ):
         relative = relative_path(path, resolved_root)
 
@@ -107,7 +136,15 @@ def scan_repository(
             continue
         findings.append(finding)
 
-    coverage = build_coverage(files_inspected, skipped_files) if skipped_files else None
+    coverage = (
+        build_coverage(
+            files_inspected,
+            skipped_files,
+            skipped_directories=(skipped_directories or None),
+        )
+        if skipped_files or skipped_directories
+        else None
+    )
     return build_report(findings, missing_files, coverage=coverage)
 
 
