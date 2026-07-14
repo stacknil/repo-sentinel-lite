@@ -102,6 +102,23 @@ rules = ["repo.suspicious_filename"]
 token_hashes = ["sha256:3eb1bd439947"]
 ```
 
+## Validate repository policy
+
+Only a missing `.reposentinel.toml` selects defaults. An existing config fails
+closed when it cannot be read, contains invalid TOML or values, or uses an
+unknown key; the CLI writes no report and returns exit code `2`.
+
+Supported top-level keys are `ignore_globs`, `entropy_threshold`,
+`max_text_file_size`, `suspicious_filenames`, `required_files`, and
+`allowlist`. Inside `[allowlist]`, use only `paths`, `rules`, and
+`token_hashes`.
+
+The legacy top-level aliases `suspicious_patterns`, `allowlist_paths`,
+`allowlist_rules`, and `allowlist_token_hashes` remain accepted for existing
+consumers. Prefer the canonical names and nested `[allowlist]` form for new
+configuration. Unknown keys that earlier versions ignored now require a typo
+fix or migration before the scan can run.
+
 ## Adjust large-file scanning
 
 Text files larger than `max_text_file_size` bytes are skipped for high-entropy
