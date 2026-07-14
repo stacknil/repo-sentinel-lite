@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import codecs
 import os
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import Literal, TypeAlias
 
 from .config import (
     matches_directory_ignore,
@@ -39,28 +40,53 @@ class TextReadSkipped:
 
 TextReadResult = TextReadSuccess | TextReadSkipped
 
+WalkEntryType: TypeAlias = Literal["file", "directory"]
+
+
+@dataclass(frozen=True, slots=True)
+class WalkSkipped:
+    path: Path
+    reason: CoverageSkipReason
+    entry_type: WalkEntryType
+
+
+WalkSkipCallback: TypeAlias = Callable[[WalkSkipped], None]
+
 
 def iter_files(
     root: Path,
     ignore_globs: Sequence[str],
     *,
     changed_paths: Iterable[str] | None = None,
+    on_skip: WalkSkipCallback | None = None,
 ) -> Iterator[Path]:
     if changed_paths is not None:
-        yield from _iter_changed_files(root, ignore_globs, changed_paths)
+        yield from _iter_changed_files(
+            root,
+            ignore_globs,
+            changed_paths,
+            on_skip=on_skip,
+        )
         return
 
     for current_root, dirnames, filenames in os.walk(root, topdown=True):
         current_dir = Path(current_root)
-        dirnames[:] = [
-            name
-            for name in dirnames
-            if name.casefold() != ".git"
-            and not matches_directory_ignore(
-                relative_path(current_dir / name, root), ignore_globs
-            )
-        ]
-        dirnames.sort(key=sort_key)
+        retained_directories: list[str] = []
+        for name in sorted(dirnames, key=sort_key):
+            path = current_dir / name
+            relative = relative_path(path, root)
+            if name.casefold() == ".git" or matches_directory_ignore(
+                relative, ignore_globs
+            ):
+                continue
+            if path.is_symlink():
+                _notify_skip(
+                    on_skip,
+                    WalkSkipped(path, "symlink_policy", "directory"),
+                )
+                continue
+            retained_directories.append(name)
+        dirnames[:] = retained_directories
 
         filenames = [
             name
@@ -112,6 +138,8 @@ def _iter_changed_files(
     root: Path,
     ignore_globs: Sequence[str],
     changed_paths: Iterable[str],
+    *,
+    on_skip: WalkSkipCallback | None = None,
 ) -> Iterator[Path]:
     seen: set[str] = set()
     normalized_paths = sorted(
@@ -123,17 +151,25 @@ def _iter_changed_files(
         key=sort_key,
     )
     for normalized_path in normalized_paths:
-        candidate = _candidate_changed_file(root, normalized_path)
+        if normalized_path in seen or matches_globs(normalized_path, ignore_globs):
+            continue
+        seen.add(normalized_path)
+        candidate = _candidate_changed_file(
+            root,
+            normalized_path,
+            on_skip=on_skip,
+        )
         if candidate is None:
             continue
-        relative = relative_path(candidate, root)
-        if relative in seen or matches_globs(relative, ignore_globs):
-            continue
-        seen.add(relative)
         yield candidate
 
 
-def _candidate_changed_file(root: Path, normalized_path: str) -> Path | None:
+def _candidate_changed_file(
+    root: Path,
+    normalized_path: str,
+    *,
+    on_skip: WalkSkipCallback | None = None,
+) -> Path | None:
     parts = PurePosixPath(normalized_path).parts
     if (
         not parts
@@ -143,6 +179,20 @@ def _candidate_changed_file(root: Path, normalized_path: str) -> Path | None:
         return None
 
     candidate = root.joinpath(*parts)
+    symlink_component = _first_symlink_component(root, parts)
+    if symlink_component is not None:
+        if symlink_component == candidate:
+            return candidate
+        _notify_skip(
+            on_skip,
+            WalkSkipped(symlink_component, "symlink_policy", "directory"),
+        )
+        _notify_skip(
+            on_skip,
+            WalkSkipped(candidate, "symlink_policy", "file"),
+        )
+        return None
+
     try:
         resolved_candidate = candidate.resolve(strict=False)
         resolved_candidate.relative_to(root)
@@ -152,6 +202,23 @@ def _candidate_changed_file(root: Path, normalized_path: str) -> Path | None:
     if not candidate.is_file():
         return None
     return candidate
+
+
+def _first_symlink_component(root: Path, parts: Sequence[str]) -> Path | None:
+    candidate = root
+    for part in parts:
+        candidate /= part
+        if candidate.is_symlink():
+            return candidate
+    return None
+
+
+def _notify_skip(
+    callback: WalkSkipCallback | None,
+    skipped: WalkSkipped,
+) -> None:
+    if callback is not None:
+        callback(skipped)
 
 
 def _is_probably_text(sample: bytes) -> bool:

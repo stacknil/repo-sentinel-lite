@@ -142,18 +142,45 @@ def format_text_report(
     if not lines:
         lines.append("No findings.")
 
-    if coverage is not None and int(coverage["files_skipped"]) > 0:
+    directories_skipped = (
+        int(coverage.get("directories_skipped", 0))
+        if coverage is not None
+        else 0
+    )
+    if coverage is not None and (
+        int(coverage["files_skipped"]) > 0 or directories_skipped > 0
+    ):
         lines.append("")
-        lines.append(
-            "Coverage: inspected "
-            f"{coverage['files_inspected']} of {coverage['files_considered']} files; "
-            f"skipped {coverage['files_skipped']}."
-        )
+        if directories_skipped:
+            directory_label = (
+                "directory" if directories_skipped == 1 else "directories"
+            )
+            lines.append(
+                "Coverage: inspected "
+                f"{coverage['files_inspected']} of "
+                f"{coverage['files_considered']} files; skipped "
+                f"{coverage['files_skipped']} files and "
+                f"{directories_skipped} {directory_label}."
+            )
+        else:
+            lines.append(
+                "Coverage: inspected "
+                f"{coverage['files_inspected']} of "
+                f"{coverage['files_considered']} files; "
+                f"skipped {coverage['files_skipped']}."
+            )
         skipped_files = coverage["skipped_files"]
         if not isinstance(skipped_files, list):
             raise ValueError("coverage skipped_files must be a list")
         lines.extend(
             f"- [{skip['reason']}] {skip['path']}" for skip in skipped_files
+        )
+        skipped_directories = coverage.get("skipped_directories", [])
+        if not isinstance(skipped_directories, list):
+            raise ValueError("coverage skipped_directories must be a list")
+        lines.extend(
+            f"- [{skip['reason']}] {skip['path']} (directory)"
+            for skip in skipped_directories
         )
 
     return "\n".join(lines) + "\n"
