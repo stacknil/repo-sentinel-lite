@@ -177,8 +177,10 @@ Common generated and dependency directories such as `.venv`, `venv`,
 `htmlcov`, and `__pycache__` are ignored by default.
 Text files larger than `max_text_file_size` bytes are skipped for high-entropy
 content scanning by default.
-Symbolic-link filenames still participate in hygiene checks, but their target
-contents are not followed or scanned.
+The default [symlink policy](docs/symlink-policy.md) never follows file or
+directory symlinks. Link names still participate in hygiene checks, while
+target names and contents do not. Directory links and loops are pruned before
+descent; changed-file paths that cross a directory link are skipped.
 
 When content inspection is skipped, JSON adds a deterministic `coverage`
 object with repository-relative paths, totals, and one of `binary`, `oversize`,
@@ -187,7 +189,9 @@ file. Text output appends the same list, and SARIF stores it in the run-level
 `properties.repoSentinelCoverage` property. Coverage diagnostics are
 informational: they do not change exit status or become suppressible findings.
 The field is omitted when no discovered file is skipped, preserving existing
-clean-scan output.
+clean-scan output. When directory symlinks are skipped, coverage also adds
+`directories_skipped` and `skipped_directories` without changing the file
+counters.
 
 For pre-commit or local review paths that already know the changed files, scan
 only those files while keeping repository-level required-file checks:
