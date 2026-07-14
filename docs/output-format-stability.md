@@ -46,6 +46,60 @@ Treat `rule_id`, `rule_version`, `severity`, `fingerprint`, and redacted
 `high_entropy_findings`, `missing_files`, and `suspicious_files` remain present
 for older consumers, but new integrations should prefer `findings`.
 
+### Scan coverage diagnostics
+
+When at least one discovered file cannot be content-inspected, the JSON report
+adds a `coverage` object:
+
+```json
+{
+  "coverage": {
+    "files_considered": 3,
+    "files_inspected": 1,
+    "files_skipped": 2,
+    "skipped_by_reason": {
+      "binary": 1,
+      "oversize": 1
+    },
+    "skipped_files": [
+      {"path": "assets/example.bin", "reason": "binary"},
+      {"path": "generated/large.txt", "reason": "oversize"}
+    ]
+  }
+}
+```
+
+Paths are normalized repository-relative paths. Entries are sorted, reason
+counts use a fixed low-cardinality vocabulary, and diagnostics contain no file
+content, raw token, operating-system error, or repository-root path. Supported
+reasons are:
+
+- `binary`: the sampled bytes fail the text heuristic
+- `oversize`: file size exceeds `max_text_file_size`
+- `symlink_policy`: the filename is inspected for hygiene, but target content
+  is not followed
+- `unreadable`: metadata or bytes could not be read
+- `unsupported_encoding`: bytes pass the text heuristic but cannot be decoded
+  as UTF-8, UTF-16, or CP1252
+
+The previous permissive Latin-1 fallback is intentionally not used because it
+would make `unsupported_encoding` unreachable and could classify arbitrary
+bytes as text.
+
+Coverage diagnostics are informational. `--fail-on-findings` and
+`--fail-on-severity` continue to evaluate security findings only; baselines
+neither suppress nor remove coverage. Text output appends a coverage section,
+and SARIF places the same object in
+`runs[0].properties.repoSentinelCoverage` instead of emitting false-positive
+security results.
+
+Compatibility impact is additive and conditional: reports with no skipped
+discovered files retain their prior shape, while reports with skipped files
+gain `coverage` (plus the text or SARIF projection). Strict-schema consumers
+should allow this optional field. Its absence does not claim complete
+repository coverage: ignored paths and a `--changed-files` selection remain
+outside the considered-file count.
+
 A clean JSON report means no unsuppressed findings matched the configured
 heuristics. It does not prove that the repository contains no leaked secret or
 credential.

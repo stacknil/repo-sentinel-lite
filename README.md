@@ -180,6 +180,15 @@ content scanning by default.
 Symbolic-link filenames still participate in hygiene checks, but their target
 contents are not followed or scanned.
 
+When content inspection is skipped, JSON adds a deterministic `coverage`
+object with repository-relative paths, totals, and one of `binary`, `oversize`,
+`symlink_policy`, `unreadable`, or `unsupported_encoding` for each skipped
+file. Text output appends the same list, and SARIF stores it in the run-level
+`properties.repoSentinelCoverage` property. Coverage diagnostics are
+informational: they do not change exit status or become suppressible findings.
+The field is omitted when no discovered file is skipped, preserving existing
+clean-scan output.
+
 For pre-commit or local review paths that already know the changed files, scan
 only those files while keeping repository-level required-file checks:
 
