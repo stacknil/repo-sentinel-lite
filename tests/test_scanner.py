@@ -163,6 +163,27 @@ def test_scan_repository_uses_custom_entropy_threshold(tmp_path: Path) -> None:
     assert report["high_entropy_findings"] == []
 
 
+def test_scan_repository_deduplicates_same_finding_identity_per_line(
+    tmp_path: Path,
+) -> None:
+    token = "0123456789abcdef0123456789abcdef"
+    (tmp_path / "README.md").write_text(
+        f"{token} {token}\n{token}\n", encoding="utf-8"
+    )
+    (tmp_path / "LICENSE").write_text("MIT\n", encoding="utf-8")
+    (tmp_path / ".gitignore").write_text("dist/\n", encoding="utf-8")
+
+    report = scan_repository(tmp_path, changed_paths=["README.md"])
+
+    assert [
+        (finding["line"], finding["token"])
+        for finding in report["high_entropy_findings"]
+    ] == [(1, token), (2, token)]
+    assert len(report["findings"]) == len(
+        {finding["fingerprint"] for finding in report["findings"]}
+    )
+
+
 def test_scan_repository_respects_ignored_paths(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# Fixture\n", encoding="utf-8")
     (tmp_path / ".env").write_text("SECRET=value\n", encoding="utf-8")
