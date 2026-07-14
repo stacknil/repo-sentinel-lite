@@ -15,6 +15,7 @@ does not identify every credential format.
 In scope:
 
 - CLI execution through `repo-sentinel scan`
+- package-level Python API calls through `repo_sentinel.scan_repository`
 - local repository tree traversal and text-file scanning
 - `.reposentinel.toml` configuration
 - `.reposentinel-baseline.json` suppression behavior
@@ -58,6 +59,7 @@ Open questions that would change risk ranking:
 ### Primary Components
 
 - CLI entry point: `src/repo_sentinel/cli.py`
+- secure-default Python facade: `src/repo_sentinel/api.py`
 - Scanner facade: `src/repo_sentinel/scanner.py`
 - Rule definitions: `src/repo_sentinel/rules/`
 - Baseline matching and audit: `src/repo_sentinel/baseline.py`
@@ -79,6 +81,9 @@ Open questions that would change risk ranking:
 - Pre-commit or CI -> CLI: hooks invoke `repo-sentinel scan
   --fail-on-severity ... .` from `.pre-commit-hooks.yaml`. The channel is local
   process execution inside the consumer repository or CI job.
+- Python caller -> package facade: `repo_sentinel.scan_repository` returns a
+  deep-redacted report by default. Explicit `reveal_secrets=True` crosses into
+  the sensitive in-memory report contract.
 - CLI -> repository tree: scanner walks files, ignores configured/default
   paths, reads likely text files, and applies filename, entropy, and structured
   secret-adjacent heuristics.
@@ -97,9 +102,13 @@ flowchart LR
   DEV["Developer"] -->|runs CLI| CLI["CLI"]
   PC["pre-commit"] -->|runs hook| CLI
   CI["CI job"] -->|runs gate| CLI
-  CLI -->|reads| REPO["Repo tree"]
-  CLI -->|reads| CFG["Config baseline"]
+  PY["Python caller"] -->|safe by default| API["Public API facade"]
+  CLI --> ENGINE["Scanner engine"]
+  API --> ENGINE
+  ENGINE -->|reads| REPO["Repo tree"]
+  ENGINE -->|reads| CFG["Config baseline"]
   CLI -->|writes| OUT["Reports"]
+  API -->|returns redacted by default| RESULT["Python result"]
 ```
 
 ## Assets and Security Objectives
@@ -139,6 +148,7 @@ flowchart LR
 | Surface | How reached | Trust boundary | Notes | Evidence |
 | --- | --- | --- | --- | --- |
 | CLI arguments | `repo-sentinel scan ...` | Developer shell to CLI | Controls paths, baselines, output, and failure behavior | `src/repo_sentinel/cli.py` |
+| Python API | `repo_sentinel.scan_repository(...)` | Caller code to package facade | Redacted by default; explicit reveal returns sensitive token bodies | `src/repo_sentinel/api.py` |
 | Repository files | Scanner walks target path | Repo content to scanner | Filename, entropy, and structured heuristics are intentionally lightweight | `src/repo_sentinel/rules/` |
 | `.reposentinel.toml` | Loaded from target root | Repo config to scanner | Ignore globs, thresholds, and allowlists can reduce coverage | `src/repo_sentinel/config.py` |
 | `.reposentinel-baseline.json` | Auto-loaded from target root | Repo baseline to scanner | Matching findings are suppressed before failure decisions | `src/repo_sentinel/baseline.py` |
@@ -155,9 +165,11 @@ flowchart LR
    the baseline drift, and future runs suppress the finding.
 4. Maintainer uses `--reveal-secrets` while debugging, stores output in logs or
    artifacts, and exposes the token body outside local review.
-5. Consumer pins an old provider revision or disables the hook in CI, then
+5. Python caller opts into `reveal_secrets=True`, serializes the sensitive
+   report as routine telemetry, and exposes credential-like token bodies.
+6. Consumer pins an old provider revision or disables the hook in CI, then
    assumes pre-commit coverage still matches current documentation.
-6. Team scans only the current working tree after a secret was removed from
+7. Team scans only the current working tree after a secret was removed from
    head, misses the same secret in Git history, and treats the repository as
    remediated without rotation.
 
@@ -169,6 +181,7 @@ flowchart LR
 | TM-002 | Contributor changing baseline | Baseline changes are accepted without review | Suppress a real finding through `.reposentinel-baseline.json` | Gate passes while risky content remains | Baseline JSON, credentials | Baseline guide says baselines are reviewed suppressions | Baseline cannot prove safety | Require baseline diff review and explanations for added entries | Alert on baseline file changes in PRs | Medium | Medium | Medium |
 | TM-003 | Contributor changing config | Ignore globs, thresholds, or allowlists are broadened | Exclude sensitive paths from traversal or suppress rules before output | Scanner misses files or findings it would otherwise inspect | Config, repository content | Config is explicit in `.reposentinel.toml`; allowlist supports path, rule, token-hash, and scoped-comment exceptions | No policy engine for safe ignore or allowlist patterns | Treat config changes like security changes; prefer token-hash or scoped exceptions over broad rule suppressions | Review `.reposentinel.toml` diffs in CI/PRs; audit baseline drift | Medium | Medium | Medium |
 | TM-004 | Maintainer debugging locally | `--reveal-secrets` output is copied to logs or artifacts | Full high-entropy token body is exposed | Real credential leaks through diagnostics | Token bodies, reports | Redaction is default in CLI and baselines | Explicit reveal option can still expose secrets | Use `--reveal-secrets` only locally; never commit or upload revealed output | Search artifacts for raw token-like strings | Low | High | Medium |
+| TM-007 | Python integration author | Caller explicitly requests revealed results | Sensitive in-memory report is logged or persisted as ordinary telemetry | Credential-like token bodies leave the local investigation boundary | Token bodies, reports | Package-level API deep-redacts by default | Explicit reveal remains necessary for some investigations | Keep reveal opt-in; label the returned object sensitive; test the package-level default | Scan logs and artifacts for raw token-like strings | Low | High | Medium |
 | TM-005 | Consumer integration drift | Hook is not installed, old rev is pinned, or CI does not run it | Expected gate is absent or stale | Findings are not blocked before merge | CI/pre-commit gate, package hooks | Provider manifest and integration guide document hooks | Consumer repos control their own config | Pin release tags, run hook in CI, review hook updates | CI status checks for hook execution | Medium | Medium | Medium |
 | TM-006 | Incident response gap | Secret was committed and then removed from current tree | Current scan passes but history still contains the credential | Credential remains usable or discoverable in history | Credentials, Git history | Docs say redaction/history cleanup do not replace revocation | Tool scans checked-out tree, not all history | Rotate/revoke real secrets; use history scanning tools when needed | Enterprise scanners and audit logs | Medium | High | High |
 
@@ -188,6 +201,7 @@ flowchart LR
 
 | Path | Why it matters | Related Threat IDs |
 | --- | --- | --- |
+| `src/repo_sentinel/api.py` | Owns the secure-default boundary for programmatic callers | TM-004, TM-007 |
 | `src/repo_sentinel/rules/` | Contains rule semantics and heuristic detector boundaries | TM-001, TM-003 |
 | `src/repo_sentinel/config.py` | Applies ignore and allowlist policy | TM-003 |
 | `src/repo_sentinel/baseline.py` | Applies baseline suppression and audit classification | TM-002, TM-004 |

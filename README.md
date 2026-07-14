@@ -117,6 +117,33 @@ Reveal full high-entropy tokens only when you explicitly need to inspect them:
 repo-sentinel scan --reveal-secrets path/to/repo
 ```
 
+### Python API
+
+The package-level API returns a deep-redacted report by default:
+
+```python
+from pathlib import Path
+
+from repo_sentinel import scan_repository
+
+report = scan_repository(Path("path/to/repo"))
+```
+
+Pass `reveal_secrets=True` only for an intentional local investigation:
+
+```python
+sensitive_report = scan_repository(
+    Path("path/to/repo"),
+    reveal_secrets=True,
+)
+```
+
+The revealed result can contain credential-like token bodies. Do not log,
+upload, or persist it as an ordinary report. Existing low-level integrations
+that import `repo_sentinel.scanner.scan_repository` receive the sensitive
+internal report for compatibility; new integrations should use the package-level
+API above.
+
 Use a `.reposentinel.toml` config to ignore paths or adjust thresholds:
 
 ```toml
