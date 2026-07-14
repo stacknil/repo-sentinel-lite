@@ -141,6 +141,8 @@ Common generated and dependency directories such as `.venv`, `venv`,
 `htmlcov`, and `__pycache__` are ignored by default.
 Text files larger than `max_text_file_size` bytes are skipped for high-entropy
 content scanning by default.
+Symbolic-link filenames still participate in hygiene checks, but their target
+contents are not followed or scanned.
 
 For pre-commit or local review paths that already know the changed files, scan
 only those files while keeping repository-level required-file checks:

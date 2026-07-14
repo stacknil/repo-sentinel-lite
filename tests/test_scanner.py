@@ -358,6 +358,28 @@ def test_scan_repository_skips_unreadable_files(
     assert report["high_entropy_findings"] == []
 
 
+def test_scan_repository_does_not_read_symlinked_file_contents(
+    tmp_path: Path,
+) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    (repository / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    outside_file = tmp_path / "outside.txt"
+    outside_file.write_text(
+        "token=0123456789abcdef0123456789abcdef\n", encoding="utf-8"
+    )
+    linked_file = repository / ".env"
+    try:
+        linked_file.symlink_to(outside_file)
+    except (NotImplementedError, OSError) as error:
+        pytest.skip(f"file symlinks are unavailable: {error}")
+
+    report = scan_repository(repository)
+
+    assert report["suspicious_files"] == [".env"]
+    assert report["high_entropy_findings"] == []
+
+
 def test_apply_baseline_compares_findings_deterministically() -> None:
     report = {
         "high_entropy_findings": [
