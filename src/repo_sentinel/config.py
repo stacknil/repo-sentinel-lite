@@ -15,6 +15,26 @@ HIGH_ENTROPY_MIN_LENGTH = 20
 DEFAULT_MAX_TEXT_FILE_SIZE = 1_048_576
 CONFIG_FILENAME = ".reposentinel.toml"
 DEFAULT_BASELINE_FILENAME = ".reposentinel-baseline.json"
+_TOP_LEVEL_CONFIG_KEYS = frozenset(
+    {
+        "allowlist",
+        "entropy_threshold",
+        "ignore_globs",
+        "max_text_file_size",
+        "required_files",
+        "suspicious_filenames",
+    }
+)
+_LEGACY_CONFIG_ALIASES = {
+    "allowlist_paths": "allowlist.paths",
+    "allowlist_rules": "allowlist.rules",
+    "allowlist_token_hashes": "allowlist.token_hashes",
+    "suspicious_patterns": "suspicious_filenames",
+}
+_ALLOWED_TOP_LEVEL_CONFIG_KEYS = _TOP_LEVEL_CONFIG_KEYS | frozenset(
+    _LEGACY_CONFIG_ALIASES
+)
+_ALLOWLIST_CONFIG_KEYS = frozenset({"paths", "rules", "token_hashes"})
 DEFAULT_IGNORE_GLOBS = (
     DEFAULT_BASELINE_FILENAME,
     "%TEMP%",
@@ -62,31 +82,48 @@ class ScanConfig:
 
 def load_scan_config(root: Path) -> ScanConfig:
     config_path = root / CONFIG_FILENAME
-    if not config_path.is_file():
-        return ScanConfig()
-
     try:
         with config_path.open("rb") as config_file:
             data = tomllib.load(config_file)
-    except OSError:
+    except FileNotFoundError as exc:
+        if config_path.is_symlink():
+            raise ValueError(
+                f"{CONFIG_FILENAME}: could not read file: {_os_error_reason(exc)}"
+            ) from exc
         return ScanConfig()
+    except tomllib.TOMLDecodeError as exc:
+        raise ValueError(f"{CONFIG_FILENAME}: {exc}") from exc
+    except OSError as exc:
+        raise ValueError(
+            f"{CONFIG_FILENAME}: could not read file: {_os_error_reason(exc)}"
+        ) from exc
 
-    return ScanConfig(
-        ignore_globs=_merge_default_ignore_globs(
-            _get_string_list(data, "ignore_globs", ())
-        ),
-        entropy_threshold=_get_float(
-            data, "entropy_threshold", HIGH_ENTROPY_THRESHOLD
-        ),
-        max_text_file_size=_get_int(
-            data, "max_text_file_size", DEFAULT_MAX_TEXT_FILE_SIZE
-        ),
-        suspicious_filenames=_get_suspicious_filenames(
-            data, SUSPICIOUS_FILENAMES
-        ),
-        required_files=_get_string_list(data, "required_files", REQUIRED_FILES),
-        allowlist=_get_allowlist_config(data),
-    )
+    try:
+        _reject_unknown_keys(
+            data,
+            allowed=_ALLOWED_TOP_LEVEL_CONFIG_KEYS,
+            context="top-level",
+        )
+        return ScanConfig(
+            ignore_globs=_merge_default_ignore_globs(
+                _get_string_list(data, "ignore_globs", ())
+            ),
+            entropy_threshold=_get_float(
+                data, "entropy_threshold", HIGH_ENTROPY_THRESHOLD
+            ),
+            max_text_file_size=_get_int(
+                data, "max_text_file_size", DEFAULT_MAX_TEXT_FILE_SIZE
+            ),
+            suspicious_filenames=_get_suspicious_filenames(
+                data, SUSPICIOUS_FILENAMES
+            ),
+            required_files=_get_string_list(
+                data, "required_files", REQUIRED_FILES
+            ),
+            allowlist=_get_allowlist_config(data),
+        )
+    except ValueError as exc:
+        raise ValueError(f"{CONFIG_FILENAME}: {exc}") from exc
 
 
 def is_suspicious_filename(
@@ -254,6 +291,11 @@ def _get_allowlist_config(data: dict[str, object]) -> AllowlistConfig:
         allowlist_value = {}
     if not isinstance(allowlist_value, dict):
         raise ValueError("allowlist must be a table")
+    _reject_unknown_keys(
+        allowlist_value,
+        allowed=_ALLOWLIST_CONFIG_KEYS,
+        context="allowlist",
+    )
 
     paths = _get_string_list(
         allowlist_value, "paths", _get_string_list(data, "allowlist_paths", ())
@@ -299,3 +341,18 @@ def _token_hash_is_allowlisted(digest: str, allowed_hashes: Sequence[str]) -> bo
         folded_digest == allowed_hash or folded_digest.startswith(allowed_hash)
         for allowed_hash in allowed_hashes
     )
+
+
+def _reject_unknown_keys(
+    data: dict[str, object], *, allowed: frozenset[str], context: str
+) -> None:
+    unknown = sorted(set(data) - allowed, key=sort_key)
+    if not unknown:
+        return
+
+    label = "key" if len(unknown) == 1 else "keys"
+    raise ValueError(f"unknown {context} {label}: {', '.join(unknown)}")
+
+
+def _os_error_reason(exc: OSError) -> str:
+    return exc.strerror or type(exc).__name__

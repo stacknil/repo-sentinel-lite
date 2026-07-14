@@ -7,7 +7,6 @@ from pathlib import Path
 
 from . import __version__
 from .scanner import (
-    CONFIG_FILENAME,
     DEFAULT_BASELINE_FILENAME,
     apply_baseline,
     audit_baseline,
@@ -216,7 +215,7 @@ def _run_scan(args: argparse.Namespace) -> int:
             changed_paths=args.changed_paths if args.changed_files else None,
         )
     except ValueError as exc:
-        print(f"Invalid config {target / CONFIG_FILENAME}: {exc}", file=sys.stderr)
+        print(f"Invalid config: {exc}", file=sys.stderr)
         return 2
 
     if args.write_baseline is not None:
@@ -314,7 +313,7 @@ def _run_baseline_audit(args: argparse.Namespace) -> int:
     try:
         report = scan_repository(target)
     except ValueError as exc:
-        print(f"Invalid config {target / CONFIG_FILENAME}: {exc}", file=sys.stderr)
+        print(f"Invalid config: {exc}", file=sys.stderr)
         return 2
 
     rendered = format_baseline_audit(
