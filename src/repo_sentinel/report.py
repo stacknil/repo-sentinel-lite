@@ -17,7 +17,13 @@ def build_report(
     *,
     coverage: object | None = None,
 ) -> dict[str, object]:
-    normalized_findings = [_report_finding(finding) for finding in findings]
+    findings_by_fingerprint: dict[str, dict[str, object]] = {}
+    for finding in findings:
+        normalized = _report_finding(finding)
+        fingerprint = str(normalized["fingerprint"])
+        findings_by_fingerprint.setdefault(fingerprint, normalized)
+
+    normalized_findings = list(findings_by_fingerprint.values())
     normalized_findings.sort(key=baseline_finding_sort_key)
 
     entropy_findings = [
