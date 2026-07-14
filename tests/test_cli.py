@@ -1040,8 +1040,86 @@ def test_scan_command_rejects_invalid_config_file(
 
     assert exit_code == 2
     assert captured.out == ""
-    assert f"Invalid config {tmp_path / '.reposentinel.toml'}:" in captured.err
-    assert "entropy_threshold must be a float" in captured.err
+    assert captured.err == (
+        "Invalid config: .reposentinel.toml: "
+        "entropy_threshold must be a float\n"
+    )
+    assert str(tmp_path) not in captured.err
+
+
+def test_scan_command_rejects_unknown_config_key(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    (tmp_path / ".reposentinel.toml").write_text(
+        "entropy_threshhold = 4.2\n", encoding="utf-8"
+    )
+
+    exit_code = main(["scan", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert captured.err == (
+        "Invalid config: .reposentinel.toml: "
+        "unknown top-level key: entropy_threshhold\n"
+    )
+    assert str(tmp_path) not in captured.err
+
+
+def test_scan_command_rejects_config_read_failure(
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    config_path = tmp_path / ".reposentinel.toml"
+    config_path.write_text("", encoding="utf-8")
+    original_open = Path.open
+
+    def deny_config_read(path: Path, *args: object, **kwargs: object):
+        if path == config_path:
+            raise PermissionError(13, "permission denied", str(path))
+        return original_open(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "open", deny_config_read)
+
+    exit_code = main(["scan", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert captured.err == (
+        "Invalid config: .reposentinel.toml: "
+        "could not read file: permission denied\n"
+    )
+    assert str(tmp_path) not in captured.err
+
+
+def test_baseline_audit_rejects_unknown_allowlist_key(
+    capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    (tmp_path / ".reposentinel.toml").write_text(
+        '[allowlist]\npathz = ["fixtures/**"]\n', encoding="utf-8"
+    )
+    (tmp_path / ".reposentinel-baseline.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "generated_at": "2026-03-23T00:00:00Z",
+                "findings": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    exit_code = main(["baseline", "audit", str(tmp_path)])
+    captured = capsys.readouterr()
+
+    assert exit_code == 2
+    assert captured.out == ""
+    assert captured.err == (
+        "Invalid config: .reposentinel.toml: unknown allowlist key: pathz\n"
+    )
+    assert str(tmp_path) not in captured.err
 
 
 def test_scan_command_rejects_unwritable_output_path(

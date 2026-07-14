@@ -159,6 +159,15 @@ token_hashes = ["sha256:3eb1bd439947"]
 
 Use `rule_id` values from JSON findings when writing rule-scoped allowlists.
 
+Configuration loading fails closed. Only an absent `.reposentinel.toml` uses
+defaults; unreadable files, invalid TOML or values, and unknown top-level or
+`[allowlist]` keys return CLI exit code `2`. Diagnostics name the repository-
+relative config file without printing the scanned root's absolute path.
+
+The legacy aliases `suspicious_patterns`, `allowlist_paths`, `allowlist_rules`,
+and `allowlist_token_hashes` remain accepted for compatibility. New configs
+should use `suspicious_filenames` and the nested `[allowlist]` keys shown above.
+
 Child-glob ignores such as `fixtures/*`, `fixtures/**`, and `fixtures/**/*`
 prune the matching directory during traversal.
 
