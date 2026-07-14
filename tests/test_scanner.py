@@ -648,7 +648,7 @@ def test_update_baseline_without_input_returns_current_canonical_findings() -> N
     assert refreshed == _baseline_from_report(report)
 
 
-def test_update_baseline_with_legacy_input_remains_path_stable() -> None:
+def test_update_baseline_with_legacy_input_rebuilds_current_state() -> None:
     report = {
         "high_entropy_findings": [
             {
@@ -676,7 +676,6 @@ def test_update_baseline_with_legacy_input_remains_path_stable() -> None:
                 "token": "0123456789abcdef0123456789abcdef",
             },
             {"kind": "missing_file", "path": "docs\\guide.md"},
-            {"kind": "suspicious_file", "path": "secrets\\private.key"},
             {"kind": "suspicious_file", "path": "stale\\private.key"},
         ],
     }
@@ -684,6 +683,25 @@ def test_update_baseline_with_legacy_input_remains_path_stable() -> None:
     refreshed = update_baseline(report, baseline)
 
     assert refreshed["findings"] == _baseline_from_report(report)["findings"]
+
+
+def test_update_baseline_replaces_changed_fingerprint_with_current_finding() -> None:
+    report = {
+        "high_entropy_findings": [],
+        "missing_files": {"README.md": False},
+        "suspicious_files": ["secrets/private.key"],
+    }
+    current = _baseline_from_report(report)
+    current_finding = current["findings"][0]
+    baseline = {
+        "schema_version": 1,
+        "generated_at": "2026-03-23T00:00:00Z",
+        "findings": [{**current_finding, "fingerprint": "0" * 64}],
+    }
+
+    refreshed = update_baseline(report, baseline)
+
+    assert refreshed["findings"] == current["findings"]
 
 
 def test_scan_repository_fingerprints_are_deterministic_across_runs(

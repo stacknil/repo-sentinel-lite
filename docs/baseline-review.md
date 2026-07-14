@@ -105,6 +105,11 @@ repo-sentinel scan \
   .
 ```
 
+`--update-baseline` always writes the complete current findings state. New
+current findings are added, stale findings are removed, and a changed
+fingerprint is replaced by the current canonical finding. The input baseline
+still controls scan-output suppression, but it does not filter the candidate.
+
 4. Diff the old and new files. Review each added, removed, or moved finding.
    Added entries need an explanation. Removed entries are usually good news, but
    still confirm they disappeared because the underlying issue was fixed or the
@@ -119,6 +124,10 @@ repo-sentinel scan \
   --prune-baseline .reposentinel-baseline.pruned.json \
   .
 ```
+
+Unlike update, prune only retains current findings that match an existing
+baseline entry. Use it when the output must remain a subset of previously
+reviewed suppressions.
 
 6. Audit the committed baseline when you need classification instead of a
    rewritten candidate file:

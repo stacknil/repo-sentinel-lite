@@ -61,6 +61,11 @@ repo-sentinel scan \
   .
 ```
 
+The update candidate contains the complete current findings set even when an
+input baseline suppresses reviewed findings from the displayed scan. Use
+`--prune-baseline` instead when the candidate should contain only still-active
+entries from the existing baseline.
+
 Audit the committed baseline without writing a replacement file:
 
 ```bash

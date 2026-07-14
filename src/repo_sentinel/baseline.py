@@ -82,9 +82,12 @@ def prune_baseline(
 def update_baseline(
     report: dict[str, object], baseline: dict[str, object] | None = None
 ) -> dict[str, object]:
-    if baseline is None:
-        return baseline_from_report(report)
-    return prune_baseline(report, baseline)
+    """Build a complete current-state candidate for baseline review.
+
+    ``baseline`` remains accepted for API compatibility. Use ``prune_baseline``
+    when the desired operation is to retain only active existing suppressions.
+    """
+    return baseline_from_report(report)
 
 
 def audit_baseline(
