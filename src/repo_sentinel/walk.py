@@ -61,7 +61,7 @@ def iter_files(
 
 def read_text_file(path: Path, max_text_file_size: int) -> str | None:
     try:
-        if path.stat().st_size > max_text_file_size:
+        if path.is_symlink() or path.stat().st_size > max_text_file_size:
             return None
     except OSError:
         return None
