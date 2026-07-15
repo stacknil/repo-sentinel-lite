@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import tomllib
 from datetime import datetime
 from pathlib import Path
 
@@ -79,6 +80,16 @@ def test_version_option_outputs_package_version(
 
     assert exc_info.value.code == 0
     assert __version__ in captured.out
+
+
+def test_main_development_metadata_matches_runtime_version() -> None:
+    project = tomllib.loads(
+        (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(
+            encoding="utf-8"
+        )
+    )["project"]
+
+    assert project["version"] == __version__ == "0.8.0.dev0"
 
 
 def test_scan_command_emits_stable_json(
