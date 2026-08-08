@@ -82,14 +82,14 @@ def test_version_option_outputs_package_version(
     assert __version__ in captured.out
 
 
-def test_main_development_metadata_matches_runtime_version() -> None:
+def test_main_metadata_matches_runtime_version() -> None:
     project = tomllib.loads(
         (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(
             encoding="utf-8"
         )
     )["project"]
 
-    assert project["version"] == __version__ == "0.8.0.dev0"
+    assert project["version"] == __version__ == "0.8.0"
 
 
 def test_scan_command_emits_stable_json(
