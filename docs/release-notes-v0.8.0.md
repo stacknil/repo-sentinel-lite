@@ -17,6 +17,11 @@ Theme: Rule and Baseline Semantics Release.
   and scoped inline comments.
 - Adds `scan --changed-files` for integrations that already know the changed
   file list.
+- Rejects fingerprint collisions instead of silently dropping a distinct
+  finding during report or baseline normalization.
+- Adds the initial remote pull-request gate: changed-file errors block,
+  changed-file warnings and skipped coverage entries report, and baseline
+  drift is emitted by a separate non-blocking audit job.
 - Updates package metadata to describe the project as repository hygiene and
   lightweight secret-adjacent scanning, not a broad secret-scanning guarantee.
 

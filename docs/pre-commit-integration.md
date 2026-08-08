@@ -41,7 +41,7 @@ Add `.pre-commit-config.yaml` to the consumer repository:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.7.1
+    rev: v0.8.0
     hooks:
       - id: repo-sentinel-error
 ```
@@ -52,7 +52,7 @@ standard files as well as suspicious files and high-entropy findings:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.7.1
+    rev: v0.8.0
     hooks:
       - id: repo-sentinel-warning
 ```
@@ -84,7 +84,7 @@ changed-files hooks:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.7.1
+    rev: v0.8.0
     hooks:
       - id: repo-sentinel-error-changed
 ```
@@ -98,6 +98,12 @@ repo-sentinel scan --changed-files . src/app.py docs/example.md
 This mode scans only the listed files for file and token rules while still
 checking repository-level required files. The built-in provider keeps the
 root-scan behavior so existing consumers do not lose coverage by upgrading.
+
+For a remote pull-request gate, use changed-files mode as the initial control
+plane. Block only changed-file error findings; report changed-file warnings
+and skipped coverage entries without blocking. Run `repo-sentinel baseline
+audit` as a separate non-blocking job so historical active suppressions remain
+reviewable without becoming ordinary pull-request noise.
 
 ## Trigger a Failure
 

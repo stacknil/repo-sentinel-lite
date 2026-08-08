@@ -21,6 +21,9 @@ def test_v08_release_notes_capture_rule_and_baseline_semantics() -> None:
         "unmatched",
         "allowlist",
         "scan --changed-files",
+        "fingerprint collisions",
+        "changed-file errors block",
+        "non-blocking audit job",
         "does not replace enterprise secret scanning",
     ):
         assert required in notes

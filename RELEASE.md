@@ -57,6 +57,15 @@ Stable production releases require the production PyPI Trusted Publisher
 configuration to match the workflow, repository, and `pypi` environment before
 the release is published.
 
+### v0.8 release gates
+
+Keep `main` frozen while release work is prepared on a review branch. Before
+publishing v0.8, run the full test and build preflight, an external clean-clone
+reproduction, and the consumer compatibility check against the
+`sec-writeups-public` checkout. The remote pull-request gate scans changed
+files first; changed-file errors block, warnings and coverage skips report,
+and baseline classification remains a separate non-blocking audit.
+
 `--verify-tag` keeps release creation from implicitly creating the tag on the
 server. That removes ambiguity about what commit the release actually points to.
 The release workflow also validates that the pushed tag matches the package

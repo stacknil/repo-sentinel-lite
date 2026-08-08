@@ -1,0 +1,108 @@
+name: Repo Sentinel Gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  changed-file-gate:
+    name: Changed-file error gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+      - name: Scan changed files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          mapfile -d '' changed_files < <(
+            git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$HEAD_SHA"
+          )
+          printf 'Changed files: %s\n' "${#changed_files[@]}"
+          if ((${#changed_files[@]} == 0)); then
+            echo "No changed files; the changed-file gate has nothing to scan."
+            exit 0
+          fi
+
+          set +e
+          python -m repo_sentinel scan \
+            --changed-files \
+            --fail-on-severity error \
+            --format text \
+            --output repo-sentinel-changed.txt \
+            . \
+            -- \
+            "${changed_files[@]}"
+          status=$?
+          set -e
+
+          if [[ -f repo-sentinel-changed.txt ]]; then
+            cat repo-sentinel-changed.txt
+          fi
+          if ((status != 0)); then
+            echo "Changed-file error findings block this pull request."
+            exit "$status"
+          fi
+          echo "Changed-file error gate passed; warnings and coverage skips are report-only."
+
+      - name: Upload changed-file report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-sentinel-changed-file-report
+          path: repo-sentinel-changed.txt
+          if-no-files-found: ignore
+          retention-days: 14
+
+  baseline-audit:
+    name: Baseline audit (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install .
+
+      - name: Audit baseline drift
+        shell: bash
+        run: |
+          if [[ ! -f .reposentinel-baseline.json ]]; then
+            echo "No .reposentinel-baseline.json; baseline audit is not configured." \
+              | tee repo-sentinel-baseline-audit.txt
+            exit 0
+          fi
+          python -m repo_sentinel baseline audit --format text . \
+            | tee repo-sentinel-baseline-audit.txt
+
+      - name: Upload baseline audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-sentinel-baseline-audit
+          path: repo-sentinel-baseline-audit.txt
+          if-no-files-found: ignore
+          retention-days: 14

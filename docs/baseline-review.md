@@ -147,6 +147,30 @@ The audit output groups entries as:
 Treat `ambiguous` and `unmatched` entries as review prompts. Do not silently
 refresh them without checking why the fingerprint or rule evidence changed.
 
+## CI Gate Policy
+
+The initial remote pull-request gate scans only changed files. It applies the
+repository baseline when one exists and uses this exit policy:
+
+- an error finding in a changed file blocks the pull request
+- a warning finding in a changed file is reported but does not block
+- skipped coverage entries are reported but do not change the exit status
+- baseline `active`, `stale`, `ambiguous`, and `unmatched` classifications are
+  emitted by a separate non-blocking audit job
+
+This keeps historical active suppressions out of the normal changed-file gate.
+They remain reviewable in the audit artifact rather than becoming daily pull
+request noise.
+
+Manual classification is still required before changing a committed baseline:
+
+1. Confirm each active entry is an intentionally reviewed example or repository
+   condition.
+2. Investigate every stale, ambiguous, and unmatched entry against the source
+   diff and current rule evidence.
+3. Keep the audit result as review evidence; do not make the audit job blocking
+   merely to force historical suppressions to zero.
+
 ## Allowlists and Scoped Exceptions
 
 Use a baseline for reviewed findings that should remain visible as committed
