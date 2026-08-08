@@ -15,6 +15,7 @@ from .report import (
     extract_findings,
     finding_matches_baseline,
     normalize_report,
+    validate_fingerprint_invariant,
 )
 
 BASELINE_SCHEMA_VERSION = 1
@@ -241,6 +242,7 @@ def normalize_baseline(baseline: object) -> dict[str, object]:
         raise ValueError("baseline findings must be a list")
 
     findings = [coerce_baseline_finding(item) for item in findings_value]
+    validate_fingerprint_invariant(findings)
     findings.sort(key=baseline_finding_sort_key)
 
     return {

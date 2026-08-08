@@ -18,9 +18,17 @@ def build_report(
     coverage: object | None = None,
 ) -> dict[str, object]:
     findings_by_fingerprint: dict[str, dict[str, object]] = {}
+    identities_by_fingerprint: dict[str, tuple[object, ...]] = {}
     for finding in findings:
         normalized = _report_finding(finding)
         fingerprint = str(normalized["fingerprint"])
+        identity = baseline_finding_identity(normalized)
+        previous_identity = identities_by_fingerprint.get(fingerprint)
+        if previous_identity is not None and previous_identity != identity:
+            raise ValueError(
+                "fingerprint collision for distinct findings: " f"{fingerprint}"
+            )
+        identities_by_fingerprint[fingerprint] = identity
         findings_by_fingerprint.setdefault(fingerprint, normalized)
 
     normalized_findings = list(findings_by_fingerprint.values())
@@ -385,6 +393,24 @@ def baseline_finding_with_fingerprint(
     return normalized
 
 
+def validate_fingerprint_invariant(
+    findings: Sequence[dict[str, object]],
+) -> None:
+    identities_by_fingerprint: dict[str, tuple[object, ...]] = {}
+    for finding in findings:
+        normalized = coerce_finding(finding, preserve_fingerprint=True)
+        fingerprint = normalized.get("fingerprint")
+        if not isinstance(fingerprint, str):
+            continue
+        identity = baseline_finding_identity(normalized)
+        previous_identity = identities_by_fingerprint.get(fingerprint)
+        if previous_identity is not None and previous_identity != identity:
+            raise ValueError(
+                "fingerprint collision for distinct findings: " f"{fingerprint}"
+            )
+        identities_by_fingerprint[fingerprint] = identity
+
+
 def baseline_finding_sort_key(finding: dict[str, object]) -> tuple[object, ...]:
     normalized = coerce_finding(finding, preserve_fingerprint=True)
     kind = str(normalized["kind"])
@@ -633,4 +659,5 @@ __all__ = [
     "report_finding",
     "severity_label",
     "suspicious_file_baseline_finding",
+    "validate_fingerprint_invariant",
 ]
