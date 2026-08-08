@@ -3,9 +3,13 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from repo_sentinel.baseline import audit_baseline
+import pytest
+
+import repo_sentinel.report as report_module
+from repo_sentinel.baseline import audit_baseline, normalize_baseline
 from repo_sentinel.cli import main
 from repo_sentinel.config import token_sha256
+from repo_sentinel.report import build_report
 from repo_sentinel.scanner import scan_repository
 
 
@@ -71,6 +75,45 @@ def test_assignment_context_skips_source_expression_values(tmp_path: Path) -> No
     report = scan_repository(tmp_path)
 
     assert report["findings"] == []
+
+
+def test_fingerprint_collision_is_not_silently_deduplicated(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        report_module, "finding_fingerprint", lambda finding: "collision"
+    )
+
+    with pytest.raises(ValueError, match="fingerprint collision"):
+        build_report(
+            [
+                {"kind": "suspicious_file", "path": ".env"},
+                {"kind": "suspicious_file", "path": "private.key"},
+            ],
+            {},
+        )
+
+
+def test_baseline_rejects_fingerprint_collision() -> None:
+    baseline = {
+        "schema_version": 1,
+        "generated_at": "2026-08-08T00:00:00Z",
+        "findings": [
+            {
+                "fingerprint": "collision",
+                "kind": "suspicious_file",
+                "path": ".env",
+            },
+            {
+                "fingerprint": "collision",
+                "kind": "suspicious_file",
+                "path": "private.key",
+            },
+        ],
+    }
+
+    with pytest.raises(ValueError, match="fingerprint collision"):
+        normalize_baseline(baseline)
 
 
 def test_assignment_context_keeps_literal_config_values(tmp_path: Path) -> None:
