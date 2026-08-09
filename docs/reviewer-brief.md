@@ -62,8 +62,10 @@ The CLI emits deterministic JSON or concise text summaries that surface:
 
 The baseline path is intentionally reviewable: a previously accepted finding
 can be checked back in and applied locally without changing scanner behavior.
-`repo-sentinel baseline audit` classifies drift as active, stale, ambiguous, or
-unmatched.
+`repo-sentinel baseline audit` classifies drift as active, relocated, changed,
+stale, ambiguous, or unmatched. Relocation uses a line-independent
+`rule_id`/path/token-hash identity, while content changes at the same location
+remain separately reviewable.
 
 ## What this proves
 

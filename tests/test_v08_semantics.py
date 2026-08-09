@@ -6,10 +6,20 @@ from pathlib import Path
 import pytest
 
 import repo_sentinel.report as report_module
-from repo_sentinel.baseline import audit_baseline, normalize_baseline
+from repo_sentinel.baseline import (
+    apply_baseline,
+    audit_baseline,
+    baseline_from_report,
+    format_baseline,
+    normalize_baseline,
+)
 from repo_sentinel.cli import main
 from repo_sentinel.config import token_sha256
-from repo_sentinel.report import build_report
+from repo_sentinel.report import (
+    build_report,
+    finding_content_identity,
+    finding_location_identity,
+)
 from repo_sentinel.scanner import scan_repository
 
 
@@ -114,6 +124,206 @@ def test_baseline_rejects_fingerprint_collision() -> None:
 
     with pytest.raises(ValueError, match="fingerprint collision"):
         normalize_baseline(baseline)
+
+
+def test_baseline_rejects_collision_for_distinct_content_identity() -> None:
+    baseline = {
+        "schema_version": 1,
+        "generated_at": "2026-08-08T00:00:00Z",
+        "findings": [
+            {
+                "fingerprint": "collision",
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "shorttok9",
+            },
+            {
+                "fingerprint": "collision",
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "different9",
+            },
+        ],
+    }
+
+    with pytest.raises(ValueError, match="fingerprint collision"):
+        normalize_baseline(baseline)
+
+
+def test_content_identity_is_independent_of_line() -> None:
+    first = {
+        "kind": "assignment_context",
+        "file": "tokens.txt",
+        "line": 2,
+        "token": "shorttok9",
+    }
+    relocated = {**first, "line": 8}
+
+    assert finding_content_identity(first) == (
+        "secret.assignment_context",
+        "tokens.txt",
+        token_sha256("shorttok9"),
+    )
+    assert finding_content_identity(first) == finding_content_identity(relocated)
+    assert finding_location_identity(first) != finding_location_identity(relocated)
+
+
+def test_baseline_audit_classifies_relocated_redacted_finding() -> None:
+    baseline_report = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "shorttok9",
+            }
+        ],
+        {},
+    )
+    current_report = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 8,
+                "token": "shorttok9",
+            }
+        ],
+        {},
+    )
+    redacted_baseline = json.loads(
+        format_baseline(baseline_from_report(baseline_report))
+    )
+
+    audit = audit_baseline(current_report, redacted_baseline)
+
+    assert audit["summary"] == {
+        "active": 0,
+        "relocated": 1,
+        "changed": 0,
+        "stale": 0,
+        "ambiguous": 0,
+        "unmatched": 0,
+    }
+    assert audit["relocated"][0]["current"]["line"] == 8
+
+
+def test_baseline_suppresses_relocated_finding_by_content_identity() -> None:
+    baseline_report = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "shorttok9",
+            }
+        ],
+        {},
+    )
+    current_report = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 8,
+                "token": "shorttok9",
+            }
+        ],
+        {},
+    )
+    redacted_baseline = json.loads(
+        format_baseline(baseline_from_report(baseline_report))
+    )
+
+    suppressed = apply_baseline(current_report, redacted_baseline)
+
+    assert suppressed["findings"] == []
+
+
+def test_baseline_audit_classifies_changed_content_at_same_location() -> None:
+    baseline = baseline_from_report(
+        build_report(
+            [
+                {
+                    "kind": "assignment_context",
+                    "file": "tokens.txt",
+                    "line": 2,
+                    "token": "shorttok9",
+                }
+            ],
+            {},
+        )
+    )
+    current = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "different9",
+            }
+        ],
+        {},
+    )
+
+    audit = audit_baseline(current, baseline)
+
+    assert audit["summary"] == {
+        "active": 0,
+        "relocated": 0,
+        "changed": 1,
+        "stale": 0,
+        "ambiguous": 0,
+        "unmatched": 0,
+    }
+    assert audit["changed"][0]["current"]["token"] == "different9"
+    assert apply_baseline(current, baseline)["findings"]
+
+
+def test_baseline_audit_keeps_duplicate_content_relocation_ambiguous() -> None:
+    baseline = baseline_from_report(
+        build_report(
+            [
+                {
+                    "kind": "assignment_context",
+                    "file": "tokens.txt",
+                    "line": 1,
+                    "token": "shorttok9",
+                }
+            ],
+            {},
+        )
+    )
+    current = build_report(
+        [
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 2,
+                "token": "shorttok9",
+            },
+            {
+                "kind": "assignment_context",
+                "file": "tokens.txt",
+                "line": 3,
+                "token": "shorttok9",
+            },
+        ],
+        {},
+    )
+
+    audit = audit_baseline(current, baseline)
+
+    assert audit["summary"] == {
+        "active": 0,
+        "relocated": 0,
+        "changed": 0,
+        "stale": 0,
+        "ambiguous": 1,
+        "unmatched": 2,
+    }
 
 
 def test_assignment_context_keeps_literal_config_values(tmp_path: Path) -> None:
@@ -241,9 +451,11 @@ def test_baseline_audit_classifies_current_drift(tmp_path: Path, capsys) -> None
 
     assert exit_code == 0
     assert audit["summary"] == {
-        "active": 1,
-        "ambiguous": 1,
+        "active": 2,
+        "relocated": 0,
+        "changed": 0,
         "stale": 1,
+        "ambiguous": 0,
         "unmatched": 1,
     }
     assert cli_audit["summary"] == audit["summary"]

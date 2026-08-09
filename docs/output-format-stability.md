@@ -145,6 +145,9 @@ For drift review without rewriting a candidate file, use:
 repo-sentinel baseline audit --format json --baseline .reposentinel-baseline.json .
 ```
 
-The JSON audit groups findings into `active`, `stale`, `ambiguous`, and
-`unmatched`. It is suitable as a CI artifact when teams want reviewer evidence
-without automatically changing a committed baseline.
+The JSON audit groups findings into `active`, `relocated`, `changed`, `stale`,
+`ambiguous`, and `unmatched`. `relocated` uses the line-independent content
+identity `rule_id + path + token_sha256`; `changed` identifies a different
+content identity at the same rule and line. It is suitable as a CI artifact
+when teams want reviewer evidence without automatically changing a committed
+baseline.

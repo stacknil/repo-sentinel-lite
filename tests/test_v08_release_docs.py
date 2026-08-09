@@ -16,6 +16,8 @@ def test_v08_release_notes_capture_rule_and_baseline_semantics() -> None:
         "rule_version",
         "repo-sentinel baseline audit",
         "active",
+        "relocated",
+        "changed",
         "stale",
         "ambiguous",
         "unmatched",
