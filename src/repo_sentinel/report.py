@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Sequence
+from string import hexdigits
 
 from .config import normalize_path, sort_key, token_sha256
 from .coverage import extract_coverage, normalize_coverage
@@ -530,7 +531,7 @@ def _finding_token_sha256(finding: dict[str, object]) -> str | None:
 
 def _is_sha256_digest(value: str) -> bool:
     return len(value) == 64 and all(
-        character in "0123456789abcdefABCDEF" for character in value
+        character in hexdigits for character in value
     )
 
 
