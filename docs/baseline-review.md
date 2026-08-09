@@ -162,8 +162,19 @@ changed content, or lost a unique identity match.
 
 ## CI Gate Policy
 
-The initial remote pull-request gate scans only changed files. It applies the
-repository baseline when one exists and uses this exit policy:
+The remote pull-request gate scans only changed files, but it does not trust
+policy files from the pull request to define its own security boundary. The
+root `.reposentinel.toml` and `.reposentinel-baseline.json` are protected
+policy files:
+
+- changing either file fails the ordinary changed-file gate and requires a
+  dedicated policy review
+- when neither file changed, the gate extracts `.reposentinel-baseline.json`
+  from the trusted `BASE_SHA` and passes it through explicit `--baseline`
+- when the trusted base has no baseline, the gate passes `--no-default-baseline`
+  so a PR-head baseline cannot become an implicit suppression source
+
+The unchanged policy is then used with this exit policy:
 
 - an error finding in a changed file blocks the pull request
 - a warning finding in a changed file is reported but does not block
@@ -172,9 +183,9 @@ repository baseline when one exists and uses this exit policy:
   classifications are
   emitted by a separate non-blocking audit job
 
-This keeps historical active suppressions out of the normal changed-file gate.
-They remain reviewable in the audit artifact rather than becoming daily pull
-request noise.
+This keeps historical active suppressions out of the normal changed-file gate
+without allowing a pull request to add its own exemption. They remain
+reviewable in the audit artifact rather than becoming daily pull request noise.
 
 Manual classification is still required before changing a committed baseline:
 

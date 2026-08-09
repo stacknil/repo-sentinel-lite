@@ -29,7 +29,8 @@ pre-commit integration.
   secret scanning and cannot guarantee absence of leaks.
 - Rule and baseline semantics: `docs/release-notes-v0.8.0.md` documents
   `rule_id`, `rule_version`, structured evidence, baseline audit
-  classifications, allowlists, and changed-files mode.
+  classifications, allowlists, changed-files mode, and the trusted-base policy
+  boundary for the pull-request gate.
 - Self-dogfooding: `docs/self-dogfooding.md` records
   `sec-writeups-public` as bootstrapped with tracked repo-sentinel config and
   baseline files, and `LogLens` as CI-integrated for repository hygiene and
@@ -66,6 +67,10 @@ can be checked back in and applied locally without changing scanner behavior.
 stale, ambiguous, or unmatched. Relocation uses a line-independent
 `rule_id`/path/token-hash identity, while content changes at the same location
 remain separately reviewable.
+
+The pull-request changed-file gate rejects changes to the root security policy
+files and otherwise uses the reviewed base revision's baseline. This prevents a
+pull request from adding a finding and its own suppression in the same head.
 
 ## What this proves
 

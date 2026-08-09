@@ -15,6 +15,14 @@ def test_remote_gate_scans_changed_files_and_blocks_only_errors() -> None:
     assert "--fail-on-severity error" in workflow
     assert "warnings and coverage skips are report-only" in workflow
     assert "--fail-on-severity warning" not in workflow
+    assert "Reject changed security policy files" in workflow
+    assert ".reposentinel.toml|.reposentinel-baseline.json" in workflow
+    assert "Require dedicated policy review" in workflow
+    assert "git diff --name-only --diff-filter=ACMRD --no-renames" in workflow
+    assert 'git cat-file -e "${BASE_SHA}:.reposentinel-baseline.json"' in workflow
+    assert 'git show "${BASE_SHA}:.reposentinel-baseline.json"' in workflow
+    assert "baseline_args=(--no-default-baseline)" in workflow
+    assert "baseline_args=(--baseline \"$trusted_baseline\")" in workflow
 
 
 def test_baseline_audit_is_independent_and_non_blocking() -> None:

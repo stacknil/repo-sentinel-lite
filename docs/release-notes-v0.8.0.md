@@ -24,6 +24,10 @@ Theme: Rule and Baseline Semantics Release.
 - Adds the initial remote pull-request gate: changed-file errors block,
   changed-file warnings and skipped coverage entries report, and baseline
   drift is emitted by a separate non-blocking audit job.
+- Protects the changed-file gate with a trusted-base policy: changes to the root
+  `.reposentinel.toml` or `.reposentinel-baseline.json` require dedicated
+  policy review, while unchanged PRs use the baseline from `BASE_SHA` or
+  explicitly disable the PR-head default baseline.
 - Updates package metadata to describe the project as repository hygiene and
   lightweight secret-adjacent scanning, not a broad secret-scanning guarantee.
 

@@ -33,6 +33,7 @@ def test_threat_model_states_secret_scanning_boundaries() -> None:
         "docs/baseline-review.md",
         "docs/pre-commit-integration.md",
         ".github/workflows/ci.yml",
+        ".github/workflows/repo-sentinel-gate.yml",
     ):
         assert evidence_path in threat_model
 

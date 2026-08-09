@@ -25,6 +25,26 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install .
 
+      - name: Reject changed security policy files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          mapfile -d '' policy_files < <(
+            git diff --name-only --diff-filter=ACMRD --no-renames -z \
+              "$BASE_SHA" "$HEAD_SHA"
+          )
+          for path in "${policy_files[@]}"; do
+            case "$path" in
+              .reposentinel.toml|.reposentinel-baseline.json)
+                echo "Protected security policy changed: $path"
+                echo "Require dedicated policy review before this pull request can merge."
+                exit 1
+                ;;
+            esac
+          done
+
       - name: Scan changed files
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -32,7 +52,8 @@ jobs:
         shell: bash
         run: |
           mapfile -d '' changed_files < <(
-            git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$HEAD_SHA"
+            git diff --name-only --diff-filter=ACMR --no-renames -z \
+              "$BASE_SHA" "$HEAD_SHA"
           )
           printf 'Changed files: %s\n' "${#changed_files[@]}"
           if ((${#changed_files[@]} == 0)); then
@@ -40,8 +61,24 @@ jobs:
             exit 0
           fi
 
+          trusted_baseline="$(mktemp)"
+          cleanup() {
+            rm -f "$trusted_baseline"
+          }
+          trap cleanup EXIT
+
+          baseline_args=(--no-default-baseline)
+          if git cat-file -e "${BASE_SHA}:.reposentinel-baseline.json" 2>/dev/null; then
+            git show "${BASE_SHA}:.reposentinel-baseline.json" > "$trusted_baseline"
+            baseline_args=(--baseline "$trusted_baseline")
+            echo "Using .reposentinel-baseline.json from BASE_SHA."
+          else
+            echo "No baseline at BASE_SHA; PR-head default baseline is disabled."
+          fi
+
           set +e
           python -m repo_sentinel scan \
+            "${baseline_args[@]}" \
             --changed-files \
             --fail-on-severity error \
             --format text \

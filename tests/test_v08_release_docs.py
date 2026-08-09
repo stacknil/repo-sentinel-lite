@@ -25,6 +25,8 @@ def test_v08_release_notes_capture_rule_and_baseline_semantics() -> None:
         "scan --changed-files",
         "fingerprint collisions",
         "changed-file errors block",
+        "trusted-base policy",
+        "dedicated",
         "non-blocking audit job",
         "does not replace enterprise secret scanning",
     ):
