@@ -13,8 +13,12 @@ from .report import (
     coerce_finding,
     coerce_missing_files,
     extract_findings,
+    finding_content_identity,
+    finding_location_identity,
     finding_matches_baseline,
+    finding_rule_location_identity,
     normalize_report,
+    validate_fingerprint_invariant,
 )
 
 BASELINE_SCHEMA_VERSION = 1
@@ -102,13 +106,35 @@ def audit_baseline(
     current_by_fingerprint = {
         str(finding["fingerprint"]): finding for finding in current_findings
     }
-    current_by_identity: dict[tuple[object, ...], list[dict[str, object]]] = {}
+    current_by_content_identity: dict[
+        tuple[object, ...], list[dict[str, object]]
+    ] = {}
+    current_by_location_identity: dict[
+        tuple[object, ...], list[dict[str, object]]
+    ] = {}
+    current_by_rule_location_identity: dict[
+        tuple[object, ...], list[dict[str, object]]
+    ] = {}
+    current_by_legacy_identity: dict[
+        tuple[object, ...], list[dict[str, object]]
+    ] = {}
     for finding in current_findings:
-        current_by_identity.setdefault(
+        current_by_content_identity.setdefault(
+            finding_content_identity(finding), []
+        ).append(finding)
+        current_by_location_identity.setdefault(
+            finding_location_identity(finding), []
+        ).append(finding)
+        current_by_rule_location_identity.setdefault(
+            finding_rule_location_identity(finding), []
+        ).append(finding)
+        current_by_legacy_identity.setdefault(
             baseline_finding_identity(finding), []
         ).append(finding)
 
     active: list[dict[str, object]] = []
+    relocated: list[dict[str, object]] = []
+    changed: list[dict[str, object]] = []
     stale: list[dict[str, object]] = []
     ambiguous: list[dict[str, object]] = []
     matched_current_fingerprints: set[str] = set()
@@ -120,38 +146,107 @@ def audit_baseline(
             matched_current_fingerprints.add(fingerprint)
             continue
 
-        identity_candidates = current_by_identity.get(
-            baseline_finding_identity(baseline_finding), []
+        content_identity = finding_content_identity(baseline_finding)
+        content_identity_is_comparable = _identity_is_comparable(content_identity)
+        location_candidates = (
+            current_by_location_identity.get(
+                finding_location_identity(baseline_finding), []
+            )
+            if content_identity_is_comparable
+            else []
         )
-        if fingerprint is None and len(identity_candidates) == 1:
+        if len(location_candidates) == 1:
             active.append(baseline_finding)
-            matched_current_fingerprints.add(str(identity_candidates[0]["fingerprint"]))
+            matched_current_fingerprints.add(
+                str(location_candidates[0]["fingerprint"])
+            )
             continue
-        if identity_candidates:
+        if len(location_candidates) > 1:
             ambiguous.append(
                 {
                     "baseline": baseline_finding,
-                    "candidates": identity_candidates,
+                    "candidates": location_candidates,
                     "reason": (
-                        "same baseline identity but no current fingerprint match"
+                        "multiple current findings share the same location identity"
                     ),
                 }
             )
             continue
 
-        location_candidates = _same_location_candidates(
-            baseline_finding, current_findings
+        content_candidates = (
+            current_by_content_identity.get(content_identity, [])
+            if content_identity_is_comparable
+            else []
         )
-        if location_candidates:
+        if len(content_candidates) == 1:
+            relocated_finding = content_candidates[0]
+            relocated.append(
+                {
+                    "baseline": baseline_finding,
+                    "current": relocated_finding,
+                    "reason": "same content identity at a different line",
+                }
+            )
+            matched_current_fingerprints.add(str(relocated_finding["fingerprint"]))
+            continue
+        if len(content_candidates) > 1:
             ambiguous.append(
                 {
                     "baseline": baseline_finding,
-                    "candidates": location_candidates,
-                    "reason": "same rule/location but different fingerprint",
+                    "candidates": content_candidates,
+                    "reason": (
+                        "multiple current findings share the same content identity"
+                    ),
                 }
             )
-        else:
-            stale.append(baseline_finding)
+            continue
+
+        rule_location_candidates = current_by_rule_location_identity.get(
+            finding_rule_location_identity(baseline_finding), []
+        )
+        if len(rule_location_candidates) == 1:
+            changed_finding = rule_location_candidates[0]
+            changed.append(
+                {
+                    "baseline": baseline_finding,
+                    "current": changed_finding,
+                    "reason": "same rule and location with different content identity",
+                }
+            )
+            matched_current_fingerprints.add(str(changed_finding["fingerprint"]))
+            continue
+        if len(rule_location_candidates) > 1:
+            ambiguous.append(
+                {
+                    "baseline": baseline_finding,
+                    "candidates": rule_location_candidates,
+                    "reason": (
+                        "multiple current findings share the same rule and location"
+                    ),
+                }
+            )
+            continue
+
+        legacy_identity_candidates = current_by_legacy_identity.get(
+            baseline_finding_identity(baseline_finding), []
+        )
+        if len(legacy_identity_candidates) == 1:
+            active.append(baseline_finding)
+            matched_current_fingerprints.add(
+                str(legacy_identity_candidates[0]["fingerprint"])
+            )
+            continue
+        if len(legacy_identity_candidates) > 1:
+            ambiguous.append(
+                {
+                    "baseline": baseline_finding,
+                    "candidates": legacy_identity_candidates,
+                    "reason": "multiple current findings share the legacy identity",
+                }
+            )
+            continue
+
+        stale.append(baseline_finding)
 
     unmatched = [
         finding
@@ -160,12 +255,16 @@ def audit_baseline(
     ]
     return {
         "active": sorted(active, key=baseline_finding_sort_key),
-        "ambiguous": ambiguous,
+        "relocated": sorted(relocated, key=_classified_baseline_sort_key),
+        "changed": sorted(changed, key=_classified_baseline_sort_key),
         "stale": sorted(stale, key=baseline_finding_sort_key),
+        "ambiguous": sorted(ambiguous, key=_classified_baseline_sort_key),
         "summary": {
             "active": len(active),
-            "ambiguous": len(ambiguous),
+            "relocated": len(relocated),
+            "changed": len(changed),
             "stale": len(stale),
+            "ambiguous": len(ambiguous),
             "unmatched": len(unmatched),
         },
         "unmatched": sorted(unmatched, key=baseline_finding_sort_key),
@@ -192,6 +291,8 @@ def format_baseline_audit(
     lines = [
         "Baseline audit:",
         f"active: {int(summary.get('active', 0))}",
+        f"relocated: {int(summary.get('relocated', 0))}",
+        f"changed: {int(summary.get('changed', 0))}",
         f"stale: {int(summary.get('stale', 0))}",
         f"ambiguous: {int(summary.get('ambiguous', 0))}",
         f"unmatched: {int(summary.get('unmatched', 0))}",
@@ -241,6 +342,7 @@ def normalize_baseline(baseline: object) -> dict[str, object]:
         raise ValueError("baseline findings must be a list")
 
     findings = [coerce_baseline_finding(item) for item in findings_value]
+    validate_fingerprint_invariant(findings)
     findings.sort(key=baseline_finding_sort_key)
 
     return {
@@ -262,17 +364,20 @@ def baseline_match_keys(
     baseline: object,
 ) -> tuple[frozenset[str], frozenset[tuple[object, ...]]]:
     baseline_findings = extract_baseline_findings(baseline)
+    finding_keys: set[tuple[object, ...]] = set()
+    for finding in baseline_findings:
+        if "fingerprint" not in finding:
+            finding_keys.add(baseline_finding_identity(finding))
+        content_identity = finding_content_identity(finding)
+        if _identity_is_comparable(content_identity):
+            finding_keys.add(content_identity)
     return (
         frozenset(
             str(finding["fingerprint"])
             for finding in baseline_findings
             if "fingerprint" in finding
         ),
-        frozenset(
-            baseline_finding_identity(finding)
-            for finding in baseline_findings
-            if "fingerprint" not in finding
-        ),
+        frozenset(finding_keys),
     )
 
 
@@ -289,21 +394,17 @@ def _looks_like_legacy_report(value: object) -> bool:
     )
 
 
-def _same_location_candidates(
-    baseline_finding: dict[str, object], current_findings: list[dict[str, object]]
-) -> list[dict[str, object]]:
-    baseline_rule_id = str(baseline_finding.get("rule_id", ""))
-    baseline_path = str(
-        baseline_finding.get("path", baseline_finding.get("file", ""))
-    )
-    baseline_line = baseline_finding.get("line")
-    return [
-        finding
-        for finding in current_findings
-        if str(finding.get("rule_id", "")) == baseline_rule_id
-        and str(finding.get("path", finding.get("file", ""))) == baseline_path
-        and finding.get("line") == baseline_line
-    ]
+def _identity_is_comparable(identity: tuple[object, ...]) -> bool:
+    return not (len(identity) == 3 and identity[-1] is None)
+
+
+def _classified_baseline_sort_key(
+    classified: dict[str, object],
+) -> tuple[object, ...]:
+    baseline = classified.get("baseline")
+    if not isinstance(baseline, dict):
+        return (3, "")
+    return baseline_finding_sort_key(baseline)
 
 
 __all__ = [

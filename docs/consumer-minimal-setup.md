@@ -77,7 +77,7 @@ Pin the provider by release tag:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.7.1
+    rev: v0.8.0
     hooks:
       - id: repo-sentinel-error
 ```
@@ -111,16 +111,38 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - run: python -m pip install repo-sentinel-lite==0.7.1
-      - run: repo-sentinel scan --fail-on-severity error --format text .
+      - run: python -m pip install repo-sentinel-lite==0.8.0
+      - name: Scan changed files
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        shell: bash
+        run: |
+          mapfile -d '' changed_files < <(
+            git diff --name-only --diff-filter=ACMR -z "$BASE_SHA" "$HEAD_SHA"
+          )
+          if ((${#changed_files[@]} == 0)); then
+            exit 0
+          fi
+          repo-sentinel scan \
+            --changed-files \
+            --fail-on-severity error \
+            --format text \
+            . \
+            -- \
+            "${changed_files[@]}"
 ```
 
-This template is intentionally repository-neutral. Add `.reposentinel.toml`
-only for consumer-specific generated paths, and keep source, configuration,
-sample inputs, and authored documentation in scope.
+This template keeps the remote gate focused on changed files. Warnings and
+coverage skips are reported without blocking; run `repo-sentinel baseline
+audit` in a separate non-blocking job when the consumer has a baseline. Add
+`.reposentinel.toml` only for consumer-specific generated paths, and keep
+source, configuration, sample inputs, and authored documentation in scope.
 
 When CI should preserve outputs for review, see
 [`output-format-stability.md`](output-format-stability.md).

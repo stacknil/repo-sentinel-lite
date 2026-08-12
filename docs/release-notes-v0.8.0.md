@@ -11,12 +11,23 @@ Theme: Rule and Baseline Semantics Release.
 - Adds structured heuristic detectors for PEM private-key headers,
   GitHub-token-like prefixes, AWS access-key-like prefixes, and generic
   secret-adjacent assignment contexts.
-- Adds `repo-sentinel baseline audit` with `active`, `stale`, `ambiguous`, and
-  `unmatched` classifications.
+- Adds `repo-sentinel baseline audit` with `active`, `relocated`, `changed`,
+  `stale`, `ambiguous`, and `unmatched` classifications. Content identity is
+  based on `rule_id`, path, and token SHA-256; location identity adds the line
+  only for audit classification, so file-header insertions are not stale drift.
 - Adds `.reposentinel.toml` allowlist support for paths, rules, token hashes,
   and scoped inline comments.
 - Adds `scan --changed-files` for integrations that already know the changed
   file list.
+- Rejects fingerprint collisions instead of silently dropping a distinct
+  finding during report or baseline normalization.
+- Adds the initial remote pull-request gate: changed-file errors block,
+  changed-file warnings and skipped coverage entries report, and baseline
+  drift is emitted by a separate non-blocking audit job.
+- Protects the changed-file gate with a trusted-base policy: changes to the root
+  `.reposentinel.toml` or `.reposentinel-baseline.json` require dedicated
+  policy review, while unchanged PRs use the baseline from `BASE_SHA` or
+  explicitly disable the PR-head default baseline.
 - Updates package metadata to describe the project as repository hygiene and
   lightweight secret-adjacent scanning, not a broad secret-scanning guarantee.
 

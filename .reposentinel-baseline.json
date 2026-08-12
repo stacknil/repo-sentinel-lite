@@ -1,0 +1,1835 @@
+{
+  "findings": [
+    {
+      "entropy": 4.2045,
+      "evidence": {
+        "entropy": 4.2045,
+        "line": 8,
+        "token_sha256": "a0f6ad38f34f10cc5948f361e470f5fd43637a4e7fdec637f8227bde6f5ac005"
+      },
+      "file": ".github/workflows/pre-commit-provider.yml",
+      "fingerprint": "3cc4335d824496eee4825b5954db1a96409e947d8c9da51bb56c958c205ad925",
+      "kind": "high_entropy",
+      "line": 8,
+      "path": ".github/workflows/pre-commit-provider.yml",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:a0f6ad38f34f>"
+    },
+    {
+      "entropy": 4.2045,
+      "evidence": {
+        "entropy": 4.2045,
+        "line": 17,
+        "token_sha256": "a0f6ad38f34f10cc5948f361e470f5fd43637a4e7fdec637f8227bde6f5ac005"
+      },
+      "file": ".github/workflows/pre-commit-provider.yml",
+      "fingerprint": "a59f722196d7284d83cd59436215733b5be337a192e7cd4a17991ff1cfbcc44a",
+      "kind": "high_entropy",
+      "line": 17,
+      "path": ".github/workflows/pre-commit-provider.yml",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:a0f6ad38f34f>"
+    },
+    {
+      "entropy": 4.0566,
+      "evidence": {
+        "entropy": 4.0566,
+        "line": 97,
+        "token_sha256": "3ed76b8efd39d61b09a5af70a37560cb7466df776c3b873f16e71b7781e7cc32"
+      },
+      "file": "docs/consumer-minimal-setup.md",
+      "fingerprint": "b74414275f39fe19e95e44b61f2d0aed09e41822222966385a1653b0198fa53a",
+      "kind": "high_entropy",
+      "line": 97,
+      "path": "docs/consumer-minimal-setup.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3ed76b8efd39>"
+    },
+    {
+      "entropy": 4.0566,
+      "evidence": {
+        "entropy": 4.0566,
+        "line": 77,
+        "token_sha256": "3ed76b8efd39d61b09a5af70a37560cb7466df776c3b873f16e71b7781e7cc32"
+      },
+      "file": "docs/self-dogfooding.md",
+      "fingerprint": "7c66a06ae738eda1d2125c802c7d79bf4927db30adea8df7b6baeaad11ba5bea",
+      "kind": "high_entropy",
+      "line": 77,
+      "path": "docs/self-dogfooding.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3ed76b8efd39>"
+    },
+    {
+      "entropy": 4.0566,
+      "evidence": {
+        "entropy": 4.0566,
+        "line": 110,
+        "token_sha256": "3ed76b8efd39d61b09a5af70a37560cb7466df776c3b873f16e71b7781e7cc32"
+      },
+      "file": "docs/self-dogfooding.md",
+      "fingerprint": "95ccf5a036aa631c7b69c6d990c16043ad70e949410d58b918ae7d7697d79d98",
+      "kind": "high_entropy",
+      "line": 110,
+      "path": "docs/self-dogfooding.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3ed76b8efd39>"
+    },
+    {
+      "entropy": 4.2045,
+      "evidence": {
+        "entropy": 4.2045,
+        "line": 72,
+        "token_sha256": "a0f6ad38f34f10cc5948f361e470f5fd43637a4e7fdec637f8227bde6f5ac005"
+      },
+      "file": "docs/threat-model.md",
+      "fingerprint": "48ee934a11131b9ec9a2ca278c6630d4ff1b9427371e650c3c272d8e4ae2fffd",
+      "kind": "high_entropy",
+      "line": 72,
+      "path": "docs/threat-model.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:a0f6ad38f34f>"
+    },
+    {
+      "entropy": 4.0323,
+      "evidence": {
+        "entropy": 4.0323,
+        "line": 53,
+        "token_sha256": "d21bea4b8a882f4b5cc3ac4dee5aadbc5018fe3bb83aa7429996150bda42ae45"
+      },
+      "file": "docs/v0.7-adoption-release.md",
+      "fingerprint": "808755a54ed2554db2bb801c71a0821abb7d56c17f2a51c66447b84dd441b93f",
+      "kind": "high_entropy",
+      "line": 53,
+      "path": "docs/v0.7-adoption-release.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:d21bea4b8a88>"
+    },
+    {
+      "entropy": 4.0023,
+      "evidence": {
+        "entropy": 4.0023,
+        "line": 55,
+        "token_sha256": "caa27c01fe827f0f38a640a0a9520e69034d58533a814b4cd70778386c251e3e"
+      },
+      "file": "docs/v0.7-adoption-release.md",
+      "fingerprint": "122dbe3e3a27b5f8c1fdb3e2b7d0617b73df2ccf9e70609091a33640bd9399fb",
+      "kind": "high_entropy",
+      "line": 55,
+      "path": "docs/v0.7-adoption-release.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:caa27c01fe82>"
+    },
+    {
+      "entropy": 4.1311,
+      "evidence": {
+        "entropy": 4.1311,
+        "line": 58,
+        "token_sha256": "37ce8883ccf3b2f4ea3b73dc62842a20353bc4bb78464e6853335bf045d4989d"
+      },
+      "file": "docs/v0.7-adoption-release.md",
+      "fingerprint": "57c6cb515cfdf1d0f65db024d361f8ee75445bcf8a97eaa687fdb92ff76f4c92",
+      "kind": "high_entropy",
+      "line": 58,
+      "path": "docs/v0.7-adoption-release.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:37ce8883ccf3>"
+    },
+    {
+      "entropy": 4.0411,
+      "evidence": {
+        "entropy": 4.0411,
+        "line": 59,
+        "token_sha256": "53dd9efc6be14c11bcc3176e8e68d675805615dec6ca91c56bdcc419ee28273d"
+      },
+      "file": "docs/v0.7-adoption-release.md",
+      "fingerprint": "555701fd878dda4077989539190e5b23e30b53efa775ab6a65be0421d2f6da54",
+      "kind": "high_entropy",
+      "line": 59,
+      "path": "docs/v0.7-adoption-release.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:53dd9efc6be1>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 1,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "examples/dirty-repo/.env",
+      "fingerprint": "07355dec76845f197bfc6e89308e4fe3ecdf30f3d85537b174780360981aa126",
+      "kind": "high_entropy",
+      "line": 1,
+      "path": "examples/dirty-repo/.env",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0323,
+      "evidence": {
+        "entropy": 4.0323,
+        "line": 26,
+        "token_sha256": "d21bea4b8a882f4b5cc3ac4dee5aadbc5018fe3bb83aa7429996150bda42ae45"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "023112419dc2beb14b33dca6cd4e90191900af636f91e14410974316fcb5c2f1",
+      "kind": "high_entropy",
+      "line": 26,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:d21bea4b8a88>"
+    },
+    {
+      "entropy": 4.0323,
+      "evidence": {
+        "entropy": 4.0323,
+        "line": 33,
+        "token_sha256": "d21bea4b8a882f4b5cc3ac4dee5aadbc5018fe3bb83aa7429996150bda42ae45"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "2f49f233fba1fbf3e9786664ed1f638dd46e041d9ba7a210be14ddda7e1ebba0",
+      "kind": "high_entropy",
+      "line": 33,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:d21bea4b8a88>"
+    },
+    {
+      "entropy": 4.0023,
+      "evidence": {
+        "entropy": 4.0023,
+        "line": 45,
+        "token_sha256": "caa27c01fe827f0f38a640a0a9520e69034d58533a814b4cd70778386c251e3e"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "c66279c145cd74de67e443fe48426492ead89a1c6aa6a5d83fce645bea622658",
+      "kind": "high_entropy",
+      "line": 45,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:caa27c01fe82>"
+    },
+    {
+      "entropy": 4.1311,
+      "evidence": {
+        "entropy": 4.1311,
+        "line": 52,
+        "token_sha256": "37ce8883ccf3b2f4ea3b73dc62842a20353bc4bb78464e6853335bf045d4989d"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "22ae5536b94a1ccd56e124f0d45dfc46a41e6841bc96b1127349970081bace6d",
+      "kind": "high_entropy",
+      "line": 52,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:37ce8883ccf3>"
+    },
+    {
+      "entropy": 4.1311,
+      "evidence": {
+        "entropy": 4.1311,
+        "line": 59,
+        "token_sha256": "37ce8883ccf3b2f4ea3b73dc62842a20353bc4bb78464e6853335bf045d4989d"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "177f4b5349b4b17dd3d121123d5d4727c64f9baae74a9c4557b09093133d5271",
+      "kind": "high_entropy",
+      "line": 59,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:37ce8883ccf3>"
+    },
+    {
+      "entropy": 4.0411,
+      "evidence": {
+        "entropy": 4.0411,
+        "line": 98,
+        "token_sha256": "53dd9efc6be14c11bcc3176e8e68d675805615dec6ca91c56bdcc419ee28273d"
+      },
+      "file": "examples/README.md",
+      "fingerprint": "ba02f1b07919e4415ef9af418cc6bdce6526ed004f1e45885a4228c161ff4e5d",
+      "kind": "high_entropy",
+      "line": 98,
+      "path": "examples/README.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:53dd9efc6be1>"
+    },
+    {
+      "entropy": 4.1899,
+      "evidence": {
+        "entropy": 4.1899,
+        "line": 125,
+        "token_sha256": "7fcd526da0cd7159243278a10c0378d2e1154d7428eb7e91220de4e07e63430f"
+      },
+      "file": "RELEASE.md",
+      "fingerprint": "aa025c24ade53b1f9e808ad38585c08648a3862276f11c01424da55a742fce9e",
+      "kind": "high_entropy",
+      "line": 125,
+      "path": "RELEASE.md",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:7fcd526da0cd>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 2,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/fixtures/sample_repo/notes/tokens.txt",
+      "fingerprint": "d91e56ce867a6d254aa4231113f5f5e58976bddcb78135c31a6a16b2751c7060",
+      "kind": "high_entropy",
+      "line": 2,
+      "path": "tests/fixtures/sample_repo/notes/tokens.txt",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 19,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/fixtures/sample_repo_report.json",
+      "fingerprint": "d43d5b975b9e5fc30bf3496d5cf393e89f5944eb6d595ef1b7c2c29f79418a80",
+      "kind": "high_entropy",
+      "line": 19,
+      "path": "tests/fixtures/sample_repo_report.json",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 105,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/fixtures/sample_repo_report.json",
+      "fingerprint": "4e11f1b8ba0c7f59bea78832bf5351ee2d7df95d08c53b1899b91bd81e42895c",
+      "kind": "high_entropy",
+      "line": 105,
+      "path": "tests/fixtures/sample_repo_report.json",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0323,
+      "evidence": {
+        "entropy": 4.0323,
+        "line": 84,
+        "token_sha256": "d21bea4b8a882f4b5cc3ac4dee5aadbc5018fe3bb83aa7429996150bda42ae45"
+      },
+      "file": "tests/test_adoption_release_docs.py",
+      "fingerprint": "c526838c8c5b281433355c0753017511953d1652a351a6f9f13adbd07468d516",
+      "kind": "high_entropy",
+      "line": 84,
+      "path": "tests/test_adoption_release_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:d21bea4b8a88>"
+    },
+    {
+      "entropy": 4.0023,
+      "evidence": {
+        "entropy": 4.0023,
+        "line": 85,
+        "token_sha256": "caa27c01fe827f0f38a640a0a9520e69034d58533a814b4cd70778386c251e3e"
+      },
+      "file": "tests/test_adoption_release_docs.py",
+      "fingerprint": "22bff2576a24a726aedf3c132876d921079e6f5c4d0fdbe50957ab308e6c58b1",
+      "kind": "high_entropy",
+      "line": 85,
+      "path": "tests/test_adoption_release_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:caa27c01fe82>"
+    },
+    {
+      "entropy": 4.1311,
+      "evidence": {
+        "entropy": 4.1311,
+        "line": 86,
+        "token_sha256": "37ce8883ccf3b2f4ea3b73dc62842a20353bc4bb78464e6853335bf045d4989d"
+      },
+      "file": "tests/test_adoption_release_docs.py",
+      "fingerprint": "d6782c53d9ec312c08369fb9b80093a015122da2a4389675a6a1c053dcc5494f",
+      "kind": "high_entropy",
+      "line": 86,
+      "path": "tests/test_adoption_release_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:37ce8883ccf3>"
+    },
+    {
+      "entropy": 4.0411,
+      "evidence": {
+        "entropy": 4.0411,
+        "line": 89,
+        "token_sha256": "53dd9efc6be14c11bcc3176e8e68d675805615dec6ca91c56bdcc419ee28273d"
+      },
+      "file": "tests/test_adoption_release_docs.py",
+      "fingerprint": "cf985686fdf45cb9dc2a6b873817fe305ddea41ea883d0f4a07dae6c525187d1",
+      "kind": "high_entropy",
+      "line": 89,
+      "path": "tests/test_adoption_release_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:53dd9efc6be1>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 9,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_api.py",
+      "fingerprint": "191dff75760bf0041a9d2b71739ff06a0e6f51912a326b3f2add7605568c0a47",
+      "kind": "high_entropy",
+      "line": 9,
+      "path": "tests/test_api.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0122,
+      "evidence": {
+        "entropy": 4.0122,
+        "line": 33,
+        "token_sha256": "bea5938906881da8097d2ab84f9ce9e8270eac2a52ac31b9ded3370076609f0f"
+      },
+      "file": "tests/test_api.py",
+      "fingerprint": "2e51a2031c53b719f4db91765fd9edb46582c031447cb2e98a88bd01c2f3c817",
+      "kind": "high_entropy",
+      "line": 33,
+      "path": "tests/test_api.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:bea593890688>"
+    },
+    {
+      "entropy": 4.0811,
+      "evidence": {
+        "entropy": 4.0811,
+        "line": 43,
+        "token_sha256": "3bcd9fd6d597ede6444f820287dedb84d5250e7f2e24efb90d6b3c70985639b5"
+      },
+      "file": "tests/test_api.py",
+      "fingerprint": "595a9116c28c9f20bb279658d921c076fd7cac42a6523db24de6661da09dcd73",
+      "kind": "high_entropy",
+      "line": 43,
+      "path": "tests/test_api.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3bcd9fd6d597>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 46,
+        "token_sha256": "4ba68aa8767bde72e8c798ee82d1275291cea73e72ad74d35ecf48e41386eb82"
+      },
+      "file": "tests/test_api.py",
+      "fingerprint": "ea731842477dd7dd4e5bcc708bb39770bf465a21eb350fca49f06d1c9fc52e35",
+      "kind": "high_entropy",
+      "line": 46,
+      "path": "tests/test_api.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:4ba68aa8767b>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 30,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "ec22e6206d81b3b58ae579d5bd0d7ac9c82eec78364a0f0cf591ab2b73c1ef48",
+      "kind": "high_entropy",
+      "line": 30,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0575,
+      "evidence": {
+        "entropy": 4.0575,
+        "line": 193,
+        "token_sha256": "040e6594da0311ecd3c61de9ea1402b714084d4259794c6674cfb4d40c6dba11"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "c23991a4b3d81edba6a8ec66ed0a011eb986800b31d8d7f4e0573150a43365fa",
+      "kind": "high_entropy",
+      "line": 193,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:040e6594da03>"
+    },
+    {
+      "entropy": 4.0746,
+      "evidence": {
+        "entropy": 4.0746,
+        "line": 232,
+        "token_sha256": "7131fd1a2d3d2ebd0baf2a82bd473135c9c9055464861ab242a7a06db886422c"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "fca3e56c1624a51dd7543efa0c980fb832f5e6d4bb622ab9dc2749df329aef37",
+      "kind": "high_entropy",
+      "line": 232,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:7131fd1a2d3d>"
+    },
+    {
+      "entropy": 4.0008,
+      "evidence": {
+        "entropy": 4.0008,
+        "line": 450,
+        "token_sha256": "f18e4dbf82698e22251b2a445e7ba4aed2e9842aa6af2ff5dd517aa5e61b6d7a"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "e30e61c8f7f15be13d795dee58a938480f35b248afe0d689924d11a2db8a96e4",
+      "kind": "high_entropy",
+      "line": 450,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:f18e4dbf8269>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 467,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "df129c77733d4826d88e7801a2a92c7b13807ffed4c9cf52894022c28f81a6ac",
+      "kind": "high_entropy",
+      "line": 467,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 516,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "27f26b5c3c2ec65ceead8065770a6732ce6b34c2f3e4af8dfe91efc3459a46de",
+      "kind": "high_entropy",
+      "line": 516,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 5.0,
+      "evidence": {
+        "entropy": 5.0,
+        "line": 517,
+        "token_sha256": "cfd2f1fad75a1978da0a444883db7251414b139f31f5a04704c291fdb0e175e6"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "137bd0f575f6beb1c6efd3ad1ebbc7b5c3c0725215eb685ea88d2e687e078f19",
+      "kind": "high_entropy",
+      "line": 517,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:cfd2f1fad75a>"
+    },
+    {
+      "entropy": 4.0009,
+      "evidence": {
+        "entropy": 4.0009,
+        "line": 586,
+        "token_sha256": "07b8336952fd22ba6c5911ec95dd94ad57604ee7e77a18c5cfb669330f793017"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "8d4362a4be927940eccc35f7055b563242de4bda7a8250ae250a90d0fff28437",
+      "kind": "high_entropy",
+      "line": 586,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:07b8336952fd>"
+    },
+    {
+      "entropy": 4.0833,
+      "evidence": {
+        "entropy": 4.0833,
+        "line": 703,
+        "token_sha256": "40446b2c3fb434c609836aff6480350b69081bdf9ad0af3d3e5f2a18e474e2d6"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "331b1248ddbe96dbb72d315eb7b4200e6f756970dad90a4935cb8a86263a6ecd",
+      "kind": "high_entropy",
+      "line": 703,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:40446b2c3fb4>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 719,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "32c3ca2e67cff2094181334cf31116420e5d70b3b4d6ed743f32cb6cc891e55b",
+      "kind": "high_entropy",
+      "line": 719,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 969,
+        "token_sha256": "4ba68aa8767bde72e8c798ee82d1275291cea73e72ad74d35ecf48e41386eb82"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "e0fd2168b5be7e776812cb28b587689dc2ce6ef79fa4c6109b807d84b5bfa66f",
+      "kind": "high_entropy",
+      "line": 969,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:4ba68aa8767b>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 982,
+        "token_sha256": "4ba68aa8767bde72e8c798ee82d1275291cea73e72ad74d35ecf48e41386eb82"
+      },
+      "file": "tests/test_cli.py",
+      "fingerprint": "1395bedada9a716abeedab886c60433b6137e5b85c2300482046ee75a7f0007d",
+      "kind": "high_entropy",
+      "line": 982,
+      "path": "tests/test_cli.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:4ba68aa8767b>"
+    },
+    {
+      "entropy": 4.0566,
+      "evidence": {
+        "entropy": 4.0566,
+        "line": 34,
+        "token_sha256": "3ed76b8efd39d61b09a5af70a37560cb7466df776c3b873f16e71b7781e7cc32"
+      },
+      "file": "tests/test_consumer_minimal_setup_docs.py",
+      "fingerprint": "47fbac4d146a5ada308b27f1cf1a874f57284ee46cd3809791630744187ac438",
+      "kind": "high_entropy",
+      "line": 34,
+      "path": "tests/test_consumer_minimal_setup_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3ed76b8efd39>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 25,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_docs_examples.py",
+      "fingerprint": "6b3af34911792f7bd5d39196896c214b528111176ffb63a9d25454e5c374a1b3",
+      "kind": "high_entropy",
+      "line": 25,
+      "path": "tests/test_docs_examples.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0274,
+      "evidence": {
+        "entropy": 4.0274,
+        "line": 56,
+        "token_sha256": "340eb02ace7d375efbf271f464b49770d50c20b0a0d4d3b62ababa9b6b806d02"
+      },
+      "file": "tests/test_docs_examples.py",
+      "fingerprint": "8246bd904dad18045534fbcecd43ff382838f78759efa40e478dbdeaa90a7cbe",
+      "kind": "high_entropy",
+      "line": 56,
+      "path": "tests/test_docs_examples.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:340eb02ace7d>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 79,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_docs_examples.py",
+      "fingerprint": "4fd020cf0e39f9a748706ff07a0f734f98970543e681f264cde83e11867608b9",
+      "kind": "high_entropy",
+      "line": 79,
+      "path": "tests/test_docs_examples.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0323,
+      "evidence": {
+        "entropy": 4.0323,
+        "line": 107,
+        "token_sha256": "d21bea4b8a882f4b5cc3ac4dee5aadbc5018fe3bb83aa7429996150bda42ae45"
+      },
+      "file": "tests/test_docs_examples.py",
+      "fingerprint": "49c8842d8f51bb03db8b1dec6fdb9634572506242c0371e4d40f1c9108f685db",
+      "kind": "high_entropy",
+      "line": 107,
+      "path": "tests/test_docs_examples.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:d21bea4b8a88>"
+    },
+    {
+      "entropy": 4.1311,
+      "evidence": {
+        "entropy": 4.1311,
+        "line": 109,
+        "token_sha256": "37ce8883ccf3b2f4ea3b73dc62842a20353bc4bb78464e6853335bf045d4989d"
+      },
+      "file": "tests/test_docs_examples.py",
+      "fingerprint": "9f437749e36c3a88dad0aea85afd0f80394e889ba68288cd1bc3e32ab4274ba0",
+      "kind": "high_entropy",
+      "line": 109,
+      "path": "tests/test_docs_examples.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:37ce8883ccf3>"
+    },
+    {
+      "entropy": 4.0168,
+      "evidence": {
+        "entropy": 4.0168,
+        "line": 8,
+        "token_sha256": "717e70101c6f6b17d780f769ff747ad4e85e6b0eb8ee3c6254ae6f9de2f2a87d"
+      },
+      "file": "tests/test_pre_commit_integration_docs.py",
+      "fingerprint": "d559af670ab837fa6b8924fa72720da951134c7cded0100e91ab8213eda181fc",
+      "kind": "high_entropy",
+      "line": 8,
+      "path": "tests/test_pre_commit_integration_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:717e70101c6f>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 31,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "e06ebb12d89889539c85897bfa68722ebaa3b7a381a36a41fb412a219c2af6b6",
+      "kind": "high_entropy",
+      "line": 31,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 57,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "8699a7d3b896747aa7cb84fc585ad130fd5df649914ff79d04611b4d1812789b",
+      "kind": "high_entropy",
+      "line": 57,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 78,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "11fb52bae6464af6035d56bdbf1199647ddd3e909401353d95df5a4363179803",
+      "kind": "high_entropy",
+      "line": 78,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 98,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "fe3f0b009f47ae129547c9905217204ca4649eb6ca43a55b90d3a0f5423ba9d3",
+      "kind": "high_entropy",
+      "line": 98,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 109,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "33a0558c73befc962d146d937b5424cb0934c9bd0754611ff29fbd43b159b806",
+      "kind": "high_entropy",
+      "line": 109,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 120,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "8f7971b2d153273d1f17411c62c2583420c8188c667899cc93280c47039ec696",
+      "kind": "high_entropy",
+      "line": 120,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 136,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "c0911c8051f008966f5dccbd46ddcfff2e4dfa9a722a1cd47bd88f43957e078f",
+      "kind": "high_entropy",
+      "line": 136,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 158,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "832e28440b63e3320e0bb5b68684029dfff9c7e69973445b1dd89f3347a331ef",
+      "kind": "high_entropy",
+      "line": 158,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 169,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "b815dd7cf7de96cb0b4f842f345a1a0f899063d2fa2770b86c14043ecb94d057",
+      "kind": "high_entropy",
+      "line": 169,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 196,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "a86dca0373c18e137f9e9b82d4835060da406c54878efa0634d8cfcb7a2dfb99",
+      "kind": "high_entropy",
+      "line": 196,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 235,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "ce05344b3bd66e98c899227101ab7cc489347d63ec02ac18b6aa5c8828a2f5c3",
+      "kind": "high_entropy",
+      "line": 235,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 265,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "da7972ee06a5d05bcb390d1731660e068c7a4e0041bc9d5f8935c61a0b49a8e6",
+      "kind": "high_entropy",
+      "line": 265,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 381,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "a62ab7824872aa7db328a52b755f6e49574ccddfb5d496f903fdebf054445362",
+      "kind": "high_entropy",
+      "line": 381,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 418,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "f96b37d932046a1bf8098114669bfa1130813e28f100c0e3ab1bdd497dacf924",
+      "kind": "high_entropy",
+      "line": 418,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 552,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "0e95e0fc4edc081d56761d6affda0c88b723fc5099e85db90870b709352b9782",
+      "kind": "high_entropy",
+      "line": 552,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 558,
+        "token_sha256": "4ba68aa8767bde72e8c798ee82d1275291cea73e72ad74d35ecf48e41386eb82"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "a98a21f84e3d5ae743be7de8f6a56f5199a760ba4717d7e87ee838dba0cf2419",
+      "kind": "high_entropy",
+      "line": 558,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:4ba68aa8767b>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 578,
+        "token_sha256": "4ba68aa8767bde72e8c798ee82d1275291cea73e72ad74d35ecf48e41386eb82"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "bfd16154177440cb92cc9fb7519b27baa529626cc1af19b6d321063819e1d225",
+      "kind": "high_entropy",
+      "line": 578,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:4ba68aa8767b>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 587,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "02364530d1471e7545e99428e6e1443bf5d22fa71d797f3568bba167d250dcda",
+      "kind": "high_entropy",
+      "line": 587,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 612,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "1491a37cb3212ded357d08d27c74224efc3c7f46ce49163f3902bc944ea6990a",
+      "kind": "high_entropy",
+      "line": 612,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 630,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "774e503a30502de189932a0ea32e57ec1816334cbb0125d05991f1f9ec989157",
+      "kind": "high_entropy",
+      "line": 630,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 655,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "e7a6fe9e2de8f707b0bd6fbe059e7a12e16865436a47c44ce4c5abb7e6fbaa76",
+      "kind": "high_entropy",
+      "line": 655,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.3752,
+      "evidence": {
+        "entropy": 4.3752,
+        "line": 674,
+        "token_sha256": "99bcbc0f124328d504536e30b6c3e7a704a910435fc46be9c499886b473f685b"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "2b8c3f3873d2c27cbddccc53cde5d7384e34b402deb528f41c32b5a86edeee7a",
+      "kind": "high_entropy",
+      "line": 674,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:99bcbc0f1243>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 708,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "ad8ff64809f188b4eec0900e93b67cf1d741a71c85037d1370ad20fe287bfb0f",
+      "kind": "high_entropy",
+      "line": 708,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.3752,
+      "evidence": {
+        "entropy": 4.3752,
+        "line": 727,
+        "token_sha256": "99bcbc0f124328d504536e30b6c3e7a704a910435fc46be9c499886b473f685b"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "199a7dfae9ae529b82a797b43d7eda34bb4638b32ada2a7678bdadf1210195f2",
+      "kind": "high_entropy",
+      "line": 727,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:99bcbc0f1243>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 759,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "9fa26dddc3b6a863f8097cbb979292d3b2b0253a61cacd0e1514deee7e3ca980",
+      "kind": "high_entropy",
+      "line": 759,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 777,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "37af81cc7fd0c18fff9229e70565628f2428c19958202aeb8cb75866c5e15ef5",
+      "kind": "high_entropy",
+      "line": 777,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 798,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "ae4eb01a24105dd5acd0fc2df467eef3b8a327692d9d0e67a450ebf087a0d7ae",
+      "kind": "high_entropy",
+      "line": 798,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 820,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "dddda187f0ccb16f01e47e94bb8c8e3ac5bbca3f1cd5ba64f03d4eecf0994128",
+      "kind": "high_entropy",
+      "line": 820,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 838,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "9691c66a3929989872477a7c1639e154db6a1c521a8b434a0bb0d3845d12eccf",
+      "kind": "high_entropy",
+      "line": 838,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 875,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "159327ff9e61e04ffd0d1f0b3a728f8d65392405753423abdb13bdc1ea7cf545",
+      "kind": "high_entropy",
+      "line": 875,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0666,
+      "evidence": {
+        "entropy": 4.0666,
+        "line": 884,
+        "token_sha256": "fc21757bcefdeabaa9b2ed93da14c4176acce3b5feb02fd1464dbf750e25e46a"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "b83077abb1bb59ce7b663846f95a81afd4d839870cf288d9e51c278f6d3a23a2",
+      "kind": "high_entropy",
+      "line": 884,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:fc21757bcefd>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 893,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "c170433765a26ccb8e2a7eb4d8962f111103b497b633effea73f21ca38df571e",
+      "kind": "high_entropy",
+      "line": 893,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 910,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_scanner.py",
+      "fingerprint": "77515b2669f1b5a9f99dca82d569aac997a36c89f88a6b678bd3a4446db89b4a",
+      "kind": "high_entropy",
+      "line": 910,
+      "path": "tests/test_scanner.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0566,
+      "evidence": {
+        "entropy": 4.0566,
+        "line": 63,
+        "token_sha256": "3ed76b8efd39d61b09a5af70a37560cb7466df776c3b873f16e71b7781e7cc32"
+      },
+      "file": "tests/test_self_dogfooding_docs.py",
+      "fingerprint": "235965abf123eed98c953641e441df1af348bf06b6eb07399a5f45a25e8d63ba",
+      "kind": "high_entropy",
+      "line": 63,
+      "path": "tests/test_self_dogfooding_docs.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3ed76b8efd39>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 15,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_symlink_policy.py",
+      "fingerprint": "faede41a74acbe02cbbe5f79c044f00a9fd30f0332e48f35d128576c61cc474a",
+      "kind": "high_entropy",
+      "line": 15,
+      "path": "tests/test_symlink_policy.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "entropy": 4.0067,
+      "evidence": {
+        "entropy": 4.0067,
+        "line": 47,
+        "token_sha256": "5ef48d4c7782489850363bf54e3e7c4c9cde0d3c096a949edb2d46822182876a"
+      },
+      "file": "tests/test_symlink_policy.py",
+      "fingerprint": "0f2f0c2f1932b471bfefd6a3b6399675dbdb4091b3409bc5d7568423ae7be8f0",
+      "kind": "high_entropy",
+      "line": 47,
+      "path": "tests/test_symlink_policy.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:5ef48d4c7782>"
+    },
+    {
+      "entropy": 4.1256,
+      "evidence": {
+        "entropy": 4.1256,
+        "line": 145,
+        "token_sha256": "99d4b1d3187158944543a555f1ee98bc4215aae8d9a5d891d4588739c7eb1d66"
+      },
+      "file": "tests/test_symlink_policy.py",
+      "fingerprint": "7fc46a9c683af5a3d7d5c10636473a36b73b060bc69a65721339ca17a2151862",
+      "kind": "high_entropy",
+      "line": 145,
+      "path": "tests/test_symlink_policy.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:99d4b1d31871>"
+    },
+    {
+      "entropy": 5.0033,
+      "evidence": {
+        "entropy": 5.0033,
+        "line": 21,
+        "token_sha256": "ae8754608195aafb81001fbdb911f6019eb8b13fa6e5ef7229ea71b0b9a7f976"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "1c67a68f11c305f2f6bf4932c0e490bac428c5869e3b5dda62d3ef1d96d8304a",
+      "kind": "high_entropy",
+      "line": 21,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:ae8754608195>"
+    },
+    {
+      "entropy": 4.0,
+      "evidence": {
+        "entropy": 4.0,
+        "line": 50,
+        "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "1e36902fa1a321c856e6495425396ca63e6e1bd1a7f39f98ab0309d4dfb8ff1a",
+      "kind": "high_entropy",
+      "line": 50,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
+      "rule_id": "secret.high_entropy",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:3eb1bd439947>"
+    },
+    {
+      "evidence": {
+        "path": "examples/dirty-repo/.env",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "0076c0f341d866bc1393fdbeef9cd5a3bb92996dce730a68944cb084db40626b",
+      "kind": "suspicious_file",
+      "path": "examples/dirty-repo/.env",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "path": "examples/dirty-repo/secrets/service.pem",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "7896a06bfb0beca786394fddbd18b96f08719b93a70fd19b46241fcfb61fd732",
+      "kind": "suspicious_file",
+      "path": "examples/dirty-repo/secrets/service.pem",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "path": "tests/fixtures/sample_repo/.env",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "b9fe990c24039ba1d8397c38266812b8879df726700389edfa1e36c60efdf67e",
+      "kind": "suspicious_file",
+      "path": "tests/fixtures/sample_repo/.env",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "path": "tests/fixtures/sample_repo/certs/service.pem",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "6b93feeefa29e0248450eadc8cdcefe152bba792e1dc4aed815f2249adc1d242",
+      "kind": "suspicious_file",
+      "path": "tests/fixtures/sample_repo/certs/service.pem",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "path": "tests/fixtures/sample_repo/keys/id_rsa",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "667b86a7d6bc0450793e5a6dbccb1109a31606276d4180c752573ac48c79b13e",
+      "kind": "suspicious_file",
+      "path": "tests/fixtures/sample_repo/keys/id_rsa",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "path": "tests/fixtures/sample_repo/vault/archive.kdbx",
+        "pattern_family": "suspicious filename"
+      },
+      "fingerprint": "7af820cd8b9b17188006d0e35e2c420777a7fb6f6a990eeafc59bd1ac7bd9f86",
+      "kind": "suspicious_file",
+      "path": "tests/fixtures/sample_repo/vault/archive.kdbx",
+      "remediation_hint": "Review whether the file belongs in source. Remove real secrets or baseline intentionally reviewed fixtures.",
+      "rule_id": "repo.suspicious_filename",
+      "rule_version": "1",
+      "severity": "error"
+    },
+    {
+      "evidence": {
+        "line": 23,
+        "pattern": "assignment to api_key",
+        "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "faf53783d41b1f04965b4f82b4173703fb0b662c9669cf9bf689f00f8362092d",
+      "kind": "assignment_context",
+      "line": 23,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:a99a2c74677a>"
+    },
+    {
+      "evidence": {
+        "line": 122,
+        "pattern": "assignment to api_key",
+        "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "e0e824ee568644a8f8ff07e8ea4a0c6d2939f72e414d7123664fb182969daf0b",
+      "kind": "assignment_context",
+      "line": 122,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:a99a2c74677a>"
+    },
+    {
+      "evidence": {
+        "line": 137,
+        "pattern": "assignment to token",
+        "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "9e925330a3924e44d868e13f488af09e7497056fe9189cf7439e8ec4a563dca2",
+      "kind": "assignment_context",
+      "line": 137,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:a99a2c74677a>"
+    },
+    {
+      "evidence": {
+        "line": 175,
+        "pattern": "assignment to api_key",
+        "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "71dda71c820b60eee86981499e79208e16d11b52117ffa3d9d20b2b732c50556",
+      "kind": "assignment_context",
+      "line": 175,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:bfa881774a7e>"
+    },
+    {
+      "evidence": {
+        "line": 176,
+        "pattern": "assignment to api_key",
+        "token_sha256": "6cf2a76b345349a582345512fa2ab2df6219323866667f1862fe1160ecf9d71a"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "3a5ac03e9c5eab25844fd0f05ad0215f107ae1898c6a9da0c112af0cfd0013a1",
+      "kind": "assignment_context",
+      "line": 176,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:6cf2a76b3453>"
+    },
+    {
+      "evidence": {
+        "line": 185,
+        "pattern": "assignment to api_key",
+        "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "cf698c1375124082d1702fb58c9b64e43cf68a74070a06d14cab75058a878c35",
+      "kind": "assignment_context",
+      "line": 185,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:bfa881774a7e>"
+    },
+    {
+      "evidence": {
+        "line": 186,
+        "pattern": "assignment to api_key",
+        "token_sha256": "6cf2a76b345349a582345512fa2ab2df6219323866667f1862fe1160ecf9d71a"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "c47107e0634c2bd420aeb508a294bbdb568de4ae2281afe74c5d25e3575f1ca0",
+      "kind": "assignment_context",
+      "line": 186,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:6cf2a76b3453>"
+    },
+    {
+      "evidence": {
+        "line": 212,
+        "pattern": "assignment to api_key",
+        "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "292d3505b69f86ca1d7926e6c40b430ce0306976195eafc6d77a2c11f17988fc",
+      "kind": "assignment_context",
+      "line": 212,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
+      "rule_id": "secret.assignment_context",
+      "rule_version": "1",
+      "severity": "warning",
+      "token": "<redacted:sha256:bfa881774a7e>"
+    },
+    {
+      "evidence": {
+        "line": 22,
+        "pattern": "AWS access-key-like prefix",
+        "token_sha256": "457643f44d19aed85fd756aa50cc0cd6b57376d4e8f5a72f9f85972a522002a3"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "1b750269cadf70d602e592f33ab6673a678f70d98b19ecaf67579271d7910d6d",
+      "kind": "aws_access_key_id",
+      "line": 22,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Rotate the key if it is real, remove it from source, and replace it with a safe fixture or environment reference.",
+      "rule_id": "secret.aws_access_key_id",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:457643f44d19>"
+    },
+    {
+      "evidence": {
+        "line": 21,
+        "pattern": "GitHub token prefix",
+        "token_sha256": "ae8754608195aafb81001fbdb911f6019eb8b13fa6e5ef7229ea71b0b9a7f976"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "b6c1526ad601f54a5c6235c3bb98ee3b62631ef20e9020acfdae21059b1728d1",
+      "kind": "github_token",
+      "line": 21,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Revoke the token if real, remove it from source, and replace it with a placeholder or secret manager reference.",
+      "rule_id": "secret.github_token",
+      "rule_version": "1",
+      "severity": "error",
+      "token": "<redacted:sha256:ae8754608195>"
+    },
+    {
+      "evidence": {
+        "line": 24,
+        "pattern": "PEM private-key header"
+      },
+      "file": "tests/test_v08_semantics.py",
+      "fingerprint": "14c6bc56494cb90dd77580778a20d29279e9d65df173e2ed25131fbe3219a5c5",
+      "kind": "pem_private_key",
+      "line": 24,
+      "path": "tests/test_v08_semantics.py",
+      "remediation_hint": "Remove the private key from source, rotate it if real, and replace it with a synthetic fixture if documentation needs one.",
+      "rule_id": "secret.pem_private_key",
+      "rule_version": "1",
+      "severity": "error"
+    }
+  ],
+  "generated_at": "2026-08-08T14:20:49Z",
+  "schema_version": 1
+}

@@ -26,9 +26,11 @@ Each current finding also includes `rule_id`, `rule_version`, `severity`,
 kept so older baseline entries remain readable.
 
 When a baseline entry has a `fingerprint`, matching prefers that fingerprint.
-Legacy entries without fingerprints still match by finding identity, such as
-kind plus path, or kind plus file, line, token, and entropy for high-entropy
-findings.
+The line-independent content identity (`rule_id + path + token_sha256`) is
+also accepted, so a reviewed token remains suppressed after a line-only move.
+Legacy entries without fingerprints still match by their historical finding
+identity, such as kind plus path, or kind plus file, line, token, and entropy
+for high-entropy findings.
 
 Apply an explicit baseline with:
 
@@ -139,13 +141,60 @@ repo-sentinel baseline audit --baseline .reposentinel-baseline.json .
 The audit output groups entries as:
 
 - `active`: a baseline entry still matches a current finding
+- `relocated`: the same `rule_id`, path, and token hash are present at a
+  different line
+- `changed`: the same `rule_id`, path, and line remain, but the token hash
+  changed
 - `stale`: a baseline entry no longer matches any current finding
 - `ambiguous`: a baseline entry points at the same rule and location but no
-  longer has a matching fingerprint
+  longer has a unique content or location match
 - `unmatched`: a current finding is not covered by the baseline
 
-Treat `ambiguous` and `unmatched` entries as review prompts. Do not silently
-refresh them without checking why the fingerprint or rule evidence changed.
+The audit's content identity is `rule_id + path + token_sha256`; its location
+identity is that content identity plus `line`. Findings without tokens use
+`rule_id + path`. The legacy fingerprint remains accepted for compatibility,
+but line movement is classified through these identities instead of being
+reported as stale.
+
+Treat `relocated`, `changed`, `ambiguous`, and `unmatched` entries as review
+prompts. Do not silently refresh them without checking why the finding moved,
+changed content, or lost a unique identity match.
+
+## CI Gate Policy
+
+The remote pull-request gate scans only changed files, but it does not trust
+policy files from the pull request to define its own security boundary. The
+root `.reposentinel.toml` and `.reposentinel-baseline.json` are protected
+policy files:
+
+- changing either file fails the ordinary changed-file gate and requires a
+  dedicated policy review
+- when neither file changed, the gate extracts `.reposentinel-baseline.json`
+  from the trusted `BASE_SHA` and passes it through explicit `--baseline`
+- when the trusted base has no baseline, the gate passes `--no-default-baseline`
+  so a PR-head baseline cannot become an implicit suppression source
+
+The unchanged policy is then used with this exit policy:
+
+- an error finding in a changed file blocks the pull request
+- a warning finding in a changed file is reported but does not block
+- skipped coverage entries are reported but do not change the exit status
+- baseline `active`, `relocated`, `changed`, `stale`, `ambiguous`, and `unmatched`
+  classifications are
+  emitted by a separate non-blocking audit job
+
+This keeps historical active suppressions out of the normal changed-file gate
+without allowing a pull request to add its own exemption. They remain
+reviewable in the audit artifact rather than becoming daily pull request noise.
+
+Manual classification is still required before changing a committed baseline:
+
+1. Confirm each active entry is an intentionally reviewed example or repository
+   condition.
+2. Investigate every relocated, changed, stale, ambiguous, and unmatched entry
+   against the source diff and current rule evidence.
+3. Keep the audit result as review evidence; do not make the audit job blocking
+   merely to force historical suppressions to zero.
 
 ## Allowlists and Scoped Exceptions
 

@@ -3,10 +3,11 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Sequence
+from string import hexdigits
 
 from .config import normalize_path, sort_key, token_sha256
 from .coverage import extract_coverage, normalize_coverage
-from .redaction import redact_report, render_token
+from .redaction import REDACTED_TOKEN_PREFIX, redact_report, render_token
 from .rules.entropy import EntropyFinding
 from .rules.registry import RULE_DEFINITIONS, SEVERITY_RANKS, rule_for_kind
 
@@ -18,9 +19,17 @@ def build_report(
     coverage: object | None = None,
 ) -> dict[str, object]:
     findings_by_fingerprint: dict[str, dict[str, object]] = {}
+    identities_by_fingerprint: dict[str, tuple[object, ...]] = {}
     for finding in findings:
         normalized = _report_finding(finding)
         fingerprint = str(normalized["fingerprint"])
+        identity = finding_location_identity(normalized)
+        previous_identity = identities_by_fingerprint.get(fingerprint)
+        if previous_identity is not None and previous_identity != identity:
+            raise ValueError(
+                "fingerprint collision for distinct findings: " f"{fingerprint}"
+            )
+        identities_by_fingerprint[fingerprint] = identity
         findings_by_fingerprint.setdefault(fingerprint, normalized)
 
     normalized_findings = list(findings_by_fingerprint.values())
@@ -374,7 +383,10 @@ def finding_matches_baseline(
     fingerprint = finding_fingerprint(normalized)
     if fingerprint in baseline_fingerprint_keys:
         return True
-    return baseline_finding_identity(normalized) in baseline_finding_keys
+    return (
+        baseline_finding_identity(normalized) in baseline_finding_keys
+        or finding_content_identity(normalized) in baseline_finding_keys
+    )
 
 
 def baseline_finding_with_fingerprint(
@@ -383,6 +395,24 @@ def baseline_finding_with_fingerprint(
     normalized = coerce_finding(finding)
     normalized["fingerprint"] = finding_fingerprint(normalized)
     return normalized
+
+
+def validate_fingerprint_invariant(
+    findings: Sequence[dict[str, object]],
+) -> None:
+    identities_by_fingerprint: dict[str, tuple[object, ...]] = {}
+    for finding in findings:
+        normalized = coerce_finding(finding, preserve_fingerprint=True)
+        fingerprint = normalized.get("fingerprint")
+        if not isinstance(fingerprint, str):
+            continue
+        identity = finding_location_identity(normalized)
+        previous_identity = identities_by_fingerprint.get(fingerprint)
+        if previous_identity is not None and previous_identity != identity:
+            raise ValueError(
+                "fingerprint collision for distinct findings: " f"{fingerprint}"
+            )
+        identities_by_fingerprint[fingerprint] = identity
 
 
 def baseline_finding_sort_key(finding: dict[str, object]) -> tuple[object, ...]:
@@ -441,6 +471,67 @@ def baseline_finding_identity(finding: dict[str, object]) -> tuple[object, ...]:
         kind,
         normalize_path(str(normalized.get("file", normalized.get("path")))),
         int(normalized.get("line", 0)),
+    )
+
+
+def finding_content_identity(finding: dict[str, object]) -> tuple[object, ...]:
+    """Return the line-independent identity used for baseline drift audit.
+
+    Token-bearing findings use ``rule_id + path + token_sha256``. Findings
+    without a token, such as missing or suspicious files, use ``rule_id +
+    path`` because there is no content token to hash.
+    """
+    normalized = coerce_finding(finding, preserve_fingerprint=True)
+    path = normalize_path(
+        str(normalized.get("path", normalized.get("file", "")))
+    )
+    token_digest = _finding_token_sha256(normalized)
+    if "token" in normalized:
+        return (str(normalized["rule_id"]), path, token_digest)
+    if token_digest is None:
+        return (str(normalized["rule_id"]), path)
+    return (str(normalized["rule_id"]), path, token_digest)
+
+
+def finding_location_identity(finding: dict[str, object]) -> tuple[object, ...]:
+    """Return the content identity plus line when the finding has a line."""
+    normalized = coerce_finding(finding, preserve_fingerprint=True)
+    content_identity = finding_content_identity(normalized)
+    if "line" not in normalized:
+        return content_identity
+    return (*content_identity, int(normalized["line"]))
+
+
+def finding_rule_location_identity(
+    finding: dict[str, object],
+) -> tuple[object, ...]:
+    """Return rule, path, and line without treating token changes as moves."""
+    normalized = coerce_finding(finding, preserve_fingerprint=True)
+    path = normalize_path(
+        str(normalized.get("path", normalized.get("file", "")))
+    )
+    identity: tuple[object, ...] = (str(normalized["rule_id"]), path)
+    if "line" in normalized:
+        identity = (*identity, int(normalized["line"]))
+    return identity
+
+
+def _finding_token_sha256(finding: dict[str, object]) -> str | None:
+    evidence = finding.get("evidence")
+    if isinstance(evidence, dict):
+        evidence_digest = evidence.get("token_sha256")
+        if isinstance(evidence_digest, str) and _is_sha256_digest(evidence_digest):
+            return evidence_digest.lower()
+
+    token = finding.get("token")
+    if not isinstance(token, str) or token.startswith(REDACTED_TOKEN_PREFIX):
+        return None
+    return token_sha256(token)
+
+
+def _is_sha256_digest(value: str) -> bool:
+    return len(value) == 64 and all(
+        character in hexdigits for character in value
     )
 
 
@@ -622,8 +713,11 @@ __all__ = [
     "entropy_baseline_finding",
     "extract_findings",
     "extract_report_components",
+    "finding_content_identity",
     "finding_fingerprint",
+    "finding_location_identity",
     "finding_matches_baseline",
+    "finding_rule_location_identity",
     "format_report",
     "format_text_report",
     "has_findings",
@@ -633,4 +727,5 @@ __all__ = [
     "report_finding",
     "severity_label",
     "suspicious_file_baseline_finding",
+    "validate_fingerprint_invariant",
 ]
