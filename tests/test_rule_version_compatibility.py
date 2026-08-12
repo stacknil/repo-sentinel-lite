@@ -255,7 +255,7 @@ def test_report_shaped_baseline_load_preserves_version_provenance(
 
 
 @pytest.mark.parametrize("missing_version", [False, True])
-def test_exact_fingerprint_version_drift_precedes_duplicate_content_ambiguity(
+def test_exact_match_precedes_duplicate_content_ambiguity(
     missing_version: bool,
 ) -> None:
     baseline = baseline_from_report(_report(rule_version="1", line=2))
