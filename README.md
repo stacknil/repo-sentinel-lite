@@ -59,6 +59,8 @@ Release notes for v0.7.1 are tracked in
 [`docs/release-notes-v0.7.1.md`](docs/release-notes-v0.7.1.md).
 Release notes for v0.8.0 are tracked in
 [`docs/release-notes-v0.8.0.md`](docs/release-notes-v0.8.0.md).
+Release notes for the v0.8.1 registry recovery are tracked in
+[`docs/release-notes-v0.8.1.md`](docs/release-notes-v0.8.1.md).
 
 Scan the current repository. This defaults to deterministic JSON output:
 

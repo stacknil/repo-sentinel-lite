@@ -89,7 +89,7 @@ def test_main_metadata_matches_runtime_version() -> None:
         )
     )["project"]
 
-    assert project["version"] == __version__ == "0.8.0"
+    assert project["version"] == __version__ == "0.8.1"
 
 
 def test_scan_command_emits_stable_json(

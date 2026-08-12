@@ -27,7 +27,7 @@ def test_pre_commit_integration_guide_covers_adoption_workflow() -> None:
         "python -m pip install pre-commit",
         "python -m pip install repo-sentinel-lite",
         "repo: https://github.com/stacknil/repo-sentinel-lite",
-        "rev: v0.8.0",
+        "rev: v0.8.1",
         "id: repo-sentinel-error",
         "id: repo-sentinel-warning",
         "id: repo-sentinel-error-changed",

@@ -41,7 +41,7 @@ Add `.pre-commit-config.yaml` to the consumer repository:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.8.0
+    rev: v0.8.1
     hooks:
       - id: repo-sentinel-error
 ```
@@ -52,7 +52,7 @@ standard files as well as suspicious files and high-entropy findings:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.8.0
+    rev: v0.8.1
     hooks:
       - id: repo-sentinel-warning
 ```
@@ -84,7 +84,7 @@ changed-files hooks:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.8.0
+    rev: v0.8.1
     hooks:
       - id: repo-sentinel-error-changed
 ```
