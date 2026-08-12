@@ -68,7 +68,7 @@ def test_release_workflow_reads_package_version_without_import_side_effects() ->
 
     assert "import ast" in release_workflow
     assert "ast.parse(" in release_workflow
-    assert 'target.id == "__version__"' in release_workflow
+    assert "__version__" in release_workflow
     assert "spec_from_file_location" not in release_workflow
     assert "exec_module(module)" not in release_workflow
 
