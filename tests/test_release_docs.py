@@ -61,6 +61,18 @@ def test_release_workflow_and_sop_keep_publisher_targets_aligned() -> None:
         assert value in release_workflow
 
 
+def test_release_workflow_reads_package_version_without_import_side_effects() -> None:
+    release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "import ast" in release_workflow
+    assert "ast.parse(" in release_workflow
+    assert 'target.id == "__version__"' in release_workflow
+    assert "spec_from_file_location" not in release_workflow
+    assert "exec_module(module)" not in release_workflow
+
+
 def test_docs_do_not_include_profile_positioning_notes() -> None:
     forbidden_names = {
         "profile-pin-note.md",
