@@ -201,6 +201,7 @@ def test_baseline_audit_classifies_relocated_redacted_finding() -> None:
 
     assert audit["summary"] == {
         "active": 0,
+        "rule_changed": 0,
         "relocated": 1,
         "changed": 0,
         "stale": 0,
@@ -272,6 +273,7 @@ def test_baseline_audit_classifies_changed_content_at_same_location() -> None:
 
     assert audit["summary"] == {
         "active": 0,
+        "rule_changed": 0,
         "relocated": 0,
         "changed": 1,
         "stale": 0,
@@ -318,6 +320,7 @@ def test_baseline_audit_keeps_duplicate_content_relocation_ambiguous() -> None:
 
     assert audit["summary"] == {
         "active": 0,
+        "rule_changed": 0,
         "relocated": 0,
         "changed": 0,
         "stale": 0,
@@ -451,7 +454,8 @@ def test_baseline_audit_classifies_current_drift(tmp_path: Path, capsys) -> None
 
     assert exit_code == 0
     assert audit["summary"] == {
-        "active": 2,
+        "active": 0,
+        "rule_changed": 2,
         "relocated": 0,
         "changed": 0,
         "stale": 1,
