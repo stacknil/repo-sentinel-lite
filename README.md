@@ -98,6 +98,10 @@ Audit baseline drift without suppressing the classification output:
 repo-sentinel baseline audit --baseline baseline.json path/to/repo
 ```
 
+The audit reports `rule_changed` when the same rule and evidence were reviewed
+under a different rule version. Suppression remains compatible, but the rule
+change requires an explicit re-review before refreshing the baseline.
+
 If the scanned repository already contains `.reposentinel-baseline.json`,
 `repo-sentinel scan` applies it automatically.
 

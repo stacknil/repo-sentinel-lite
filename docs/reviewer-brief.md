@@ -63,10 +63,11 @@ The CLI emits deterministic JSON or concise text summaries that surface:
 
 The baseline path is intentionally reviewable: a previously accepted finding
 can be checked back in and applied locally without changing scanner behavior.
-`repo-sentinel baseline audit` classifies drift as active, relocated, changed,
-stale, ambiguous, or unmatched. Relocation uses a line-independent
-`rule_id`/path/token-hash identity, while content changes at the same location
-remain separately reviewable.
+`repo-sentinel baseline audit` classifies drift as active, `rule_changed`,
+relocated, changed, stale, ambiguous, or unmatched. Rule-version drift keeps the
+same suppression identity but requires re-review before baseline refresh.
+Relocation uses a line-independent `rule_id`/path/token-hash identity, while
+content changes at the same location remain separately reviewable.
 
 The pull-request changed-file gate rejects changes to the root security policy
 files and otherwise uses the reviewed base revision's baseline. This prevents a
