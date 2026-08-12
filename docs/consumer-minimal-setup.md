@@ -77,7 +77,7 @@ Pin the provider by release tag:
 ```yaml
 repos:
   - repo: https://github.com/stacknil/repo-sentinel-lite
-    rev: v0.8.0
+    rev: v0.8.1
     hooks:
       - id: repo-sentinel-error
 ```
@@ -116,7 +116,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
-      - run: python -m pip install repo-sentinel-lite==0.8.0
+      - run: python -m pip install repo-sentinel-lite==0.8.1
       - name: Scan changed files
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
