@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           mapfile -d '' policy_files < <(
-            git diff --name-only --diff-filter=ACMRD --no-renames -z \
+            git diff --name-only --diff-filter=ACMRTD --no-renames -z \
               "$BASE_SHA" "$HEAD_SHA"
           )
           for path in "${policy_files[@]}"; do
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           mapfile -d '' changed_files < <(
-            git diff --name-only --diff-filter=ACMR --no-renames -z \
+            git diff --name-only --diff-filter=ACMRT --no-renames -z \
               "$BASE_SHA" "$HEAD_SHA"
           )
           printf 'Changed files: %s\n' "${#changed_files[@]}"
