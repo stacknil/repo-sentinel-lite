@@ -4,4 +4,4 @@ from .api import scan_repository
 
 __all__ = ["__version__", "scan_repository"]
 
-__version__ = "0.8.1"
+__version__ = "0.9.0.dev0"

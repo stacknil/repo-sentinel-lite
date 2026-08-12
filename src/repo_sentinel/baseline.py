@@ -31,7 +31,20 @@ def load_baseline(path: Path) -> dict[str, object]:
         raise ValueError(f"baseline is not valid JSON: {exc.msg}") from exc
 
     if _looks_like_legacy_report(data):
-        return baseline_from_report(normalize_report(data))
+        baseline = baseline_from_report(data)
+        source_findings = data.get("findings")
+        if isinstance(source_findings, list):
+            source_versions_by_fingerprint = _source_versions_by_fingerprint(
+                source_findings
+            )
+            for finding in baseline["findings"]:
+                fingerprint = str(finding["fingerprint"])
+                if source_versions_by_fingerprint.get(fingerprint) is None:
+                    finding.pop("rule_version", None)
+        else:
+            for finding in baseline["findings"]:
+                finding.pop("rule_version", None)
+        return baseline
 
     return normalize_baseline(data)
 
@@ -133,6 +146,7 @@ def audit_baseline(
         ).append(finding)
 
     active: list[dict[str, object]] = []
+    rule_changed: list[dict[str, object]] = []
     relocated: list[dict[str, object]] = []
     changed: list[dict[str, object]] = []
     stale: list[dict[str, object]] = []
@@ -141,13 +155,53 @@ def audit_baseline(
 
     for baseline_finding in baseline_findings:
         fingerprint = baseline_finding.get("fingerprint")
-        if isinstance(fingerprint, str) and fingerprint in current_by_fingerprint:
-            active.append(baseline_finding)
-            matched_current_fingerprints.add(fingerprint)
+        exact_finding = (
+            current_by_fingerprint.get(fingerprint)
+            if isinstance(fingerprint, str)
+            else None
+        )
+        if exact_finding is not None:
+            rule_change_reason = _rule_version_change_reason(
+                baseline_finding, exact_finding
+            )
+            if rule_change_reason is not None:
+                rule_changed.append(
+                    {
+                        "baseline": baseline_finding,
+                        "current": exact_finding,
+                        "reason": rule_change_reason,
+                    }
+                )
+            else:
+                active.append(baseline_finding)
+            matched_current_fingerprints.add(str(exact_finding["fingerprint"]))
             continue
 
         content_identity = finding_content_identity(baseline_finding)
         content_identity_is_comparable = _identity_is_comparable(content_identity)
+        content_candidates = (
+            current_by_content_identity.get(content_identity, [])
+            if content_identity_is_comparable
+            else []
+        )
+        if len(content_candidates) == 1:
+            current_finding = content_candidates[0]
+            rule_change_reason = _rule_version_change_reason(
+                baseline_finding, current_finding
+            )
+            if rule_change_reason is not None:
+                rule_changed.append(
+                    {
+                        "baseline": baseline_finding,
+                        "current": current_finding,
+                        "reason": rule_change_reason,
+                    }
+                )
+                matched_current_fingerprints.add(
+                    str(current_finding["fingerprint"])
+                )
+                continue
+
         location_candidates = (
             current_by_location_identity.get(
                 finding_location_identity(baseline_finding), []
@@ -173,11 +227,6 @@ def audit_baseline(
             )
             continue
 
-        content_candidates = (
-            current_by_content_identity.get(content_identity, [])
-            if content_identity_is_comparable
-            else []
-        )
         if len(content_candidates) == 1:
             relocated_finding = content_candidates[0]
             relocated.append(
@@ -255,12 +304,16 @@ def audit_baseline(
     ]
     return {
         "active": sorted(active, key=baseline_finding_sort_key),
+        "rule_changed": sorted(
+            rule_changed, key=_classified_baseline_sort_key
+        ),
         "relocated": sorted(relocated, key=_classified_baseline_sort_key),
         "changed": sorted(changed, key=_classified_baseline_sort_key),
         "stale": sorted(stale, key=baseline_finding_sort_key),
         "ambiguous": sorted(ambiguous, key=_classified_baseline_sort_key),
         "summary": {
             "active": len(active),
+            "rule_changed": len(rule_changed),
             "relocated": len(relocated),
             "changed": len(changed),
             "stale": len(stale),
@@ -283,7 +336,9 @@ def format_baseline_audit(
     audit: dict[str, object], *, output_format: str = "text"
 ) -> str:
     if output_format == "json":
-        return json.dumps(audit, indent=2, sort_keys=True) + "\n"
+        return json.dumps(
+            redact_baseline(audit), indent=2, sort_keys=True
+        ) + "\n"
 
     summary = audit.get("summary", {})
     if not isinstance(summary, dict):
@@ -291,6 +346,7 @@ def format_baseline_audit(
     lines = [
         "Baseline audit:",
         f"active: {int(summary.get('active', 0))}",
+        f"rule_changed: {int(summary.get('rule_changed', 0))}",
         f"relocated: {int(summary.get('relocated', 0))}",
         f"changed: {int(summary.get('changed', 0))}",
         f"stale: {int(summary.get('stale', 0))}",
@@ -384,7 +440,11 @@ def baseline_match_keys(
 def coerce_baseline_finding(value: object) -> dict[str, object]:
     if not isinstance(value, dict):
         raise ValueError("baseline findings entries must be objects")
-    return coerce_finding(value, preserve_fingerprint=True)
+    normalized = coerce_finding(value, preserve_fingerprint=True)
+    persisted_rule_version = value.get("rule_version")
+    if not isinstance(persisted_rule_version, str) or not persisted_rule_version:
+        normalized.pop("rule_version", None)
+    return normalized
 
 
 def _looks_like_legacy_report(value: object) -> bool:
@@ -396,6 +456,36 @@ def _looks_like_legacy_report(value: object) -> bool:
 
 def _identity_is_comparable(identity: tuple[object, ...]) -> bool:
     return not (len(identity) == 3 and identity[-1] is None)
+
+
+def _source_versions_by_fingerprint(
+    findings: list[object],
+) -> dict[str, str | None]:
+    versions: dict[str, str | None] = {}
+    for source_finding in findings:
+        normalized = coerce_baseline_finding(source_finding)
+        fingerprint = normalized.get("fingerprint")
+        if not isinstance(fingerprint, str):
+            continue
+        rule_version = normalized.get("rule_version")
+        versions[fingerprint] = (
+            rule_version if isinstance(rule_version, str) else None
+        )
+    return versions
+
+
+def _rule_version_change_reason(
+    baseline_finding: dict[str, object], current_finding: dict[str, object]
+) -> str | None:
+    if baseline_finding.get("rule_id") != current_finding.get("rule_id"):
+        return None
+    baseline_version = baseline_finding.get("rule_version")
+    current_version = current_finding.get("rule_version")
+    if not isinstance(baseline_version, str) or not baseline_version:
+        return "unknown baseline rule version"
+    if baseline_version != current_version:
+        return f"rule version changed from {baseline_version} to {current_version}"
+    return None
 
 
 def _classified_baseline_sort_key(
