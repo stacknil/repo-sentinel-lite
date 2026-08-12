@@ -1534,13 +1534,13 @@
       "entropy": 5.0033,
       "evidence": {
         "entropy": 5.0033,
-        "line": 21,
+        "line": 31,
         "token_sha256": "ae8754608195aafb81001fbdb911f6019eb8b13fa6e5ef7229ea71b0b9a7f976"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "1c67a68f11c305f2f6bf4932c0e490bac428c5869e3b5dda62d3ef1d96d8304a",
+      "fingerprint": "be4e745d9c34d203aef370d0b53fff9df732f3ce6354a1a40a615c5e9aa3d105",
       "kind": "high_entropy",
-      "line": 21,
+      "line": 31,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
       "rule_id": "secret.high_entropy",
@@ -1552,13 +1552,13 @@
       "entropy": 4.0,
       "evidence": {
         "entropy": 4.0,
-        "line": 50,
+        "line": 60,
         "token_sha256": "3eb1bd439947eb762998e566ccc2e099c791118b2f40579cc4f7da2b5061b7f9"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "1e36902fa1a321c856e6495425396ca63e6e1bd1a7f39f98ab0309d4dfb8ff1a",
+      "fingerprint": "a1745a5a2e4496c2b56a9c2009033a66112fb402b37c0f0f9aee4ec622c2a96d",
       "kind": "high_entropy",
-      "line": 50,
+      "line": 60,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Review the token. If it is real, rotate and remove it; if it is a fixture, baseline or allowlist it with a narrow exception.",
       "rule_id": "secret.high_entropy",
@@ -1646,14 +1646,14 @@
     },
     {
       "evidence": {
-        "line": 23,
+        "line": 33,
         "pattern": "assignment to api_key",
         "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "faf53783d41b1f04965b4f82b4173703fb0b662c9669cf9bf689f00f8362092d",
+      "fingerprint": "23e6bc80f4043b1b8fc25fe1564760d03365aef701eda781294a96fb25d1d0d7",
       "kind": "assignment_context",
-      "line": 23,
+      "line": 33,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1663,14 +1663,14 @@
     },
     {
       "evidence": {
-        "line": 122,
+        "line": 335,
         "pattern": "assignment to api_key",
         "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "e0e824ee568644a8f8ff07e8ea4a0c6d2939f72e414d7123664fb182969daf0b",
+      "fingerprint": "2f83335cfe15024a3d588aa1b3396d0cc3de1ef739be9ddd3dd39f7b1a22d031",
       "kind": "assignment_context",
-      "line": 122,
+      "line": 335,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1680,14 +1680,14 @@
     },
     {
       "evidence": {
-        "line": 137,
+        "line": 350,
         "pattern": "assignment to token",
         "token_sha256": "a99a2c74677a6f26cd5d0882498b32237f121c4a9e5dd215171378c2695124fc"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "9e925330a3924e44d868e13f488af09e7497056fe9189cf7439e8ec4a563dca2",
+      "fingerprint": "a080cab712c32c187e239c675bfcce4a9ec284ba47022f246a914437cf875937",
       "kind": "assignment_context",
-      "line": 137,
+      "line": 350,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1697,14 +1697,14 @@
     },
     {
       "evidence": {
-        "line": 175,
+        "line": 388,
         "pattern": "assignment to api_key",
         "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "71dda71c820b60eee86981499e79208e16d11b52117ffa3d9d20b2b732c50556",
+      "fingerprint": "8e1f77359efce96fb38af6ef86b2dbbac9160ba9b9b303190462a45985551a11",
       "kind": "assignment_context",
-      "line": 175,
+      "line": 388,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1714,14 +1714,14 @@
     },
     {
       "evidence": {
-        "line": 176,
+        "line": 389,
         "pattern": "assignment to api_key",
         "token_sha256": "6cf2a76b345349a582345512fa2ab2df6219323866667f1862fe1160ecf9d71a"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "3a5ac03e9c5eab25844fd0f05ad0215f107ae1898c6a9da0c112af0cfd0013a1",
+      "fingerprint": "2104dec8adfdc5efb9e2866a4d42adbeb382a9528215dbed0ac2669cb7de7b4b",
       "kind": "assignment_context",
-      "line": 176,
+      "line": 389,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1731,14 +1731,14 @@
     },
     {
       "evidence": {
-        "line": 185,
+        "line": 398,
         "pattern": "assignment to api_key",
         "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "cf698c1375124082d1702fb58c9b64e43cf68a74070a06d14cab75058a878c35",
+      "fingerprint": "3b5c083d995ea89fca27ba9c9aca7d3638f34658c1d5652080cf8f9483ec6275",
       "kind": "assignment_context",
-      "line": 185,
+      "line": 398,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1748,14 +1748,14 @@
     },
     {
       "evidence": {
-        "line": 186,
+        "line": 399,
         "pattern": "assignment to api_key",
         "token_sha256": "6cf2a76b345349a582345512fa2ab2df6219323866667f1862fe1160ecf9d71a"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "c47107e0634c2bd420aeb508a294bbdb568de4ae2281afe74c5d25e3575f1ca0",
+      "fingerprint": "83439fc7eee5497c9123a27956c1832a01088e7e04f730ab2d9e684802631e9c",
       "kind": "assignment_context",
-      "line": 186,
+      "line": 399,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1765,14 +1765,14 @@
     },
     {
       "evidence": {
-        "line": 212,
+        "line": 425,
         "pattern": "assignment to api_key",
         "token_sha256": "bfa881774a7ef26f4b173e5492e679ccd8817c3b4358353270e132f0890396f3"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "292d3505b69f86ca1d7926e6c40b430ce0306976195eafc6d77a2c11f17988fc",
+      "fingerprint": "63df53c671e68c125f520d17d1948b6018e93862f4f4a6b8ae0b3eb383055d96",
       "kind": "assignment_context",
-      "line": 212,
+      "line": 425,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Confirm whether the value is synthetic. Prefer placeholders, environment variables, or an allowlist entry for reviewed fixtures.",
       "rule_id": "secret.assignment_context",
@@ -1782,14 +1782,14 @@
     },
     {
       "evidence": {
-        "line": 22,
+        "line": 32,
         "pattern": "AWS access-key-like prefix",
         "token_sha256": "457643f44d19aed85fd756aa50cc0cd6b57376d4e8f5a72f9f85972a522002a3"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "1b750269cadf70d602e592f33ab6673a678f70d98b19ecaf67579271d7910d6d",
+      "fingerprint": "6698af1066e9ef231a83419cb08e4fc96d93fed5ad9e1b74e327f26290c3c1f8",
       "kind": "aws_access_key_id",
-      "line": 22,
+      "line": 32,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Rotate the key if it is real, remove it from source, and replace it with a safe fixture or environment reference.",
       "rule_id": "secret.aws_access_key_id",
@@ -1799,14 +1799,14 @@
     },
     {
       "evidence": {
-        "line": 21,
+        "line": 31,
         "pattern": "GitHub token prefix",
         "token_sha256": "ae8754608195aafb81001fbdb911f6019eb8b13fa6e5ef7229ea71b0b9a7f976"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "b6c1526ad601f54a5c6235c3bb98ee3b62631ef20e9020acfdae21059b1728d1",
+      "fingerprint": "8e8be5b9347ce244816f1abf64805b2988f058155e63129cbfb5a7b13c869d1e",
       "kind": "github_token",
-      "line": 21,
+      "line": 31,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Revoke the token if real, remove it from source, and replace it with a placeholder or secret manager reference.",
       "rule_id": "secret.github_token",
@@ -1816,13 +1816,13 @@
     },
     {
       "evidence": {
-        "line": 24,
+        "line": 34,
         "pattern": "PEM private-key header"
       },
       "file": "tests/test_v08_semantics.py",
-      "fingerprint": "14c6bc56494cb90dd77580778a20d29279e9d65df173e2ed25131fbe3219a5c5",
+      "fingerprint": "53e9fca46fe3238f80aac3679a8d4c7d76c99c0830d94cf67352fb4e25805bcc",
       "kind": "pem_private_key",
-      "line": 24,
+      "line": 34,
       "path": "tests/test_v08_semantics.py",
       "remediation_hint": "Remove the private key from source, rotate it if real, and replace it with a synthetic fixture if documentation needs one.",
       "rule_id": "secret.pem_private_key",
@@ -1830,6 +1830,6 @@
       "severity": "error"
     }
   ],
-  "generated_at": "2026-08-08T14:20:49Z",
+  "generated_at": "2026-08-13T03:18:25Z",
   "schema_version": 1
 }
