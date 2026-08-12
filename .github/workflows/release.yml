@@ -49,9 +49,9 @@ jobs:
           RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           python - <<'PY'
+          import ast
           import os
           import re
-          from importlib.util import module_from_spec, spec_from_file_location
           from pathlib import Path
           import tomllib
 
@@ -63,12 +63,21 @@ jobs:
           pyproject = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
           project_version = pyproject["project"]["version"]
 
-          init_path = Path("src/repo_sentinel/__init__.py")
-          spec = spec_from_file_location("repo_sentinel", init_path)
-          module = module_from_spec(spec)
-          assert spec.loader is not None
-          spec.loader.exec_module(module)
-          package_version = module.__version__
+          init_tree = ast.parse(
+              Path("src/repo_sentinel/__init__.py").read_text(encoding="utf-8")
+          )
+          package_version = next(
+              assignment.value.value
+              for assignment in init_tree.body
+              if isinstance(assignment, ast.Assign)
+              and any(
+                  isinstance(target, ast.Name)
+                  and target.id == "__version__"
+                  for target in assignment.targets
+              )
+              and isinstance(assignment.value, ast.Constant)
+              and isinstance(assignment.value.value, str)
+          )
 
           errors = []
           if not release_tag.startswith("v"):
