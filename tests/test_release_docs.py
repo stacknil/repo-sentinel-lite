@@ -61,7 +61,7 @@ def test_release_workflow_and_sop_keep_publisher_targets_aligned() -> None:
         assert value in release_workflow
 
 
-def test_release_version_check_uses_ast() -> None:
+def test_release_version_uses_ast() -> None:
     release_workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(
         encoding="utf-8"
     )

@@ -76,7 +76,7 @@ def test_remote_gate_scans_changed_files_and_blocks_only_errors() -> None:
     assert "baseline_args=(--baseline \"$trusted_baseline\")" in workflow
 
 
-def test_policy_filter_includes_regular_to_symlink_type_change(tmp_path: Path) -> None:
+def test_policy_filter_includes_type_change(tmp_path: Path) -> None:
     repository = tmp_path / "policy-type-change"
     path = ".reposentinel.toml"
     base_sha, head_sha = _commit_regular_to_symlink_change(repository, path)
@@ -94,7 +94,7 @@ def test_policy_filter_includes_regular_to_symlink_type_change(tmp_path: Path) -
     assert path in changed_paths
 
 
-def test_changed_file_filter_includes_regular_to_symlink_type_change(
+def test_changed_filter_includes_type_change(
     tmp_path: Path,
 ) -> None:
     repository = tmp_path / "ordinary-type-change"
