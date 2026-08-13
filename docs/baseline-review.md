@@ -25,6 +25,11 @@ Each current finding also includes `rule_id`, `rule_version`, `severity`,
 `fingerprint`, `evidence`, and `remediation_hint`. The legacy `kind` field is
 kept so older baseline entries remain readable.
 
+`rule_version` is the review boundary for rule semantics. Rule authors must bump
+it when detection behavior, severity, or remediation changes require a fresh
+security judgment. Changing metadata without a version bump cannot trigger a
+new review state automatically.
+
 When a baseline entry has a `fingerprint`, matching prefers that fingerprint.
 The line-independent content identity (`rule_id + path + token_sha256`) is
 also accepted, so a reviewed token remains suppressed after a line-only move.
@@ -141,6 +146,8 @@ repo-sentinel baseline audit --baseline .reposentinel-baseline.json .
 The audit output groups entries as:
 
 - `active`: a baseline entry still matches a current finding
+- `rule_changed`: the same `rule_id` and content identity match a unique current
+  finding, but the persisted `rule_version` differs or was not recorded
 - `relocated`: the same `rule_id`, path, and token hash are present at a
   different line
 - `changed`: the same `rule_id`, path, and line remain, but the token hash
@@ -156,9 +163,22 @@ identity is that content identity plus `line`. Findings without tokens use
 but line movement is classified through these identities instead of being
 reported as stale.
 
-Treat `relocated`, `changed`, `ambiguous`, and `unmatched` entries as review
-prompts. Do not silently refresh them without checking why the finding moved,
-changed content, or lost a unique identity match.
+`rule_changed` is evaluated before `active` and `relocated`. Its JSON detail
+contains both the baseline and current findings, so reviewers can compare the
+persisted and current versions and still inspect a line move. A schema-v1
+baseline without an explicit `rule_version` remains readable and suppressible,
+but audit reports `unknown baseline rule version`; it is never filled from the
+live registry and presented as previously reviewed.
+
+After reviewing the current rule semantics, generate and commit a refreshed
+baseline. The baseline writer records the current version, so the next audit
+returns the entry to `active`. This does not change the baseline schema version,
+fingerprint algorithm, or suppression key.
+
+Treat `rule_changed`, `relocated`, `changed`, `ambiguous`, and `unmatched`
+entries as review prompts. Do not silently refresh them without checking why
+the rule changed, the finding moved, content changed, or a unique identity match
+was lost.
 
 ## CI Gate Policy
 
@@ -179,8 +199,8 @@ The unchanged policy is then used with this exit policy:
 - an error finding in a changed file blocks the pull request
 - a warning finding in a changed file is reported but does not block
 - skipped coverage entries are reported but do not change the exit status
-- baseline `active`, `relocated`, `changed`, `stale`, `ambiguous`, and `unmatched`
-  classifications are
+- baseline `active`, `rule_changed`, `relocated`, `changed`, `stale`,
+  `ambiguous`, and `unmatched` classifications are
   emitted by a separate non-blocking audit job
 
 This keeps historical active suppressions out of the normal changed-file gate
@@ -191,8 +211,8 @@ Manual classification is still required before changing a committed baseline:
 
 1. Confirm each active entry is an intentionally reviewed example or repository
    condition.
-2. Investigate every relocated, changed, stale, ambiguous, and unmatched entry
-   against the source diff and current rule evidence.
+2. Investigate every rule-changed, relocated, changed, stale, ambiguous, and
+   unmatched entry against the source diff and current rule evidence.
 3. Keep the audit result as review evidence; do not make the audit job blocking
    merely to force historical suppressions to zero.
 

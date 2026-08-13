@@ -143,8 +143,8 @@ def build_parser() -> argparse.ArgumentParser:
     audit_parser = baseline_subparsers.add_parser(
         "audit",
         help=(
-            "Classify baseline entries as active, relocated, changed, stale, "
-            "ambiguous, or unmatched."
+            "Classify baseline entries as active, rule_changed, relocated, "
+            "changed, stale, ambiguous, or unmatched."
         ),
     )
     audit_parser.add_argument(
