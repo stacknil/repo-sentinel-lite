@@ -123,3 +123,43 @@ jobs:
                   if value in text:
                       raise SystemExit(f"Forbidden metadata text remains: {value}")
           PY
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 1
+
+  artifact-handoff:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Download distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: python-distributions
+          path: dist
+
+      - name: Verify downloaded distributions
+        run: |
+          python -m pip install twine
+          python - <<'PY'
+          from pathlib import Path
+
+          distributions = sorted(path.name for path in Path("dist").iterdir())
+          wheels = [name for name in distributions if name.endswith(".whl")]
+          sdists = [name for name in distributions if name.endswith(".tar.gz")]
+          if len(wheels) != 1 or len(sdists) != 1 or len(distributions) != 2:
+              raise SystemExit(
+                  "Expected one wheel and one sdist in dist; "
+                  f"found: {distributions}"
+              )
+          PY
+          python -m twine check dist/*
