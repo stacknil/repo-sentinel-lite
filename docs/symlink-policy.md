@@ -17,10 +17,26 @@ not inspect Git history.
 | Outside-root file symlink | Check link name; skip target | Check link name; skip target | `skipped_files` |
 | Directory symlink | Check link name; prune before descent | Skip a selected file below the link | `skipped_directories`; selected file also enters `skipped_files` |
 | Directory symlink loop | Check link name; prune before descent | Skip without resolving the loop | `skipped_directories` |
+| Repository-root `.git` metadata | Exclude directory or worktree pointer | Exclude an explicit `.git` path | Not repository content |
+| Nested file named `.git` | Inspect content | Inspect when selected | File counters |
 
 There is no implicit or explicit follow mode. A repository that intentionally
 uses symlinks must scan the canonical target path separately if that content
 should be inspected.
+
+## Git administrative entry
+
+Git represents repository administration differently across checkout shapes:
+a normal clone has a root `.git` directory, while a linked worktree has a root
+`.git` file containing a `gitdir:` pointer. Both identify the checkout itself,
+not tracked repository content, so the walker excludes only the exact root
+entry in full and changed-file modes. It does not apply a basename-wide ignore;
+`nested/.git` remains inspectable content.
+
+The exclusion is silent rather than a coverage skip because the administrative
+entry is outside the considered content set in both checkout shapes. This keeps
+normal-clone and linked-worktree reports equivalent without exposing the Git
+common-directory path in findings or coverage diagnostics.
 
 ## Name classification
 
@@ -67,6 +83,8 @@ Coverage is informational. Baselines preserve it, and
 - An outside-root file symlink selected in changed-file mode now produces the
   same link-name finding and coverage as a full scan instead of disappearing.
 - File-only coverage and no-skip output retain their previous shape.
+- Normal clones and linked worktrees now use the same root `.git` exclusion;
+  nested `.git` files and their changed-file selection remain inspectable.
 
 Symlink tests use synthetic targets. Linux CI exercises normal symlink
 behavior; Windows tests skip only when the environment cannot create the
