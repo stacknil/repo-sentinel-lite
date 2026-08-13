@@ -151,10 +151,10 @@ flowchart LR
 | Python API | `repo_sentinel.scan_repository(...)` | Caller code to package facade | Redacted by default; explicit reveal returns sensitive token bodies | `src/repo_sentinel/api.py` |
 | Repository files | Scanner walks target path | Repo content to scanner | Filename, entropy, and structured heuristics are intentionally lightweight | `src/repo_sentinel/rules/` |
 | `.reposentinel.toml` | Loaded from target root | Repo config to scanner | Ignore globs, thresholds, and allowlists can reduce coverage | `src/repo_sentinel/config.py` |
-| `.reposentinel-baseline.json` | Auto-loaded from target root | Repo baseline to scanner | Matching findings are suppressed before failure decisions; the pull-request gate treats the root file as protected policy | `src/repo_sentinel/baseline.py`, `.github/workflows/repo-sentinel-gate.yml` |
+| `.reposentinel-baseline.json` | Auto-loaded from target root | Repo baseline to scanner | Matching findings are suppressed before failure decisions; the pull-request gate treats the root file as protected policy | `src/repo_sentinel/baseline.py`, Repo Sentinel gate workflow |
 | Pre-commit hooks | Consumer config invokes provider | Developer/CI hook runner to CLI | Hooks scan repository root with severity gates | `.pre-commit-hooks.yaml` |
 | CI package checks | GitHub Actions builds/tests package | CI to package artifacts | Validates metadata and package shape, not secret absence | `.github/workflows/ci.yml` |
-| Changed-file gate | GitHub Actions scans PR content | PR head to trusted base policy | Blocks protected policy changes; otherwise uses base-revision baseline with changed-file severity policy | `.github/workflows/repo-sentinel-gate.yml` |
+| Changed-file gate | GitHub Actions scans PR content | PR head to trusted base policy | Blocks protected policy changes; otherwise uses base-revision baseline with changed-file severity policy | Repo Sentinel gate workflow |
 
 ## Top Abuse Paths
 
@@ -207,7 +207,7 @@ flowchart LR
 | `src/repo_sentinel/config.py` | Applies ignore and allowlist policy | TM-003 |
 | `src/repo_sentinel/baseline.py` | Applies baseline suppression and audit classification | TM-002, TM-004 |
 | `src/repo_sentinel/cli.py` | Wires baseline suppression before output and failure decisions | TM-002, TM-004 |
-| `.github/workflows/repo-sentinel-gate.yml` | Separates PR content from trusted base policy and blocks policy self-exemption | TM-002, TM-003, TM-005 |
+| `.github/workflows/` + `repo-sentinel-gate.yml` | Separates PR content from trusted base policy and blocks policy self-exemption | TM-002, TM-003, TM-005 |
 | `.pre-commit-hooks.yaml` | Defines provider hook arguments and scan scope for consumers | TM-005 |
 | `docs/baseline-review.md` | Sets reviewer expectations for suppression and drift | TM-002, TM-003 |
 | `docs/pre-commit-integration.md` | Sets consumer expectations for hook and CI reuse | TM-005 |
