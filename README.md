@@ -188,6 +188,11 @@ directory symlinks. Link names still participate in hygiene checks, while
 target names and contents do not. Directory links and loops are pruned before
 descent; changed-file paths that cross a directory link are skipped.
 
+The repository-root `.git` administrative entry is never treated as user
+content. This applies equally to the directory in a normal clone and the
+`gitdir:` pointer file in a linked worktree, including an explicit `.git`
+changed path. A nested file named `.git` remains ordinary repository content.
+
 When content inspection is skipped, JSON adds a deterministic `coverage`
 object with repository-relative paths, totals, and one of `binary`, `oversize`,
 `symlink_policy`, `unreadable`, or `unsupported_encoding` for each skipped

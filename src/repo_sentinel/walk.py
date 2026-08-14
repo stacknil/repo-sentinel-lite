@@ -88,14 +88,15 @@ def iter_files(
             retained_directories.append(name)
         dirnames[:] = retained_directories
 
-        filenames = [
-            name
-            for name in filenames
-            if not matches_globs(
-                relative_path(current_dir / name, root), ignore_globs
-            )
-        ]
-        filenames.sort(key=sort_key)
+        retained_files: list[str] = []
+        for name in filenames:
+            relative = relative_path(current_dir / name, root)
+            if _is_root_git_entry(relative) or matches_globs(
+                relative, ignore_globs
+            ):
+                continue
+            retained_files.append(name)
+        filenames = sorted(retained_files, key=sort_key)
 
         for filename in filenames:
             yield current_dir / filename
@@ -144,9 +145,10 @@ def _iter_changed_files(
     seen: set[str] = set()
     normalized_paths = sorted(
         {
-            normalize_path(path)
+            normalized_path
             for path in changed_paths
-            if normalize_path(path) not in {"", "."}
+            if (normalized_path := normalize_path(path)) not in {"", "."}
+            and not _is_root_git_entry(normalized_path)
         },
         key=sort_key,
     )
@@ -211,6 +213,10 @@ def _first_symlink_component(root: Path, parts: Sequence[str]) -> Path | None:
         if candidate.is_symlink():
             return candidate
     return None
+
+
+def _is_root_git_entry(normalized_path: str) -> bool:
+    return PurePosixPath(normalized_path).parts == (".git",)
 
 
 def _notify_skip(
