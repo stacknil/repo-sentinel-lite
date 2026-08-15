@@ -3,14 +3,18 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import assert_never, cast
 
-from .baseline_matching import BaselineClassification, reconcile_baseline
+from .baseline_matching import (
+    BaselineClassification,
+    coerce_baseline_finding,
+    reconcile_baseline,
+)
 from .redaction import redact_baseline
 from .report import (
     baseline_finding_sort_key,
     baseline_finding_with_fingerprint,
     build_report,
-    coerce_finding,
     coerce_missing_files,
     extract_findings,
     normalize_report,
@@ -115,33 +119,40 @@ def audit_baseline(
     stale: list[dict[str, object]] = []
     ambiguous: list[dict[str, object]] = []
     for decision in reconciliation.decisions:
-        if decision.classification == BaselineClassification.ACTIVE:
-            active.append(decision.baseline)
-        elif decision.classification == BaselineClassification.STALE:
-            stale.append(decision.baseline)
-        elif decision.classification == BaselineClassification.AMBIGUOUS:
-            ambiguous.append(
-                {
+        match decision.classification:
+            case BaselineClassification.ACTIVE:
+                active.append(decision.baseline)
+            case BaselineClassification.STALE:
+                stale.append(decision.baseline)
+            case BaselineClassification.AMBIGUOUS:
+                ambiguous.append(
+                    {
+                        "baseline": decision.baseline,
+                        "candidates": list(decision.candidates),
+                        "reason": decision.reason,
+                    }
+                )
+            case (
+                BaselineClassification.RULE_CHANGED
+                | BaselineClassification.RELOCATED
+                | BaselineClassification.CHANGED
+            ) as classification:
+                entry = {
                     "baseline": decision.baseline,
-                    "candidates": list(decision.candidates),
+                    "current": cast(dict[str, object], decision.current),
                     "reason": decision.reason,
                 }
-            )
-        else:
-            current = decision.current
-            if current is None:
-                raise AssertionError("classified baseline match has no current finding")
-            entry = {
-                "baseline": decision.baseline,
-                "current": current,
-                "reason": decision.reason,
-            }
-            if decision.classification == BaselineClassification.RULE_CHANGED:
-                rule_changed.append(entry)
-            elif decision.classification == BaselineClassification.RELOCATED:
-                relocated.append(entry)
-            elif decision.classification == BaselineClassification.CHANGED:
-                changed.append(entry)
+                match classification:
+                    case BaselineClassification.RULE_CHANGED:
+                        rule_changed.append(entry)
+                    case BaselineClassification.RELOCATED:
+                        relocated.append(entry)
+                    case BaselineClassification.CHANGED:
+                        changed.append(entry)
+                    case _ as unreachable:
+                        assert_never(unreachable)
+            case _ as unreachable:
+                assert_never(unreachable)
 
     unmatched = list(reconciliation.unmatched_current)
     return {
@@ -254,16 +265,6 @@ def extract_baseline_findings(baseline: object) -> list[dict[str, object]]:
     if not isinstance(findings, list):
         raise ValueError("baseline findings must be a list")
     return findings
-
-
-def coerce_baseline_finding(value: object) -> dict[str, object]:
-    if not isinstance(value, dict):
-        raise ValueError("baseline findings entries must be objects")
-    normalized = coerce_finding(value, preserve_fingerprint=True)
-    persisted_rule_version = value.get("rule_version")
-    if not isinstance(persisted_rule_version, str) or not persisted_rule_version:
-        normalized.pop("rule_version", None)
-    return normalized
 
 
 def _looks_like_legacy_report(value: object) -> bool:

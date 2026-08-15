@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import cast
 
 from .report import (
     baseline_finding_identity,
@@ -11,9 +12,7 @@ from .report import (
     coerce_finding,
     finding_content_identity,
     finding_fingerprint,
-    finding_location_identity,
     finding_rule_location_identity,
-    validate_fingerprint_invariant,
 )
 
 
@@ -26,6 +25,23 @@ class BaselineClassification(StrEnum):
     AMBIGUOUS = "ambiguous"
 
 
+_MATCHED_CLASSIFICATIONS = frozenset(
+    {
+        BaselineClassification.ACTIVE,
+        BaselineClassification.RULE_CHANGED,
+        BaselineClassification.RELOCATED,
+        BaselineClassification.CHANGED,
+    }
+)
+_SUPPRESSIBLE_CLASSIFICATIONS = frozenset(
+    {
+        BaselineClassification.ACTIVE,
+        BaselineClassification.RULE_CHANGED,
+        BaselineClassification.RELOCATED,
+    }
+)
+
+
 @dataclass(frozen=True, slots=True)
 class BaselineDecision:
     classification: BaselineClassification
@@ -34,6 +50,27 @@ class BaselineDecision:
     current: dict[str, object] | None = None
     candidates: tuple[dict[str, object], ...] = ()
     reason: str | None = None
+
+    def __post_init__(self) -> None:
+        has_current = self.current is not None
+        if has_current != (self.classification in _MATCHED_CLASSIFICATIONS):
+            raise ValueError(
+                f"{self.classification} decision has invalid current finding state"
+            )
+        if self.classification == BaselineClassification.AMBIGUOUS:
+            if not self.candidates:
+                raise ValueError("ambiguous decision requires candidates")
+        elif self.candidates:
+            raise ValueError(
+                f"{self.classification} decision cannot contain candidates"
+            )
+        expected_suppression = (
+            self.classification in _SUPPRESSIBLE_CLASSIFICATIONS
+        )
+        if self.suppress != expected_suppression:
+            raise ValueError(
+                f"{self.classification} decision has invalid suppression state"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,10 +81,93 @@ class BaselineReconciliation:
     unmatched_current: tuple[dict[str, object], ...]
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(slots=True)
 class _FindingEntry:
     index: int
     finding: dict[str, object]
+    _identities: dict[str, tuple[object, ...]] = field(
+        default_factory=dict, init=False, repr=False
+    )
+
+    @property
+    def fingerprint(self) -> str | None:
+        value = self.finding.get("fingerprint")
+        return value if isinstance(value, str) else None
+
+    def content_identity(self) -> tuple[object, ...]:
+        return self._identity(
+            "content", lambda: finding_content_identity(self.finding)
+        )
+
+    def location_identity(self) -> tuple[object, ...]:
+        def build() -> tuple[object, ...]:
+            content_identity = self.content_identity()
+            return (
+                content_identity
+                if "line" not in self.finding
+                else (*content_identity, int(self.finding["line"]))
+            )
+
+        return self._identity("location", build)
+
+    def rule_location_identity(self) -> tuple[object, ...]:
+        return self._identity(
+            "rule_location",
+            lambda: finding_rule_location_identity(self.finding),
+        )
+
+    def legacy_identity(self) -> tuple[object, ...]:
+        return self._identity(
+            "legacy", lambda: baseline_finding_identity(self.finding)
+        )
+
+    def _identity(
+        self,
+        name: str,
+        build: Callable[[], tuple[object, ...]],
+    ) -> tuple[object, ...]:
+        if name not in self._identities:
+            self._identities[name] = build()
+        return self._identities[name]
+
+
+@dataclass(frozen=True, slots=True)
+class _MatchPolicy:
+    classification: BaselineClassification
+    reason: str | None
+    ambiguous_reason: str
+    classify_rule_change: bool = False
+
+
+_EXACT_POLICY = _MatchPolicy(
+    BaselineClassification.ACTIVE,
+    None,
+    "multiple baseline or current findings share the same fingerprint",
+    True,
+)
+_LOCATION_POLICY = _MatchPolicy(
+    BaselineClassification.ACTIVE,
+    None,
+    "multiple current findings share the same location identity",
+    True,
+)
+_RELOCATION_POLICY = _MatchPolicy(
+    BaselineClassification.RELOCATED,
+    "same content identity at a different line",
+    "multiple current findings share the same content identity",
+    True,
+)
+_RULE_LOCATION_POLICY = _MatchPolicy(
+    classification=BaselineClassification.CHANGED,
+    reason="same rule and location with different content identity",
+    ambiguous_reason="multiple current findings share the same rule and location",
+)
+_LEGACY_POLICY = _MatchPolicy(
+    classification=BaselineClassification.ACTIVE,
+    reason=None,
+    ambiguous_reason="multiple current findings share the legacy identity",
+    classify_rule_change=True,
+)
 
 
 def reconcile_baseline(
@@ -72,31 +192,23 @@ class _Reconciler:
     ) -> None:
         self.baselines = _entries(baseline_findings, current=False)
         self.current = _entries(current_findings, current=True)
-        validate_fingerprint_invariant(
-            [entry.finding for entry in self.baselines]
-        )
-        validate_fingerprint_invariant(
-            [entry.finding for entry in self.current]
-        )
+        _validate_fingerprint_invariant(self.baselines)
+        _validate_fingerprint_invariant(self.current)
         self.decisions: dict[int, BaselineDecision] = {}
         self.consumed: set[int] = set()
+        self.suppressed: set[int] = set()
         self.blocked: set[int] = set()
 
     def run(self) -> BaselineReconciliation:
         self._resolve_exact_fingerprints()
         self._resolve_content_identities()
         self._resolve_grouped_identity(
-            finding_rule_location_identity,
-            BaselineClassification.CHANGED,
-            "same rule and location with different content identity",
-            "multiple current findings share the same rule and location",
+            lambda entry: entry.rule_location_identity(),
+            _RULE_LOCATION_POLICY,
         )
         self._resolve_grouped_identity(
-            baseline_finding_identity,
-            BaselineClassification.ACTIVE,
-            None,
-            "multiple current findings share the legacy identity",
-            classify_rule_change=True,
+            lambda entry: entry.legacy_identity(),
+            _LEGACY_POLICY,
         )
         for baseline in self.baselines:
             if baseline.index not in self.decisions:
@@ -109,25 +221,17 @@ class _Reconciler:
         decisions = tuple(
             self.decisions[entry.index] for entry in self.baselines
         )
-        current_indexes = {
-            id(entry.finding): entry.index for entry in self.current
-        }
-        suppressed = {
-            current_indexes[id(decision.current)]
-            for decision in decisions
-            if decision.suppress and decision.current is not None
-        }
         return BaselineReconciliation(
             decisions=decisions,
             remaining_current=tuple(
                 entry.finding
                 for entry in self.current
-                if entry.index not in suppressed
+                if entry.index not in self.suppressed
             ),
             retained_current=tuple(
                 entry.finding
                 for entry in self.current
-                if entry.index in suppressed
+                if entry.index in self.suppressed
             ),
             unmatched_current=tuple(
                 entry.finding
@@ -141,52 +245,24 @@ class _Reconciler:
             (
                 entry
                 for entry in self.baselines
-                if isinstance(entry.finding.get("fingerprint"), str)
+                if entry.fingerprint is not None
             ),
-            lambda entry: str(entry.finding["fingerprint"]),
+            lambda entry: cast(str, entry.fingerprint),
         )
         current = _groups(
             self.current,
-            lambda entry: str(entry.finding["fingerprint"]),
+            lambda entry: cast(str, entry.fingerprint),
         )
         for fingerprint in sorted(baselines):
             baseline_group = baselines[fingerprint]
             current_group = current.get(fingerprint, [])
-            if not current_group:
-                continue
-            if len(baseline_group) == len(current_group) == 1:
-                self._record_match(
-                    baseline_group[0],
-                    current_group[0],
-                    BaselineClassification.ACTIVE,
-                    None,
-                    classify_rule_change=True,
-                )
-            else:
-                self._record_ambiguity(
-                    baseline_group,
-                    current_group,
-                    "multiple baseline or current findings share the same fingerprint",
-                )
+            self._resolve_candidates(
+                baseline_group, current_group, _EXACT_POLICY
+            )
 
     def _resolve_content_identities(self) -> None:
-        comparable = finding_content_identity
-        baselines = _groups(
-            (
-                entry
-                for entry in self._pending_baselines()
-                if _identity_is_comparable(comparable(entry.finding))
-            ),
-            lambda entry: comparable(entry.finding),
-        )
-        current = _groups(
-            (
-                entry
-                for entry in self._available_current()
-                if _identity_is_comparable(comparable(entry.finding))
-            ),
-            lambda entry: comparable(entry.finding),
-        )
+        baselines = _content_groups(self._pending_baselines())
+        current = _content_groups(self._available_current())
         for identity in sorted(baselines, key=_stable_identity_key):
             baseline_group = baselines[identity]
             current_group = current.get(identity, [])
@@ -201,11 +277,11 @@ class _Reconciler:
     ) -> None:
         baseline_locations = _groups(
             baselines,
-            lambda entry: finding_location_identity(entry.finding),
+            lambda entry: entry.location_identity(),
         )
         current_locations = _groups(
             current,
-            lambda entry: finding_location_identity(entry.finding),
+            lambda entry: entry.location_identity(),
         )
         shared_locations = sorted(
             set(baseline_locations) & set(current_locations),
@@ -223,22 +299,9 @@ class _Reconciler:
                 if entry.index not in self.consumed
                 and entry.index not in self.blocked
             ]
-            if not baseline_group or not current_group:
-                continue
-            if len(baseline_group) == len(current_group) == 1:
-                self._record_match(
-                    baseline_group[0],
-                    current_group[0],
-                    BaselineClassification.ACTIVE,
-                    None,
-                    classify_rule_change=True,
-                )
-            else:
-                self._record_ambiguity(
-                    baseline_group,
-                    current_group,
-                    "multiple current findings share the same location identity",
-                )
+            self._resolve_candidates(
+                baseline_group, current_group, _LOCATION_POLICY
+            )
 
         remaining_baselines = [
             entry for entry in baselines if entry.index not in self.decisions
@@ -249,57 +312,46 @@ class _Reconciler:
             if entry.index not in self.consumed
             and entry.index not in self.blocked
         ]
-        if len(remaining_baselines) == len(remaining_current) == 1:
-            self._record_match(
-                remaining_baselines[0],
-                remaining_current[0],
-                BaselineClassification.RELOCATED,
-                "same content identity at a different line",
-                classify_rule_change=True,
-            )
-        elif remaining_baselines and remaining_current:
-            self._record_ambiguity(
-                remaining_baselines,
-                remaining_current,
-                "multiple current findings share the same content identity",
-            )
+        self._resolve_candidates(
+            remaining_baselines, remaining_current, _RELOCATION_POLICY
+        )
 
     def _resolve_grouped_identity(
         self,
-        identity: Callable[[dict[str, object]], tuple[object, ...]],
-        classification: BaselineClassification,
-        reason: str | None,
-        ambiguous_reason: str,
-        *,
-        classify_rule_change: bool = False,
+        identity: Callable[[_FindingEntry], tuple[object, ...]],
+        policy: _MatchPolicy,
     ) -> None:
-        baselines = _groups(
-            self._pending_baselines(),
-            lambda entry: identity(entry.finding),
-        )
-        current = _groups(
-            self._available_current(),
-            lambda entry: identity(entry.finding),
-        )
+        baselines = _groups(self._pending_baselines(), identity)
+        current = _groups(self._available_current(), identity)
         for match_identity in sorted(baselines, key=_stable_identity_key):
-            baseline_group = baselines[match_identity]
-            current_group = current.get(match_identity, [])
-            if not current_group:
-                continue
-            if len(baseline_group) == len(current_group) == 1:
-                self._record_match(
-                    baseline_group[0],
-                    current_group[0],
-                    classification,
-                    reason,
-                    classify_rule_change=classify_rule_change,
-                )
-            else:
-                self._record_ambiguity(
-                    baseline_group,
-                    current_group,
-                    ambiguous_reason,
-                )
+            self._resolve_candidates(
+                baselines[match_identity],
+                current.get(match_identity, []),
+                policy,
+            )
+
+    def _resolve_candidates(
+        self,
+        baselines: list[_FindingEntry],
+        current: list[_FindingEntry],
+        policy: _MatchPolicy,
+    ) -> None:
+        if not baselines or not current:
+            return
+        if len(baselines) == len(current) == 1:
+            self._record_match(
+                baselines[0],
+                current[0],
+                policy.classification,
+                policy.reason,
+                classify_rule_change=policy.classify_rule_change,
+            )
+        else:
+            self._record_ambiguity(
+                baselines,
+                current,
+                policy.ambiguous_reason,
+            )
 
     def _record_match(
         self,
@@ -322,19 +374,17 @@ class _Reconciler:
             if rule_change_reason is not None
             else classification
         )
+        suppress = resolved in _SUPPRESSIBLE_CLASSIFICATIONS
         self.decisions[baseline.index] = BaselineDecision(
             classification=resolved,
-            suppress=resolved
-            in {
-                BaselineClassification.ACTIVE,
-                BaselineClassification.RULE_CHANGED,
-                BaselineClassification.RELOCATED,
-            },
+            suppress=suppress,
             baseline=baseline.finding,
             current=current.finding,
             reason=rule_change_reason or reason,
         )
         self.consumed.add(current.index)
+        if suppress:
+            self.suppressed.add(current.index)
 
     def _record_ambiguity(
         self,
@@ -375,19 +425,29 @@ def _entries(
 ) -> list[_FindingEntry]:
     normalized: list[dict[str, object]] = []
     for finding in findings:
-        item = coerce_finding(finding, preserve_fingerprint=True)
+        item = (
+            coerce_finding(finding, preserve_fingerprint=True)
+            if current
+            else coerce_baseline_finding(finding)
+        )
         if current and "fingerprint" not in item:
             item["fingerprint"] = finding_fingerprint(item)
-        elif not current:
-            rule_version = finding.get("rule_version")
-            if not isinstance(rule_version, str) or not rule_version:
-                item.pop("rule_version", None)
         normalized.append(item)
     normalized.sort(key=_stable_finding_sort_key)
     return [
         _FindingEntry(index=index, finding=finding)
         for index, finding in enumerate(normalized)
     ]
+
+
+def coerce_baseline_finding(value: object) -> dict[str, object]:
+    if not isinstance(value, dict):
+        raise ValueError("baseline findings entries must be objects")
+    normalized = coerce_finding(value, preserve_fingerprint=True)
+    persisted_rule_version = value.get("rule_version")
+    if not isinstance(persisted_rule_version, str) or not persisted_rule_version:
+        normalized.pop("rule_version", None)
+    return normalized
 
 
 def _groups(
@@ -398,6 +458,33 @@ def _groups(
     for entry in entries:
         grouped.setdefault(identity(entry), []).append(entry)
     return grouped
+
+
+def _content_groups(
+    entries: Iterable[_FindingEntry],
+) -> dict[object, list[_FindingEntry]]:
+    grouped: dict[object, list[_FindingEntry]] = {}
+    for entry in entries:
+        identity = entry.content_identity()
+        if _identity_is_comparable(identity):
+            grouped.setdefault(identity, []).append(entry)
+    return grouped
+
+
+def _validate_fingerprint_invariant(entries: list[_FindingEntry]) -> None:
+    first_by_fingerprint: dict[str, _FindingEntry] = {}
+    for entry in entries:
+        fingerprint = entry.fingerprint
+        if fingerprint is None:
+            continue
+        previous = first_by_fingerprint.setdefault(fingerprint, entry)
+        if (
+            previous is not entry
+            and previous.location_identity() != entry.location_identity()
+        ):
+            raise ValueError(
+                "fingerprint collision for distinct findings: " f"{fingerprint}"
+            )
 
 
 def _identity_is_comparable(identity: tuple[object, ...]) -> bool:
@@ -433,5 +520,6 @@ __all__ = [
     "BaselineClassification",
     "BaselineDecision",
     "BaselineReconciliation",
+    "coerce_baseline_finding",
     "reconcile_baseline",
 ]
