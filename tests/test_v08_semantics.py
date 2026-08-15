@@ -455,13 +455,17 @@ def test_baseline_audit_classifies_current_drift(tmp_path: Path, capsys) -> None
     assert exit_code == 0
     assert audit["summary"] == {
         "active": 0,
-        "rule_changed": 2,
+        "rule_changed": 0,
         "relocated": 0,
         "changed": 0,
         "stale": 1,
-        "ambiguous": 0,
-        "unmatched": 1,
+        "ambiguous": 2,
+        "unmatched": 2,
     }
+    assert all(
+        [candidate["path"] for candidate in entry["candidates"]] == [".env"]
+        for entry in audit["ambiguous"]
+    )
     assert cli_audit["summary"] == audit["summary"]
 
 
