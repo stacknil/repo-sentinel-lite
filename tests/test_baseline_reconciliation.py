@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from itertools import permutations
 
+import pytest
+
 import repo_sentinel.baseline as baseline_module
+import repo_sentinel.baseline_matching as matching_module
 import repo_sentinel.report as report_module
 from repo_sentinel.baseline import (
     apply_baseline,
@@ -13,6 +16,7 @@ from repo_sentinel.baseline import (
 )
 from repo_sentinel.baseline_matching import (
     BaselineClassification,
+    BaselineDecision,
     reconcile_baseline,
 )
 from repo_sentinel.redaction import redact_baseline
@@ -154,6 +158,76 @@ def test_rule_changed_classification_remains_suppressible() -> None:
     assert audit["summary"]["rule_changed"] == 1
 
 
+@pytest.mark.parametrize(
+    "decision_fields",
+    [
+        {
+            "classification": BaselineClassification.ACTIVE,
+            "suppress": True,
+        },
+        {
+            "classification": BaselineClassification.STALE,
+            "suppress": False,
+            "current": _finding(line=2),
+        },
+        {
+            "classification": BaselineClassification.AMBIGUOUS,
+            "suppress": False,
+        },
+        {
+            "classification": BaselineClassification.CHANGED,
+            "suppress": True,
+            "current": _finding(line=2),
+        },
+    ],
+)
+def test_baseline_decision_rejects_invalid_states(
+    decision_fields: dict[str, object],
+) -> None:
+    with pytest.raises(ValueError):
+        BaselineDecision(baseline=_finding(line=1), **decision_fields)
+
+
 def test_reconciliation_is_the_only_matching_surface() -> None:
     assert not hasattr(baseline_module, "baseline_match_keys")
     assert not hasattr(report_module, "finding_matches_baseline")
+
+
+def test_exact_reconciliation_avoids_weak_identity_normalization(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    report = build_report(
+        [_finding(line=line) for line in range(1, 51)],
+        {},
+    )
+    baseline = baseline_from_report(report)
+    baseline_findings = extract_baseline_findings(baseline)
+    current_findings = extract_findings(report)
+    original_coerce = report_module.coerce_finding
+    call_count = 0
+
+    def counted_coerce(
+        value: object, *, preserve_fingerprint: bool = False
+    ) -> dict[str, object]:
+        nonlocal call_count
+        call_count += 1
+        return original_coerce(
+            value,
+            preserve_fingerprint=preserve_fingerprint,
+        )
+
+    monkeypatch.setattr(matching_module, "coerce_finding", counted_coerce)
+    monkeypatch.setattr(report_module, "coerce_finding", counted_coerce)
+
+    reconciliation = reconcile_baseline(
+        baseline_findings=baseline_findings,
+        current_findings=current_findings,
+    )
+
+    assert all(
+        decision.classification is BaselineClassification.ACTIVE
+        for decision in reconciliation.decisions
+    )
+    assert call_count <= 2 * (
+        len(baseline_findings) + len(current_findings)
+    )
