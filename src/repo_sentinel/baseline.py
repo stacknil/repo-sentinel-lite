@@ -7,14 +7,12 @@ from pathlib import Path
 from .baseline_matching import BaselineClassification, reconcile_baseline
 from .redaction import redact_baseline
 from .report import (
-    baseline_finding_identity,
     baseline_finding_sort_key,
     baseline_finding_with_fingerprint,
     build_report,
     coerce_finding,
     coerce_missing_files,
     extract_findings,
-    finding_content_identity,
     normalize_report,
     validate_fingerprint_invariant,
 )
@@ -258,27 +256,6 @@ def extract_baseline_findings(baseline: object) -> list[dict[str, object]]:
     return findings
 
 
-def baseline_match_keys(
-    baseline: object,
-) -> tuple[frozenset[str], frozenset[tuple[object, ...]]]:
-    baseline_findings = extract_baseline_findings(baseline)
-    finding_keys: set[tuple[object, ...]] = set()
-    for finding in baseline_findings:
-        if "fingerprint" not in finding:
-            finding_keys.add(baseline_finding_identity(finding))
-        content_identity = finding_content_identity(finding)
-        if _identity_is_comparable(content_identity):
-            finding_keys.add(content_identity)
-    return (
-        frozenset(
-            str(finding["fingerprint"])
-            for finding in baseline_findings
-            if "fingerprint" in finding
-        ),
-        frozenset(finding_keys),
-    )
-
-
 def coerce_baseline_finding(value: object) -> dict[str, object]:
     if not isinstance(value, dict):
         raise ValueError("baseline findings entries must be objects")
@@ -294,10 +271,6 @@ def _looks_like_legacy_report(value: object) -> bool:
         key in value
         for key in ("high_entropy_findings", "missing_files", "suspicious_files")
     )
-
-
-def _identity_is_comparable(identity: tuple[object, ...]) -> bool:
-    return not (len(identity) == 3 and identity[-1] is None)
 
 
 def _source_versions_by_fingerprint(
@@ -321,7 +294,6 @@ __all__ = [
     "apply_baseline",
     "audit_baseline",
     "baseline_from_report",
-    "baseline_match_keys",
     "coerce_baseline_finding",
     "extract_baseline_findings",
     "format_baseline",

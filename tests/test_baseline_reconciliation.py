@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from itertools import permutations
 
+import repo_sentinel.baseline as baseline_module
+import repo_sentinel.report as report_module
+
 from repo_sentinel.baseline import (
     apply_baseline,
     audit_baseline,
@@ -150,3 +153,8 @@ def test_rule_changed_classification_remains_suppressible() -> None:
     assert suppressed["findings"] == []
     assert [finding["line"] for finding in pruned["findings"]] == [2]
     assert audit["summary"]["rule_changed"] == 1
+
+
+def test_reconciliation_is_the_only_matching_surface() -> None:
+    assert not hasattr(baseline_module, "baseline_match_keys")
+    assert not hasattr(report_module, "finding_matches_baseline")
