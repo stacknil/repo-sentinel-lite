@@ -4,6 +4,7 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .baseline_matching import BaselineClassification, reconcile_baseline
 from .redaction import redact_baseline
 from .report import (
     baseline_finding_identity,
@@ -14,9 +15,6 @@ from .report import (
     coerce_missing_files,
     extract_findings,
     finding_content_identity,
-    finding_location_identity,
-    finding_matches_baseline,
-    finding_rule_location_identity,
     normalize_report,
     validate_fingerprint_invariant,
 )
@@ -59,20 +57,20 @@ def apply_baseline(
     normalized_report = normalize_report(report)
     current_findings = extract_findings(normalized_report)
     missing_files = coerce_missing_files(normalized_report["missing_files"])
-    baseline_fingerprint_keys, baseline_finding_keys = baseline_match_keys(baseline)
-    remaining_findings: list[dict[str, object]] = []
-
-    for finding in current_findings:
-        if finding_matches_baseline(
-            finding, baseline_fingerprint_keys, baseline_finding_keys
+    reconciliation = reconcile_baseline(
+        baseline_findings=extract_baseline_findings(baseline),
+        current_findings=current_findings,
+    )
+    for decision in reconciliation.decisions:
+        if (
+            decision.suppress
+            and decision.current is not None
+            and decision.current["kind"] == "missing_file"
         ):
-            if finding["kind"] == "missing_file":
-                missing_files[str(finding["path"])] = False
-            continue
-        remaining_findings.append(finding)
+            missing_files[str(decision.current["path"])] = False
 
     return build_report(
-        remaining_findings,
+        reconciliation.remaining_current,
         missing_files,
         coverage=normalized_report.get("coverage"),
     )
@@ -82,19 +80,13 @@ def prune_baseline(
     report: dict[str, object], baseline: dict[str, object]
 ) -> dict[str, object]:
     current_baseline = baseline_from_report(report)
-    current_findings = extract_baseline_findings(current_baseline)
-    baseline_fingerprint_keys, baseline_finding_keys = baseline_match_keys(baseline)
+    reconciliation = reconcile_baseline(
+        baseline_findings=extract_baseline_findings(baseline),
+        current_findings=extract_baseline_findings(current_baseline),
+    )
 
     return {
-        "findings": [
-            finding
-            for finding in current_findings
-            if finding_matches_baseline(
-                finding,
-                baseline_fingerprint_keys,
-                baseline_finding_keys,
-            )
-        ],
+        "findings": list(reconciliation.retained_current),
         "generated_at": current_baseline["generated_at"],
         "schema_version": BASELINE_SCHEMA_VERSION,
     }
@@ -114,203 +106,53 @@ def update_baseline(
 def audit_baseline(
     report: dict[str, object], baseline: dict[str, object]
 ) -> dict[str, object]:
-    current_findings = extract_findings(normalize_report(report))
-    baseline_findings = extract_baseline_findings(baseline)
-    current_by_fingerprint = {
-        str(finding["fingerprint"]): finding for finding in current_findings
-    }
-    current_by_content_identity: dict[
-        tuple[object, ...], list[dict[str, object]]
-    ] = {}
-    current_by_location_identity: dict[
-        tuple[object, ...], list[dict[str, object]]
-    ] = {}
-    current_by_rule_location_identity: dict[
-        tuple[object, ...], list[dict[str, object]]
-    ] = {}
-    current_by_legacy_identity: dict[
-        tuple[object, ...], list[dict[str, object]]
-    ] = {}
-    for finding in current_findings:
-        current_by_content_identity.setdefault(
-            finding_content_identity(finding), []
-        ).append(finding)
-        current_by_location_identity.setdefault(
-            finding_location_identity(finding), []
-        ).append(finding)
-        current_by_rule_location_identity.setdefault(
-            finding_rule_location_identity(finding), []
-        ).append(finding)
-        current_by_legacy_identity.setdefault(
-            baseline_finding_identity(finding), []
-        ).append(finding)
-
+    reconciliation = reconcile_baseline(
+        baseline_findings=extract_baseline_findings(baseline),
+        current_findings=extract_findings(normalize_report(report)),
+    )
     active: list[dict[str, object]] = []
     rule_changed: list[dict[str, object]] = []
     relocated: list[dict[str, object]] = []
     changed: list[dict[str, object]] = []
     stale: list[dict[str, object]] = []
     ambiguous: list[dict[str, object]] = []
-    matched_current_fingerprints: set[str] = set()
-
-    for baseline_finding in baseline_findings:
-        fingerprint = baseline_finding.get("fingerprint")
-        exact_finding = (
-            current_by_fingerprint.get(fingerprint)
-            if isinstance(fingerprint, str)
-            else None
-        )
-        if exact_finding is not None:
-            rule_change_reason = _rule_version_change_reason(
-                baseline_finding, exact_finding
-            )
-            if rule_change_reason is not None:
-                rule_changed.append(
-                    {
-                        "baseline": baseline_finding,
-                        "current": exact_finding,
-                        "reason": rule_change_reason,
-                    }
-                )
-            else:
-                active.append(baseline_finding)
-            matched_current_fingerprints.add(str(exact_finding["fingerprint"]))
-            continue
-
-        content_identity = finding_content_identity(baseline_finding)
-        content_identity_is_comparable = _identity_is_comparable(content_identity)
-        content_candidates = (
-            current_by_content_identity.get(content_identity, [])
-            if content_identity_is_comparable
-            else []
-        )
-        if len(content_candidates) == 1:
-            current_finding = content_candidates[0]
-            rule_change_reason = _rule_version_change_reason(
-                baseline_finding, current_finding
-            )
-            if rule_change_reason is not None:
-                rule_changed.append(
-                    {
-                        "baseline": baseline_finding,
-                        "current": current_finding,
-                        "reason": rule_change_reason,
-                    }
-                )
-                matched_current_fingerprints.add(
-                    str(current_finding["fingerprint"])
-                )
-                continue
-
-        location_candidates = (
-            current_by_location_identity.get(
-                finding_location_identity(baseline_finding), []
-            )
-            if content_identity_is_comparable
-            else []
-        )
-        if len(location_candidates) == 1:
-            active.append(baseline_finding)
-            matched_current_fingerprints.add(
-                str(location_candidates[0]["fingerprint"])
-            )
-            continue
-        if len(location_candidates) > 1:
+    for decision in reconciliation.decisions:
+        if decision.classification == BaselineClassification.ACTIVE:
+            active.append(decision.baseline)
+        elif decision.classification == BaselineClassification.STALE:
+            stale.append(decision.baseline)
+        elif decision.classification == BaselineClassification.AMBIGUOUS:
             ambiguous.append(
                 {
-                    "baseline": baseline_finding,
-                    "candidates": location_candidates,
-                    "reason": (
-                        "multiple current findings share the same location identity"
-                    ),
+                    "baseline": decision.baseline,
+                    "candidates": list(decision.candidates),
+                    "reason": decision.reason,
                 }
             )
-            continue
+        else:
+            current = decision.current
+            if current is None:
+                raise AssertionError("classified baseline match has no current finding")
+            entry = {
+                "baseline": decision.baseline,
+                "current": current,
+                "reason": decision.reason,
+            }
+            if decision.classification == BaselineClassification.RULE_CHANGED:
+                rule_changed.append(entry)
+            elif decision.classification == BaselineClassification.RELOCATED:
+                relocated.append(entry)
+            elif decision.classification == BaselineClassification.CHANGED:
+                changed.append(entry)
 
-        if len(content_candidates) == 1:
-            relocated_finding = content_candidates[0]
-            relocated.append(
-                {
-                    "baseline": baseline_finding,
-                    "current": relocated_finding,
-                    "reason": "same content identity at a different line",
-                }
-            )
-            matched_current_fingerprints.add(str(relocated_finding["fingerprint"]))
-            continue
-        if len(content_candidates) > 1:
-            ambiguous.append(
-                {
-                    "baseline": baseline_finding,
-                    "candidates": content_candidates,
-                    "reason": (
-                        "multiple current findings share the same content identity"
-                    ),
-                }
-            )
-            continue
-
-        rule_location_candidates = current_by_rule_location_identity.get(
-            finding_rule_location_identity(baseline_finding), []
-        )
-        if len(rule_location_candidates) == 1:
-            changed_finding = rule_location_candidates[0]
-            changed.append(
-                {
-                    "baseline": baseline_finding,
-                    "current": changed_finding,
-                    "reason": "same rule and location with different content identity",
-                }
-            )
-            matched_current_fingerprints.add(str(changed_finding["fingerprint"]))
-            continue
-        if len(rule_location_candidates) > 1:
-            ambiguous.append(
-                {
-                    "baseline": baseline_finding,
-                    "candidates": rule_location_candidates,
-                    "reason": (
-                        "multiple current findings share the same rule and location"
-                    ),
-                }
-            )
-            continue
-
-        legacy_identity_candidates = current_by_legacy_identity.get(
-            baseline_finding_identity(baseline_finding), []
-        )
-        if len(legacy_identity_candidates) == 1:
-            active.append(baseline_finding)
-            matched_current_fingerprints.add(
-                str(legacy_identity_candidates[0]["fingerprint"])
-            )
-            continue
-        if len(legacy_identity_candidates) > 1:
-            ambiguous.append(
-                {
-                    "baseline": baseline_finding,
-                    "candidates": legacy_identity_candidates,
-                    "reason": "multiple current findings share the legacy identity",
-                }
-            )
-            continue
-
-        stale.append(baseline_finding)
-
-    unmatched = [
-        finding
-        for finding in current_findings
-        if str(finding["fingerprint"]) not in matched_current_fingerprints
-    ]
+    unmatched = list(reconciliation.unmatched_current)
     return {
-        "active": sorted(active, key=baseline_finding_sort_key),
-        "rule_changed": sorted(
-            rule_changed, key=_classified_baseline_sort_key
-        ),
-        "relocated": sorted(relocated, key=_classified_baseline_sort_key),
-        "changed": sorted(changed, key=_classified_baseline_sort_key),
-        "stale": sorted(stale, key=baseline_finding_sort_key),
-        "ambiguous": sorted(ambiguous, key=_classified_baseline_sort_key),
+        "active": active,
+        "rule_changed": rule_changed,
+        "relocated": relocated,
+        "changed": changed,
+        "stale": stale,
+        "ambiguous": ambiguous,
         "summary": {
             "active": len(active),
             "rule_changed": len(rule_changed),
@@ -320,7 +162,7 @@ def audit_baseline(
             "ambiguous": len(ambiguous),
             "unmatched": len(unmatched),
         },
-        "unmatched": sorted(unmatched, key=baseline_finding_sort_key),
+        "unmatched": unmatched,
     }
 
 
@@ -472,29 +314,6 @@ def _source_versions_by_fingerprint(
             rule_version if isinstance(rule_version, str) else None
         )
     return versions
-
-
-def _rule_version_change_reason(
-    baseline_finding: dict[str, object], current_finding: dict[str, object]
-) -> str | None:
-    if baseline_finding.get("rule_id") != current_finding.get("rule_id"):
-        return None
-    baseline_version = baseline_finding.get("rule_version")
-    current_version = current_finding.get("rule_version")
-    if not isinstance(baseline_version, str) or not baseline_version:
-        return "unknown baseline rule version"
-    if baseline_version != current_version:
-        return f"rule version changed from {baseline_version} to {current_version}"
-    return None
-
-
-def _classified_baseline_sort_key(
-    classified: dict[str, object],
-) -> tuple[object, ...]:
-    baseline = classified.get("baseline")
-    if not isinstance(baseline, dict):
-        return (3, "")
-    return baseline_finding_sort_key(baseline)
 
 
 __all__ = [
