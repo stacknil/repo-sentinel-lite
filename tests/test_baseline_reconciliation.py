@@ -4,7 +4,6 @@ from itertools import permutations
 
 import repo_sentinel.baseline as baseline_module
 import repo_sentinel.report as report_module
-
 from repo_sentinel.baseline import (
     apply_baseline,
     audit_baseline,
