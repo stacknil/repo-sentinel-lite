@@ -374,21 +374,6 @@ def finding_fingerprint(finding: dict[str, object]) -> str:
     return hashlib.sha256(serialized_identity.encode("utf-8")).hexdigest()
 
 
-def finding_matches_baseline(
-    finding: dict[str, object],
-    baseline_fingerprint_keys: frozenset[str],
-    baseline_finding_keys: frozenset[tuple[object, ...]],
-) -> bool:
-    normalized = coerce_finding(finding)
-    fingerprint = finding_fingerprint(normalized)
-    if fingerprint in baseline_fingerprint_keys:
-        return True
-    return (
-        baseline_finding_identity(normalized) in baseline_finding_keys
-        or finding_content_identity(normalized) in baseline_finding_keys
-    )
-
-
 def baseline_finding_with_fingerprint(
     finding: dict[str, object],
 ) -> dict[str, object]:
@@ -716,7 +701,6 @@ __all__ = [
     "finding_content_identity",
     "finding_fingerprint",
     "finding_location_identity",
-    "finding_matches_baseline",
     "finding_rule_location_identity",
     "format_report",
     "format_text_report",
