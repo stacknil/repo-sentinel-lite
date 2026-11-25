@@ -1,17 +1,8 @@
 name: Pre-Commit Provider Validation
 
-# Keep this workflow path-filtered so provider-related changes self-validate cleanly.
-
 on:
+  # Main requires validate-provider on every pull request.
   pull_request:
-    paths:
-      - .github/workflows/pre-commit-provider.yml
-      - .pre-commit-hooks.yaml
-      - README.md
-      - docs/pre-commit-integration.md
-      - pyproject.toml
-      - src/repo_sentinel/**
-      - tests/validate_pre_commit_provider.py
   push:
     paths:
       - .github/workflows/pre-commit-provider.yml
