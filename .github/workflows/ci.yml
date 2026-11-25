@@ -37,6 +37,21 @@ jobs:
       - name: Run Ruff
         run: ruff check .
 
+  platform-test-gate:
+    # Branch protection requires these stable names. Both require the full test matrix.
+    name: test (${{ matrix.os }})
+    needs: test
+    if: ${{ always() }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require all platform and Python combinations to pass
+        env:
+          TEST_RESULT: ${{ needs.test.result }}
+        run: test "$TEST_RESULT" = success
+
   build:
     runs-on: ubuntu-latest
     steps:
