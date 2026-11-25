@@ -10,6 +10,22 @@ Use Python 3.11 or newer:
 python -m pip install repo-sentinel-lite
 ```
 
+## Upgrade compatibility
+
+In a fresh Python 3.12 environment, production PyPI supplied 0.7.1 and 0.8.1. A consumer fixture with the three standard files and a synthetic `synthetic.pem` produced a suspicious-filename finding on 0.7.1. A reviewed baseline written there suppressed that finding after upgrading to 0.8.1. To repeat in a disposable repository, run the same commands before and after upgrading:
+
+```sh
+touch README.md LICENSE .gitignore
+printf 'example\n' > synthetic.pem
+python -m pip install repo-sentinel-lite==0.7.1
+repo-sentinel scan --write-baseline ../consumer-baseline.json .
+python -m pip install --upgrade repo-sentinel-lite==0.8.1
+python -m pip check
+repo-sentinel scan --baseline ../consumer-baseline.json --fail-on-severity error --format text .
+```
+
+Gitleaks supports Git-history scanning and baseline filtering. Yelp's detect-secrets provides plugin-based detection and an interactive baseline audit. Repo Sentinel's consumer workflow combines working-tree hygiene, changed-file checks and suppression-drift review. The upgrade check above exercises one filename finding and its baseline across two published versions. [Gitleaks](https://github.com/gitleaks/gitleaks) · [detect-secrets](https://github.com/Yelp/detect-secrets)
+
 ## First Scan
 
 Run a scan from the repository root:
