@@ -33,26 +33,11 @@ Requires Python 3.11 or newer.
 
 ## Usage
 
-More copy-pasteable CLI workflows are in
-[`docs/cli-recipes.md`](docs/cli-recipes.md).
-For the shortest consumer setup path, see
-[`docs/consumer-minimal-setup.md`](docs/consumer-minimal-setup.md).
-For baseline review expectations and a sample baseline, see
-[`docs/baseline-review.md`](docs/baseline-review.md).
-For output stability and CI artifact guidance, see
-[`docs/output-format-stability.md`](docs/output-format-stability.md).
-For pre-commit provider setup, see
-[`docs/pre-commit-integration.md`](docs/pre-commit-integration.md).
-For threat model boundaries and non-goals, see
-[`docs/threat-model.md`](docs/threat-model.md).
-For the v0.8 synthetic performance envelope, see
-[`docs/performance-envelope-v0.8.md`](docs/performance-envelope-v0.8.md).
-For self-dogfooding status, see
-[`docs/self-dogfooding.md`](docs/self-dogfooding.md).
-For the short external case study, see
-[How repo-sentinel-lite Dogfoods Repository Hygiene](docs/case-study-self-dogfooding.md).
-For near-term review boundaries, see [`ROADMAP.md`](ROADMAP.md).
-For before-and-after scanner examples, see [`examples/`](examples/).
+- [Set up a consumer repository](docs/consumer-minimal-setup.md), [install the pre-commit hook](docs/pre-commit-integration.md), or [run a CLI recipe](docs/cli-recipes.md).
+- [Review a baseline](docs/baseline-review.md) and check the [output contract](docs/output-format-stability.md) before consuming scan results in CI.
+- Inspect [example outputs](examples/), the [threat model](docs/threat-model.md), and the [measured performance envelope](docs/performance-envelope-v0.8.md).
+- Follow the [self-dogfooding status](docs/self-dogfooding.md), [case study](docs/case-study-self-dogfooding.md), or [roadmap](ROADMAP.md).
+
 The v0.7 adoption plan is tracked in
 [`docs/v0.7-adoption-release.md`](docs/v0.7-adoption-release.md).
 Release notes for v0.7.1 are tracked in
